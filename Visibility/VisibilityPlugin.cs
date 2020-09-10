@@ -248,7 +248,7 @@ namespace Visibility
 			}
 		}
 
-		private static void CheckRender<T>(IEnumerable<T> collection, IEnumerable<PlayerCharacter> partyCollection, IEnumerable<PlayerCharacter> friendCollection, ref bool oneShot,
+		private static void CheckRender<T>(IEnumerable<T> collection, IEnumerable<PlayerCharacter> partyCollection, Dictionary<int, PlayerCharacter> friendDictionary, ref bool oneShot,
 			bool hide = false, bool showParty = false, bool showFriend = false, bool showDead = false, IEnumerable<Actor> mounts = null) where T: Actor
 		{
 			if (hide)
@@ -256,7 +256,7 @@ namespace Visibility
 				foreach (var item in collection)
 				{
 					if ((showParty && partyCollection.SingleOrDefault(x => x.ActorId == (item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId)) != null)
-					    || (showFriend && friendCollection.SingleOrDefault(x => (x.ActorId == (item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId)) ) != null)
+					    || (showFriend && friendDictionary.ContainsKey(item is BattleNpc npc ? npc.OwnerId : item.ActorId))
 					    || (showDead && (item as Chara).CurrentHp == 0))
 					{
 						item.Render();
@@ -319,9 +319,9 @@ namespace Visibility
 				      && !voidedPlayers.Contains(actor)
 				select actor as PlayerCharacter;
 
-			var friends = from actor in players
+			var friends = (from actor in players
 				where actor.IsStatus(StatusFlags.Friend)
-				select actor;
+				select actor).ToDictionary(character => character.ActorId, character => character);
 
 			var partyMembers = from actor in _pluginInterface.ClientState.Actors
 				where Array.Exists(_partyActorId, actorId => actorId == actor.ActorId)
