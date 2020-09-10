@@ -248,7 +248,7 @@ namespace Visibility
 			}
 		}
 
-		private static void CheckRender<T>(IEnumerable<T> collection, IEnumerable<PlayerCharacter> partyCollection, Dictionary<int, PlayerCharacter> friendDictionary, ref bool oneShot,
+		private void CheckRender<T>(IEnumerable<T> collection, ICollection<int> friendCollection, ref bool oneShot,
 			bool hide = false, bool showParty = false, bool showFriend = false, bool showDead = false, IEnumerable<Actor> mounts = null) where T: Actor
 		{
 			if (hide)
@@ -256,8 +256,8 @@ namespace Visibility
 				foreach (var item in collection)
 				{
 					var lookupId = item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId;
-					if ((showParty && partyCollection.SingleOrDefault(x => x.ActorId == lookupId) != null)
-					    || (showFriend && friendDictionary.ContainsKey(lookupId))
+					if ((showParty && _partyActorId.Contains(lookupId))
+					    || (showFriend && friendCollection.Contains(lookupId))
 					    || (showDead && (item as Chara).CurrentHp == 0))
 					{
 						item.Render();
@@ -322,11 +322,11 @@ namespace Visibility
 
 			var friends = (from actor in players
 				where actor.IsStatus(StatusFlags.Friend)
-				select actor).ToDictionary(character => character.ActorId, character => character);
+				select actor.ActorId).ToHashSet();
 
-			var partyMembers = from actor in _pluginInterface.ClientState.Actors
+			var partyMembers = (from actor in _pluginInterface.ClientState.Actors
 				where Array.Exists(_partyActorId, actorId => actorId == actor.ActorId)
-				select actor as PlayerCharacter;
+				select actor.ActorId).ToHashSet();
 
 			var pets = from actor in _pluginInterface.ClientState.Actors
 				where actor is BattleNpc npc
@@ -354,24 +354,24 @@ namespace Visibility
 				item.Hide();
 			}
 
-			CheckRender(chocobos, partyMembers, friends,
+			CheckRender(chocobos, friends,
 				ref _oneShot[0], _pluginConfig.HideChocobo,
 				_pluginConfig.ShowPartyChocobo,
 				_pluginConfig.ShowFriendChocobo);
 
-			CheckRender(pets, partyMembers, friends,
+			CheckRender(pets, friends,
 				ref _oneShot[1], _pluginConfig.HidePet,
 				_pluginConfig.ShowPartyPet,
 				_pluginConfig.ShowFriendPet);
 
-			CheckRender(players, partyMembers, friends,
+			CheckRender(players, friends,
 				ref _oneShot[2], _pluginConfig.HidePlayer,
 				_pluginConfig.ShowPartyPlayer,
 				_pluginConfig.ShowFriendPlayer,
 				_pluginConfig.ShowDeadPlayer);
 
-			CheckRender(minions, partyMembers, friends,
-				ref _oneShot[3], _pluginConfig.HideMinion, false, false, false, mounts);
+			CheckRender(minions, friends, ref _oneShot[3],
+				_pluginConfig.HideMinion, false, false, false, mounts);
 
 			foreach (var item in voidItems)
 			{
