@@ -15,9 +15,9 @@ namespace Visibility.Utils
 
         public void Init(DalamudPluginInterface pluginInterface)
         {
-            _magicStructInfo = pluginInterface.TargetModuleScanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? 48 85 C9 74 0C");
-            _placeholderResolver = Marshal.GetDelegateForFunctionPointer<ResolvePlaceholderActor>(_address.ResolvePlaceholderText);
             _address.Setup(pluginInterface.TargetModuleScanner);
+            _placeholderResolver = Marshal.GetDelegateForFunctionPointer<ResolvePlaceholderActor>(_address.ResolvePlaceholderText);
+            _magicStructInfo = pluginInterface.TargetModuleScanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? 48 85 C9 74 0C");
             SetupPlaceholderResolver();
         }
         
