@@ -255,8 +255,9 @@ namespace Visibility
 			{
 				foreach (var item in collection)
 				{
-					if ((showParty && partyCollection.SingleOrDefault(x => x.ActorId == (item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId)) != null)
-					    || (showFriend && friendDictionary.ContainsKey(item is BattleNpc npc ? npc.OwnerId : item.ActorId))
+					var lookupId = item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId;
+					if ((showParty && partyCollection.SingleOrDefault(x => x.ActorId == lookupId) != null)
+					    || (showFriend && friendDictionary.ContainsKey(lookupId))
 					    || (showDead && (item as Chara).CurrentHp == 0))
 					{
 						item.Render();
