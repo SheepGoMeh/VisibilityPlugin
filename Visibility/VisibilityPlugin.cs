@@ -174,7 +174,7 @@ namespace Visibility
 				.SingleOrDefault(x => x is PlayerCharacter character
 				                      && character.HomeWorld.Id == world.RowId
 				                      && character.Name.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)) is PlayerCharacter actor)
-				? new VoidItem(playerName, world.Name, world.RowId, args[3], command == "VoidUIManual")
+				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual")
 				: new VoidItem(actor, args[3], command == "VoidUIManual"));
 
 			if (!_pluginConfig.VoidList.Any(x =>
