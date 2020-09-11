@@ -349,11 +349,6 @@ namespace Visibility
 				      && npc.OwnerId != _pluginInterface.ClientState.LocalPlayer?.ActorId
 				select actor as BattleNpc;
 
-			foreach (var item in voidedPlayers)
-			{
-				item.Hide();
-			}
-
 			CheckRender(chocobos, friends,
 				ref _oneShot[0], _pluginConfig.HideChocobo,
 				_pluginConfig.ShowPartyChocobo,
@@ -364,11 +359,19 @@ namespace Visibility
 				_pluginConfig.ShowPartyPet,
 				_pluginConfig.ShowFriendPet);
 
-			CheckRender(players, friends,
-				ref _oneShot[2], _pluginConfig.HidePlayer,
-				_pluginConfig.ShowPartyPlayer,
-				_pluginConfig.ShowFriendPlayer,
-				_pluginConfig.ShowDeadPlayer);
+			if (!_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty])
+			{
+				foreach (var item in voidedPlayers)
+				{
+					item.Hide();
+				}
+
+				CheckRender(players, friends,
+					ref _oneShot[2], _pluginConfig.HidePlayer,
+					_pluginConfig.ShowPartyPlayer,
+					_pluginConfig.ShowFriendPlayer,
+					_pluginConfig.ShowDeadPlayer);
+			}
 
 			CheckRender(minions, friends, ref _oneShot[3],
 				_pluginConfig.HideMinion, false, false, false, mounts);
