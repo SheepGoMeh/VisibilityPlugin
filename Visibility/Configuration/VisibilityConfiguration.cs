@@ -350,7 +350,7 @@ namespace Visibility.Configuration
 			ImGui.InputText("###homeworldName", _buffer[2], (uint) _buffer[2].Length, ImGuiInputTextFlags.CharsNoBlank);
 			ImGui.NextColumn();
 			ImGui.NextColumn();
-			ImGui.InputText("###reason", _buffer[3], (uint) _buffer[3].Length, ImGuiInputTextFlags.CharsNoBlank);
+			ImGui.InputText("###reason", _buffer[3], (uint) _buffer[3].Length);
 			ImGui.NextColumn();
 
 			if (ImGui.Button("Void player"))
