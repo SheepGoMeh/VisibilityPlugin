@@ -258,7 +258,7 @@ namespace Visibility.Configuration
 
 			if (ImGui.Button("VoidList"))
 			{
-				_showVoidListWindow = true;
+				_showVoidListWindow = !_showVoidListWindow;
 			}
 			ImGui.NextColumn();
 			ImGui.End();
