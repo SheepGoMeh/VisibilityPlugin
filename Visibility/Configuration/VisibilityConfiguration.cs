@@ -42,6 +42,24 @@ namespace Visibility.Configuration
 			set => _hideChocobo = value;
 		}
 
+		public bool ShowCompanyPet
+		{
+			get => _showCompanyPet;
+			set => _showCompanyPet = value;
+		}
+
+		public bool ShowCompanyPlayer
+		{
+			get => _showCompanyPlayer;
+			set => _showCompanyPlayer = value;
+		}
+
+		public bool ShowCompanyChocobo
+		{
+			get => _showCompanyChocobo;
+			set => _showCompanyChocobo = value;
+		}
+
 		public bool ShowPartyPet
 		{
 			get => _showPartyPet;
@@ -143,9 +161,16 @@ namespace Visibility.Configuration
 		private bool _showFriendChocobo = false;
 		[NonSerialized]
 		private bool _showDeadPlayer = false;
-		
+		[NonSerialized]
+		private bool _showCompanyPet = false;
+		[NonSerialized]
+		private bool _showCompanyPlayer = false;
+		[NonSerialized]
+		private bool _showCompanyChocobo = false;
+
 		[NonSerialized]
 		public readonly Dictionary<string, Action<bool>> settingDictionary = new Dictionary<string, Action<bool>>();
+
 
 		public void Init(VisibilityPlugin plugin, DalamudPluginInterface pluginInterface)
 		{
@@ -155,6 +180,9 @@ namespace Visibility.Configuration
 			settingDictionary["hidepet"] = x => _hidePet = x;
 			settingDictionary["hideplayer"] = x => _hidePlayer = x;
 			settingDictionary["hideminion"] = x => _hideMinion = x;
+			settingDictionary["showcompanypet"] = x => _showCompanyPet = x;
+			settingDictionary["showcompanyplayer"] = x => _showCompanyPlayer = x;
+			settingDictionary["showcompanychocobo"] = x => _showCompanyChocobo = x;
 			settingDictionary["showpartypet"] = x => _showPartyPet = x;
 			settingDictionary["showpartyplayer"] = x => _showPartyPlayer = x;
 			settingDictionary["showpartychocobo"] = x => _showPartyChocobo = x;
@@ -181,7 +209,7 @@ namespace Visibility.Configuration
 
 			var scale = ImGui.GetIO().FontGlobalScale;
 
-			ImGui.SetNextWindowSize(new Vector2(450 * scale, 230), ImGuiCond.Always);
+			ImGui.SetNextWindowSize(new Vector2(500 * scale, 230), ImGuiCond.Always);
 			ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize);
 
 			if (ImGui.Checkbox($"###{nameof(_plugin.enabled)}", ref _plugin.enabled))
@@ -194,7 +222,7 @@ namespace Visibility.Configuration
 			ImGui.Text("Enable");
 			ImGui.Separator();
 
-			ImGui.Columns(5, "###cols", false);
+			ImGui.Columns(6, "###cols", false);
 
 			ImGui.NextColumn();
 			ImGui.Text("Hide all");
@@ -204,6 +232,8 @@ namespace Visibility.Configuration
 			ImGui.Text("Show friends");
 			ImGui.NextColumn();
 			ImGui.Text("Show dead");
+			ImGui.NextColumn();
+			ImGui.Text("Show FC");
 			ImGui.NextColumn();
 			ImGui.Separator();
 			ImGui.Text("Pets");
@@ -215,10 +245,13 @@ namespace Visibility.Configuration
 			Checkbox(nameof(_showFriendPet), ref _showFriendPet);
 			ImGui.NextColumn();
 			ImGui.NextColumn();
+			Checkbox(nameof(_showCompanyPet), ref _showCompanyPet);
+			ImGui.NextColumn();
 
 			ImGui.Text("Minions");
 			ImGui.NextColumn();
 			Checkbox(nameof(_hideMinion), ref _hideMinion);
+			ImGui.NextColumn();
 			ImGui.NextColumn();
 			ImGui.NextColumn();
 			ImGui.NextColumn();
@@ -233,6 +266,8 @@ namespace Visibility.Configuration
 			Checkbox(nameof(_showFriendChocobo), ref _showFriendChocobo);
 			ImGui.NextColumn();
 			ImGui.NextColumn();
+			Checkbox(nameof(_showCompanyChocobo), ref _showCompanyChocobo);
+			ImGui.NextColumn();
 
 			ImGui.Text("Players");
 			ImGui.NextColumn();
@@ -244,6 +279,8 @@ namespace Visibility.Configuration
 			ImGui.NextColumn();
 			Checkbox(nameof(_showDeadPlayer), ref _showDeadPlayer);
 			ImGui.NextColumn();
+			Checkbox(nameof(_showCompanyPlayer), ref _showCompanyPlayer);
+			ImGui.NextColumn();
 			ImGui.Separator();
 
 			if (ImGui.Button("Refresh"))
@@ -251,6 +288,7 @@ namespace Visibility.Configuration
 				_plugin.RefreshActors();
 			}
 
+			ImGui.NextColumn();
 			ImGui.NextColumn();
 			ImGui.NextColumn();
 			ImGui.NextColumn();

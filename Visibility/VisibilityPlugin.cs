@@ -248,8 +248,10 @@ namespace Visibility
 			}
 		}
 
-		private void CheckRender<T>(IEnumerable<T> collection, ICollection<int> friendCollection, ref bool oneShot,
-			bool hide = false, bool showParty = false, bool showFriend = false, bool showDead = false, IEnumerable<Actor> mounts = null) where T: Actor
+		private void CheckRender<T>(IEnumerable<T> collection, ICollection<int> friendCollection,
+			ICollection<int> companyCollection, ref bool oneShot, bool hide = false, bool showParty = false,
+			bool showFriend = false, bool showCompany = false, bool showDead = false, IEnumerable<Actor> mounts = null)
+			where T : Actor
 		{
 			if (hide)
 			{
@@ -263,6 +265,7 @@ namespace Visibility
 					var lookupId = item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId;
 					if ((showParty && _partyActorId.Contains(lookupId))
 					    || (showFriend && friendCollection.Contains(lookupId))
+					    || (showCompany && companyCollection.Contains(lookupId))
 					    || (showDead && (item as Chara).CurrentHp == 0))
 					{
 						item.Render();
@@ -329,8 +332,10 @@ namespace Visibility
 				where actor.IsStatus(StatusFlags.Friend)
 				select actor.ActorId).ToHashSet();
 
-			var partyMembers = (from actor in _pluginInterface.ClientState.Actors
-				where Array.Exists(_partyActorId, actorId => actorId == actor.ActorId)
+			var companyMembers = (from actor in _pluginInterface.ClientState.Actors
+				where actor is PlayerCharacter playerCharacter
+				      && !string.IsNullOrEmpty(playerCharacter.CompanyTag)
+				      && playerCharacter.CompanyTag == _pluginInterface.ClientState.LocalPlayer?.CompanyTag
 				select actor.ActorId).ToHashSet();
 
 			var pets = from actor in _pluginInterface.ClientState.Actors
@@ -354,15 +359,17 @@ namespace Visibility
 				      && npc.OwnerId != _pluginInterface.ClientState.LocalPlayer?.ActorId
 				select actor as BattleNpc;
 
-			CheckRender(chocobos, friends,
+			CheckRender(chocobos, friends, companyMembers,
 				ref _oneShot[0], _pluginConfig.HideChocobo,
 				_pluginConfig.ShowPartyChocobo,
-				_pluginConfig.ShowFriendChocobo);
+				_pluginConfig.ShowFriendChocobo,
+				_pluginConfig.ShowCompanyChocobo);
 
-			CheckRender(pets, friends,
+			CheckRender(pets, friends, companyMembers,
 				ref _oneShot[1], _pluginConfig.HidePet,
 				_pluginConfig.ShowPartyPet,
-				_pluginConfig.ShowFriendPet);
+				_pluginConfig.ShowFriendPet,
+				_pluginConfig.ShowCompanyPet);
 
 			if (!_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty])
 			{
@@ -371,15 +378,16 @@ namespace Visibility
 					item.Hide();
 				}
 
-				CheckRender(players, friends,
+				CheckRender(players, friends, companyMembers,
 					ref _oneShot[2], _pluginConfig.HidePlayer,
 					_pluginConfig.ShowPartyPlayer,
 					_pluginConfig.ShowFriendPlayer,
+					_pluginConfig.ShowCompanyPlayer,
 					_pluginConfig.ShowDeadPlayer);
 			}
 
-			CheckRender(minions, friends, ref _oneShot[3],
-				_pluginConfig.HideMinion, false, false, false, mounts);
+			CheckRender(minions, friends, companyMembers, ref _oneShot[3],
+				_pluginConfig.HideMinion, false, false, false, false, mounts);
 
 			foreach (var item in voidItems)
 			{
