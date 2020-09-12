@@ -255,6 +255,11 @@ namespace Visibility
 			{
 				foreach (var item in collection)
 				{
+					if (item == _pluginInterface.ClientState.LocalPlayer)
+					{
+						continue;
+					}
+
 					var lookupId = item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId;
 					if ((showParty && _partyActorId.Contains(lookupId))
 					    || (showFriend && friendCollection.Contains(lookupId))
