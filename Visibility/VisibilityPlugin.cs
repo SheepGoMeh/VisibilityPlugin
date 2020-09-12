@@ -393,7 +393,6 @@ namespace Visibility
 		{
 			var actors = from actor in _pluginInterface.ClientState.Actors
 						 where !(actor is BattleNpc)
-						 && actor.ActorId != _pluginInterface.ClientState.LocalPlayer?.ActorId
 						 select actor;
 
 			var battleActors = from actor in _pluginInterface.ClientState.Actors
