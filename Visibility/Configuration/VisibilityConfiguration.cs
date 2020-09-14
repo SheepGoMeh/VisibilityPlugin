@@ -30,12 +30,6 @@ namespace Visibility.Configuration
 			set => _hidePlayer = value;
 		}
 
-		public bool HideMinion
-		{
-			get => _hideMinion;
-			set => _hideMinion = value;
-		}
-
 		public bool HideChocobo
 		{
 			get => _hideChocobo;
@@ -140,8 +134,6 @@ namespace Visibility.Configuration
 		[NonSerialized]
 		private bool _hidePlayer = false;
 		[NonSerialized]
-		private bool _hideMinion = false;
-		[NonSerialized]
 		private bool _hideChocobo = false;
 		[NonSerialized]
 		private bool _showPartyPet = false;
@@ -179,7 +171,6 @@ namespace Visibility.Configuration
 
 			settingDictionary["hidepet"] = x => _hidePet = x;
 			settingDictionary["hideplayer"] = x => _hidePlayer = x;
-			settingDictionary["hideminion"] = x => _hideMinion = x;
 			settingDictionary["showcompanypet"] = x => _showCompanyPet = x;
 			settingDictionary["showcompanyplayer"] = x => _showCompanyPlayer = x;
 			settingDictionary["showcompanychocobo"] = x => _showCompanyChocobo = x;
@@ -209,7 +200,7 @@ namespace Visibility.Configuration
 
 			var scale = ImGui.GetIO().FontGlobalScale;
 
-			ImGui.SetNextWindowSize(new Vector2(500 * scale, 230), ImGuiCond.Always);
+			ImGui.SetNextWindowSize(new Vector2(500 * scale, 205 * scale), ImGuiCond.Always);
 			ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize);
 
 			if (ImGui.Checkbox($"###{nameof(_plugin.enabled)}", ref _plugin.enabled))
@@ -246,15 +237,6 @@ namespace Visibility.Configuration
 			ImGui.NextColumn();
 			ImGui.NextColumn();
 			Checkbox(nameof(_showCompanyPet), ref _showCompanyPet);
-			ImGui.NextColumn();
-
-			ImGui.Text("Minions");
-			ImGui.NextColumn();
-			Checkbox(nameof(_hideMinion), ref _hideMinion);
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-			ImGui.NextColumn();
 			ImGui.NextColumn();
 
 			ImGui.Text("Chocobos");

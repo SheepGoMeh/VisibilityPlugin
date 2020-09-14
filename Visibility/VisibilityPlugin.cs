@@ -250,7 +250,7 @@ namespace Visibility
 
 		private void CheckRender<T>(IEnumerable<T> collection, ICollection<int> friendCollection,
 			ICollection<int> companyCollection, ref bool oneShot, bool hide = false, bool showParty = false,
-			bool showFriend = false, bool showCompany = false, bool showDead = false, IEnumerable<Actor> mounts = null)
+			bool showFriend = false, bool showCompany = false, bool showDead = false)
 			where T : Actor
 		{
 			if (hide)
@@ -276,13 +276,6 @@ namespace Visibility
 					}
 				}
 
-				if (mounts != null)
-				{
-					foreach (var item in mounts)
-					{
-						item.Render();
-					}
-				}
 
 				oneShot = true;
 			}
@@ -344,15 +337,6 @@ namespace Visibility
 				      && npc.OwnerId != _pluginInterface.ClientState.LocalPlayer?.ActorId
 				select actor as BattleNpc;
 
-			var minions = from actor in _pluginInterface.ClientState.Actors
-				where actor.ObjectKind == ObjectKind.Companion
-				      && actor.ActorId != _pluginInterface.ClientState.LocalPlayer?.ActorId
-				select actor;
-
-			var mounts = from actor in _pluginInterface.ClientState.Actors
-				where actor.ObjectKind == ObjectKind.MountType
-				select actor;
-
 			var chocobos = from actor in _pluginInterface.ClientState.Actors
 				where actor is BattleNpc npc
 				      && (byte)npc.BattleNpcKind == 3
@@ -385,9 +369,6 @@ namespace Visibility
 					_pluginConfig.ShowCompanyPlayer,
 					_pluginConfig.ShowDeadPlayer);
 			}
-
-			CheckRender(minions, friends, companyMembers, ref _oneShot[3],
-				_pluginConfig.HideMinion, false, false, false, false, mounts);
 
 			foreach (var item in voidItems)
 			{
