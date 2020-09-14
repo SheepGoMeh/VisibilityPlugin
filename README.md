@@ -7,8 +7,8 @@ It also comes with VoidList, which is a better blacklist.
 
 It provides:
 * Ability to hide players, pets and chocobos.
-* Ability to filter hidden players by party, friends and dead.
-* Ability to filter chocobos and pets by party and friends.
+* Ability to filter hidden players by party, friends, free company, and dead.
+* Ability to filter chocobos and pets by party, friends and free company.
 
 ![](https://github.com/sheepgomeh/visibilityplugin/raw/master/res/visibility.png)
 
