@@ -355,7 +355,8 @@ namespace Visibility
 				_pluginConfig.ShowFriendPet,
 				_pluginConfig.ShowCompanyPet);
 
-			if (!_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty])
+			if (!_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty]
+				|| _pluginConfig.territoryTypeWhitelist.Contains(_pluginInterface.ClientState.TerritoryType))
 			{
 				foreach (var item in voidedPlayers)
 				{

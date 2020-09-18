@@ -163,6 +163,13 @@ namespace Visibility.Configuration
 		[NonSerialized]
 		public readonly Dictionary<string, Action<bool>> settingDictionary = new Dictionary<string, Action<bool>>();
 
+		[NonSerialized]
+		public readonly HashSet<ushort> territoryTypeWhitelist = new HashSet<ushort>
+		{
+			792,
+			898,
+			899
+		};
 
 		public void Init(VisibilityPlugin plugin, DalamudPluginInterface pluginInterface)
 		{
