@@ -72,6 +72,7 @@ namespace Visibility
 			_placeholderResolver.Init(pluginInterface);
 
 			_pluginInterface.UiBuilder.OnBuildUi += BuildUi;
+			_pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
 			_pluginInterface.Framework.OnUpdateEvent += OnUpdateEvent;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
 		}
@@ -79,6 +80,7 @@ namespace Visibility
 		public void Dispose()
 		{
 			_pluginInterface.UiBuilder.OnBuildUi -= BuildUi;
+			_pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
 			_pluginInterface.Framework.OnUpdateEvent -= OnUpdateEvent;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
 			_pluginInterface.CommandManager.RemoveHandler(PluginCommandName);
@@ -220,6 +222,11 @@ namespace Visibility
 			{
 				Print("VoidList: Invalid target.");
 			}
+		}
+
+		private void OpenConfigUi(object sender, EventArgs eventArgs)
+		{
+			_drawConfig = !_drawConfig;
 		}
 
 		private void BuildUi()
