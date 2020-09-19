@@ -23,6 +23,8 @@ namespace Visibility
 		private static string PluginCommandName => "/pvis";
 		private static string VoidCommandName => "/void";
 		private static string VoidTargetCommandName => "/voidtarget";
+
+		private int _ticks;
 		
 		private DalamudPluginInterface _pluginInterface;
 		private VisibilityConfiguration _pluginConfig;
@@ -294,11 +296,14 @@ namespace Visibility
 		{
 			if (!enabled ||
 			    (_pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas] ||
-			     _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas51]))
+			     _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas51])
+			    || _ticks + 250 > Environment.TickCount)
 			{
 				return;
 			}
-			
+
+			_ticks = Environment.TickCount & int.MaxValue;
+
 			for (var i = 0; i != _partyActorId.Length; ++i)
 			{
 				_partyActorId[i] = _placeholderResolver.GetTargetActorId($"<{i + 2}>");
