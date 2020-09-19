@@ -322,40 +322,64 @@ namespace Visibility
 				where item.ActorId == 0
 				select item;
 
-			var voidedPlayers = from actor in _pluginInterface.ClientState.Actors
-				where _pluginConfig.VoidList.SingleOrDefault(x => x.ActorId != 0 && x.ActorId == actor.ActorId) != null
-				      && actor.ActorId != _pluginInterface.ClientState.LocalPlayer?.ActorId
-				select actor;
+			var actorTable = _pluginInterface.ClientState.Actors;
 
-			var players = from actor in _pluginInterface.ClientState.Actors
-				where actor is PlayerCharacter character
-				      && actor.ActorId != _pluginInterface.ClientState.LocalPlayer?.ActorId
-				      && character.HomeWorld.Id != ushort.MaxValue
-				      && character.CurrentWorld.Id != ushort.MaxValue
-				      && !voidedPlayers.Contains(actor)
-				select actor as PlayerCharacter;
+			var friends = new HashSet<int>();
+			var companyMembers = new HashSet<int>();
 
-			var friends = (from actor in players
-				where actor.IsStatus(StatusFlags.Friend)
-				select actor.ActorId).ToHashSet();
+			var players = new HashSet<PlayerCharacter>();
+			var voidedPlayers = new HashSet<PlayerCharacter>();
 
-			var companyMembers = (from actor in _pluginInterface.ClientState.Actors
-				where actor is PlayerCharacter playerCharacter
-				      && !string.IsNullOrEmpty(playerCharacter.CompanyTag)
-				      && playerCharacter.CompanyTag == _pluginInterface.ClientState.LocalPlayer?.CompanyTag
-				select actor.ActorId).ToHashSet();
+			var pets = new HashSet<BattleNpc>();
+			var chocobos = new HashSet<BattleNpc>();
 
-			var pets = from actor in _pluginInterface.ClientState.Actors
-				where actor is BattleNpc npc
-				      && npc.BattleNpcKind == BattleNpcSubKind.Pet
-				      && npc.OwnerId != _pluginInterface.ClientState.LocalPlayer?.ActorId
-				select actor as BattleNpc;
+			for (var i = 0; i != actorTable.Length; ++i)
+			{
+				if (actorTable[i] == null) continue;
+				if (actorTable[i].ObjectKind != ObjectKind.Player
+					&& actorTable[i].ObjectKind != ObjectKind.BattleNpc) continue;
 
-			var chocobos = from actor in _pluginInterface.ClientState.Actors
-				where actor is BattleNpc npc
-				      && (byte)npc.BattleNpcKind == 3
-				      && npc.OwnerId != _pluginInterface.ClientState.LocalPlayer?.ActorId
-				select actor as BattleNpc;
+				switch (actorTable[i])
+				{
+					case PlayerCharacter playerCharacter when playerCharacter.ActorId == _pluginInterface.ClientState.LocalPlayer?.ActorId:
+						continue;
+					case PlayerCharacter playerCharacter when playerCharacter.HomeWorld.Id == ushort.MaxValue:
+						continue;
+					case PlayerCharacter playerCharacter when playerCharacter.CurrentWorld.Id == ushort.MaxValue:
+						continue;
+					case PlayerCharacter playerCharacter when _pluginConfig.VoidList.SingleOrDefault(x =>
+						x.ActorId != 0 && x.ActorId == playerCharacter.ActorId) != null:
+						voidedPlayers.Add(playerCharacter);
+						break;
+					case PlayerCharacter playerCharacter:
+					{
+						players.Add(playerCharacter);
+
+						if (playerCharacter.IsStatus(StatusFlags.Friend))
+						{
+							friends.Add(playerCharacter.ActorId);
+						}
+
+						if (!string.IsNullOrEmpty(playerCharacter.CompanyTag)
+						    && playerCharacter.CompanyTag == _pluginInterface.ClientState.LocalPlayer?.CompanyTag)
+						{
+							companyMembers.Add(playerCharacter.ActorId);
+						}
+
+						break;
+					}
+					case BattleNpc battleNpc when battleNpc.OwnerId < 0:
+						continue;
+					case BattleNpc battleNpc when battleNpc.OwnerId == _pluginInterface.ClientState.LocalPlayer?.ActorId:
+						continue;
+					case BattleNpc battleNpc when battleNpc.BattleNpcKind == BattleNpcSubKind.Pet:
+						pets.Add(battleNpc);
+						break;
+					case BattleNpc battleNpc when (byte)battleNpc.BattleNpcKind == 3:
+						chocobos.Add(battleNpc);
+						break;
+				}
+			}
 
 			CheckRender(chocobos, friends, companyMembers,
 				ref _oneShot[0], _pluginConfig.HideChocobo,
