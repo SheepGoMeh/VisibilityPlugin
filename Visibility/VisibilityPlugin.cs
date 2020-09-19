@@ -163,8 +163,10 @@ namespace Visibility
 				return;
 			}
 
+			var dataCenter = _pluginInterface.ClientState.LocalPlayer?.HomeWorld.GameData.DataCenter;
+
 			var world = _pluginInterface.Data.GetExcelSheet<World>()
-				.SingleOrDefault(x => x.Name.Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
+				.SingleOrDefault(x => x.DataCenter == dataCenter && x.Name.Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 			if (world == default(World))
 			{
