@@ -372,7 +372,7 @@ namespace Visibility
 						continue;
 					case BattleNpc battleNpc when battleNpc.OwnerId == _pluginInterface.ClientState.LocalPlayer?.ActorId:
 						continue;
-					case BattleNpc battleNpc when battleNpc.BattleNpcKind == BattleNpcSubKind.Pet:
+					case BattleNpc battleNpc when battleNpc.BattleNpcKind == BattleNpcSubKind.Pet && battleNpc.NameId != 6565:
 						pets.Add(battleNpc);
 						break;
 					case BattleNpc battleNpc when (byte)battleNpc.BattleNpcKind == 3:
