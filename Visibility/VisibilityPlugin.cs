@@ -166,7 +166,7 @@ namespace Visibility
 			var dataCenter = _pluginInterface.ClientState.LocalPlayer?.HomeWorld.GameData.DataCenter;
 
 			var world = _pluginInterface.Data.GetExcelSheet<World>()
-				.SingleOrDefault(x => x.DataCenter == dataCenter && x.Name.Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
+				.SingleOrDefault(x => x.DataCenter.Row == dataCenter?.Row && x.Name.Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 			if (world == default(World))
 			{
