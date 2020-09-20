@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Dalamud.Game.Chat;
 using Dalamud.Game.Chat.SeStringHandling;
 using Dalamud.Game.ClientState;
@@ -183,17 +184,19 @@ namespace Visibility
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual")
 				: new VoidItem(actor, args[3], command == "VoidUIManual"));
 
+			var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
+
 			if (!_pluginConfig.VoidList.Any(x =>
 				(x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId) ||
 				(x.ActorId == voidItem.ActorId && x.ActorId != 0)))
 			{
 				_pluginConfig.VoidList.Add(voidItem);
 				_pluginConfig.Save();
-				Print($"VoidList: {playerName}@{world.Name} has been added to the void list.");
+				Print($"VoidList: {playerName}{icon}{world.Name} has been added to the void list.");
 			}
 			else
 			{
-				Print($"VoidList: {playerName}@{world.Name} entry already exists.");
+				Print($"VoidList: {playerName}{icon}{world.Name} entry already exists.");
 			}
 		}
 
@@ -206,6 +209,7 @@ namespace Visibility
 				                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer?.TargetActorID) is PlayerCharacter actor)
 			{
 				var voidItem = new VoidItem(actor, arguments, false);
+				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
 				
 				if (!_pluginConfig.VoidList.Any(x =>
 					(x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId) ||
@@ -213,11 +217,11 @@ namespace Visibility
 				{
 					_pluginConfig.VoidList.Add(voidItem);
 					_pluginConfig.Save();
-					Print($"VoidList: {actor.Name}@{actor.HomeWorld.GameData.Name} has been added to the void list.");
+					Print($"VoidList: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added to the void list.");
 				}
 				else
 				{
-					Print($"VoidList: {actor.Name}@{actor.HomeWorld.GameData.Name} entry already exists.");
+					Print($"VoidList: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} entry already exists.");
 				}
 			}
 			else
