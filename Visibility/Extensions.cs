@@ -71,7 +71,9 @@ namespace Visibility
 				}
 				catch (Exception ex)
 				{
+#if DEBUG
 					PluginLog.LogError(ex.ToString());
+#endif
 				}
 			});
 		}
@@ -92,7 +94,9 @@ namespace Visibility
 				}
 				catch (Exception ex)
 				{
+#if DEBUG
 					PluginLog.LogError(ex.ToString());
+#endif
 				}
 			});
 		}
@@ -111,7 +115,9 @@ namespace Visibility
 				}
 				catch (Exception ex)
 				{
+#if DEBUG
 					PluginLog.LogError(ex.ToString());
+#endif
 				}
 			});
 		}
