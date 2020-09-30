@@ -310,7 +310,7 @@ namespace Visibility
 			if (!enabled ||
 			    (_pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas] ||
 			     _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas51])
-			    || _ticks + 250 > Environment.TickCount)
+			    || _ticks + 20 > Environment.TickCount)
 			{
 				return;
 			}
