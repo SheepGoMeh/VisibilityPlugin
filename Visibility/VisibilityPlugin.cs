@@ -31,12 +31,12 @@ namespace Visibility
 		private VisibilityConfiguration _pluginConfig;
 
 		private bool _drawConfig;
-		public bool enabled;
 		
 		private readonly bool[] _oneShot = { false, false, false, false };
 		private readonly int[] _partyActorId = new int[7];
 
-		private PlaceholderResolver _placeholderResolver;
+		//private PlaceholderResolver _placeholderResolver;
+		private CharacterDrawResolver _characterDrawResolver;
 
 		private Action<string> Print => s => _pluginInterface?.Framework.Gui.Chat.Print(s);
 
@@ -45,11 +45,6 @@ namespace Visibility
 			_pluginInterface = pluginInterface;
 			_pluginConfig = pluginInterface.GetPluginConfig() as VisibilityConfiguration ?? new VisibilityConfiguration();
 			_pluginConfig.Init(this, pluginInterface);
-
-			enabled = _pluginConfig.Enabled;
-
-			pluginInterface.ClientState.OnLogout += (s, e) => enabled = false;
-			pluginInterface.ClientState.OnLogin += (s, e) => enabled = _pluginConfig.Enabled;
 
 			_pluginInterface.CommandManager.AddHandler(PluginCommandName, new CommandInfo(PluginCommand)
 			{
@@ -69,24 +64,65 @@ namespace Visibility
 				ShowInHelp = true
 			});
 
-			_placeholderResolver = new PlaceholderResolver();
-			_placeholderResolver.Init(pluginInterface);
+			/*_placeholderResolver = new PlaceholderResolver();
+			_placeholderResolver.Init(pluginInterface);*/
+			
+			_characterDrawResolver = new CharacterDrawResolver();
+			_characterDrawResolver.Init(pluginInterface, _pluginConfig);
 
 			_pluginInterface.UiBuilder.OnBuildUi += BuildUi;
 			_pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
-			_pluginInterface.Framework.OnUpdateEvent += OnUpdateEvent;
+			//_pluginInterface.Framework.OnUpdateEvent += OnUpdateEvent;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
 		}
 
-		public void Dispose()
+		protected virtual void Dispose(bool disposing)
 		{
+			if (!disposing)
+			{
+				return;
+			}
+
+			_characterDrawResolver.Dispose();
+
 			_pluginInterface.UiBuilder.OnBuildUi -= BuildUi;
 			_pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
-			_pluginInterface.Framework.OnUpdateEvent -= OnUpdateEvent;
+			//_pluginInterface.Framework.OnUpdateEvent -= OnUpdateEvent;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
 			_pluginInterface.CommandManager.RemoveHandler(PluginCommandName);
 			_pluginInterface.CommandManager.RemoveHandler(VoidCommandName);
 			_pluginInterface.CommandManager.RemoveHandler(VoidTargetCommandName);
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public void Unhide(UnitType unitType, ContainerType containerType)
+		{
+			_characterDrawResolver.Unhide(unitType, containerType);
+		}
+
+		public void UnhidePlayers(ContainerType type)
+		{
+			_characterDrawResolver.UnhidePlayers(type);
+		}
+		
+		public void UnhidePets(ContainerType type)
+		{
+			_characterDrawResolver.UnhidePets(type);
+		}
+
+		public void UnhideMinions(ContainerType type)
+		{
+			_characterDrawResolver.UnhideMinions(type);
+		}
+
+		public void UnhideChocobos(ContainerType type)
+		{
+			_characterDrawResolver.UnhideChocobos(type);
 		}
 
 		private void PluginCommand(string command, string arguments)
@@ -102,7 +138,7 @@ namespace Visibility
 				if (args[0].Equals("help", StringComparison.InvariantCultureIgnoreCase))
 				{
 					Print($"{PluginCommandName} help - This help menu");
-					Print($"{PluginCommandName} <setting> <on/off> - Sets a setting to on or off");
+					Print($"{PluginCommandName} <setting> <on/off/toggle> - Sets a setting to on, off or toggles it");
 					Print("Available values:");
 
 					foreach (var key in _pluginConfig.settingDictionary.Keys)
@@ -125,22 +161,28 @@ namespace Visibility
 					return;
 				}
 
-				bool value;
+				int value;
 
-				if (args[1].Equals("on", StringComparison.InvariantCultureIgnoreCase) ||
-				    args[1].Equals("true", StringComparison.InvariantCultureIgnoreCase) || args[1].Equals("1"))
+				switch(args[1].ToLowerInvariant())
 				{
-					value = true;
-				}
-				else if (args[1].Equals("off", StringComparison.InvariantCultureIgnoreCase) ||
-				         args[1].Equals("false", StringComparison.InvariantCultureIgnoreCase) || args[1].Equals("0"))
-				{
-					value = false;
-				}
-				else
-				{
-					Print($"'{args[1]}' is not a valid value.");
-					return;
+					case "0":
+					case "off":
+					case "false":
+						value = 0;
+						break;
+
+					case "1":
+					case "on":
+					case "true":
+						value = 1;
+						break;
+
+					case "toggle":
+						value = 2;
+						break;
+					default:
+						Print($"'{args[1]}' is not a valid value.");
+						return;
 				}
 
 				_pluginConfig.settingDictionary[args[0].ToLowerInvariant()].Invoke(value);
@@ -167,7 +209,7 @@ namespace Visibility
 			var dataCenter = _pluginInterface.ClientState.LocalPlayer?.HomeWorld.GameData.DataCenter;
 
 			var world = _pluginInterface.Data.GetExcelSheet<World>()
-				.SingleOrDefault(x => x.DataCenter.Row == dataCenter?.Row && x.Name.Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
+				.SingleOrDefault(x => x.DataCenter.Row == dataCenter?.Row && x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 			if (world == default(World))
 			{
@@ -242,7 +284,7 @@ namespace Visibility
 
 		private void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
 		{
-			if (!enabled) return;
+			if (!_pluginConfig.Enabled) return;
 			try
 			{
 				if (isHandled) return;
@@ -291,6 +333,7 @@ namespace Visibility
 					}
 				}
 
+				_pluginInterface.ClientState.LocalPlayer.Render();
 
 				oneShot = true;
 			}
@@ -307,7 +350,7 @@ namespace Visibility
 
 		private void OnUpdateEvent(Framework framework)
 		{
-			if (!enabled ||
+			if (!_pluginConfig.Enabled ||
 			    (_pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas] ||
 			     _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas51])
 			    || _ticks + 20 > Environment.TickCount)
@@ -317,10 +360,10 @@ namespace Visibility
 
 			_ticks = Environment.TickCount & int.MaxValue;
 
-			for (var i = 0; i != _partyActorId.Length; ++i)
+			/*for (var i = 0; i != _partyActorId.Length; ++i)
 			{
 				_partyActorId[i] = _placeholderResolver.GetTargetActorId($"<{i + 2}>");
-			}
+			}*/
 
 			var voidItems = from item in _pluginConfig.VoidList
 				where item.ActorId == 0
@@ -398,7 +441,7 @@ namespace Visibility
 				_pluginConfig.ShowCompanyPet);
 
 			if (!_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty]
-				|| _pluginConfig.territoryTypeWhitelist.Contains(_pluginInterface.ClientState.TerritoryType))
+				|| _pluginConfig.TerritoryTypeWhitelist.Contains(_pluginInterface.ClientState.TerritoryType))
 			{
 				foreach (var item in voidedPlayers)
 				{
@@ -428,6 +471,10 @@ namespace Visibility
 
 		public void RefreshActors()
 		{
+			_characterDrawResolver.UnhideAll();
+
+			return;
+			/*
 			var actors = from actor in _pluginInterface.ClientState.Actors
 						 where !(actor is BattleNpc)
 						 select actor;
@@ -446,7 +493,7 @@ namespace Visibility
 			foreach (var actor in battleActors)
 			{
 				actor.Rerender();
-			}
+			}*/
 		}
 	}
 }

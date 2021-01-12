@@ -7,8 +7,11 @@ using System.Text;
 using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Actors;
 using Dalamud.Game.ClientState.Actors.Types;
+using Dalamud.Game.ClientState.Actors.Types.NonPlayer;
 using Dalamud.Plugin;
 using ImGuiNET;
+using Lumina.Excel.GeneratedSheets;
+using Visibility.Utils;
 using Visibility.Void;
 
 namespace Visibility.Configuration
@@ -16,7 +19,12 @@ namespace Visibility.Configuration
 	public class VisibilityConfiguration : IPluginConfiguration
 	{
 		public int Version { get; set; }
-		public bool Enabled { get; set; } = true;
+
+		public bool Enabled
+		{
+			get => _enabled;
+			set => _enabled = value;
+		}
 
 		public bool HidePet
 		{
@@ -28,6 +36,12 @@ namespace Visibility.Configuration
 		{
 			get => _hidePlayer;
 			set => _hidePlayer = value;
+		}
+
+		public bool HideMinion
+		{
+			get => _hideMinion;
+			set => _hideMinion = value;
 		}
 
 		public bool HideChocobo
@@ -46,6 +60,12 @@ namespace Visibility.Configuration
 		{
 			get => _showCompanyPlayer;
 			set => _showCompanyPlayer = value;
+		}
+
+		public bool ShowCompanyMinion
+		{
+			get => _showCompanyMinion;
+			set => _showCompanyMinion = value;
 		}
 
 		public bool ShowCompanyChocobo
@@ -130,9 +150,13 @@ namespace Visibility.Configuration
 		};
 
 		[NonSerialized]
+		private bool _enabled = true;
+		[NonSerialized]
 		private bool _hidePet = false;
 		[NonSerialized]
 		private bool _hidePlayer = false;
+		[NonSerialized]
+		private bool _hideMinion = false;
 		[NonSerialized]
 		private bool _hideChocobo = false;
 		[NonSerialized]
@@ -158,36 +182,99 @@ namespace Visibility.Configuration
 		[NonSerialized]
 		private bool _showCompanyPlayer = false;
 		[NonSerialized]
+		private bool _showCompanyMinion = false;
+		[NonSerialized]
 		private bool _showCompanyChocobo = false;
 
 		[NonSerialized]
-		public readonly Dictionary<string, Action<bool>> settingDictionary = new Dictionary<string, Action<bool>>();
+		public readonly Dictionary<string, Action<int>> settingDictionary = new Dictionary<string, Action<int>>();
 
 		[NonSerialized]
-		public readonly HashSet<ushort> territoryTypeWhitelist = new HashSet<ushort>
+		public readonly HashSet<ushort> TerritoryTypeWhitelist = new HashSet<ushort>
 		{
 			792,
 			898,
 			899
 		};
 
+		private void ChangeSetting(string id)
+		{
+			switch (id)
+			{
+				case nameof(_hidePet):
+					_plugin.UnhidePets(ContainerType.All);
+					break;
+				case nameof(_hidePlayer):
+					_plugin.UnhidePlayers(ContainerType.All);
+					break;
+				case nameof(_hideMinion):
+					_plugin.UnhideMinions(ContainerType.All);
+					break;
+				case nameof(_hideChocobo):
+					_plugin.UnhideChocobos(ContainerType.All);
+					break;
+				case nameof(_showCompanyPet):
+					_plugin.UnhidePets(ContainerType.Company);
+					break;
+				case nameof(_showCompanyPlayer):
+					_plugin.UnhidePlayers(ContainerType.Company);
+					break;
+				case nameof(_showCompanyMinion):
+					_plugin.UnhideMinions(ContainerType.Company);
+					break;
+				case nameof(_showCompanyChocobo):
+					_plugin.UnhideChocobos(ContainerType.Company);
+					break;
+				case nameof(_showPartyPet):
+					_plugin.UnhidePets(ContainerType.Party);
+					break;
+				case nameof(_showPartyPlayer):
+					_plugin.UnhidePlayers(ContainerType.Party);
+					break;
+				case nameof(_showPartyMinion):
+					_plugin.UnhideMinions(ContainerType.Party);
+					break;
+				case nameof(_showPartyChocobo):
+					_plugin.UnhideChocobos(ContainerType.Party);
+					break;
+				case nameof(_showFriendPet):
+					_plugin.UnhidePets(ContainerType.Friend);
+					break;
+				case nameof(_showFriendPlayer):
+					_plugin.UnhidePlayers(ContainerType.Friend);
+					break;
+				case nameof(_showFriendMinion):
+					_plugin.UnhideMinions(ContainerType.Friend);
+					break;
+				case nameof(_showFriendChocobo):
+					_plugin.UnhideChocobos(ContainerType.Friend);
+					break;
+			}
+		}
+
+		private void ChangeSetting(string id, ref bool var, int val)
+		{
+			var = val > 1 ? !var : val > 0;
+			ChangeSetting(id);
+		}
+
 		public void Init(VisibilityPlugin plugin, DalamudPluginInterface pluginInterface)
 		{
 			_plugin = plugin;
 			_pluginInterface = pluginInterface;
 
-			settingDictionary["hidepet"] = x => _hidePet = x;
-			settingDictionary["hideplayer"] = x => _hidePlayer = x;
-			settingDictionary["showcompanypet"] = x => _showCompanyPet = x;
-			settingDictionary["showcompanyplayer"] = x => _showCompanyPlayer = x;
-			settingDictionary["showcompanychocobo"] = x => _showCompanyChocobo = x;
-			settingDictionary["showpartypet"] = x => _showPartyPet = x;
-			settingDictionary["showpartyplayer"] = x => _showPartyPlayer = x;
-			settingDictionary["showpartychocobo"] = x => _showPartyChocobo = x;
-			settingDictionary["showfriendpet"] = x => _showFriendPet = x;
-			settingDictionary["showfriendplayer"] = x => _showFriendPlayer = x;
-			settingDictionary["showfriendchocobo"] = x => _showFriendChocobo= x;
-			settingDictionary["showdeadplayer"] = x => _showDeadPlayer = x;
+			settingDictionary["hidepet"] = x => ChangeSetting(nameof(_hidePet), ref _hidePet, x);
+			settingDictionary["hideplayer"] = x => ChangeSetting(nameof(_hidePlayer), ref _hidePlayer, x);
+			settingDictionary["showcompanypet"] = x => ChangeSetting(nameof(_showCompanyPet), ref _showCompanyPet, x);
+			settingDictionary["showcompanyplayer"] = x => ChangeSetting(nameof(_showCompanyPlayer), ref _showCompanyPlayer, x);
+			settingDictionary["showcompanychocobo"] = x => ChangeSetting(nameof(_showCompanyChocobo), ref _showCompanyChocobo, x);
+			settingDictionary["showpartypet"] = x => ChangeSetting(nameof(_showPartyPet), ref _showPartyPet, x);
+			settingDictionary["showpartyplayer"] = x => ChangeSetting(nameof(_showPartyPlayer), ref _showPartyPlayer, x);
+			settingDictionary["showpartychocobo"] = x => ChangeSetting(nameof(_showPartyChocobo), ref _showPartyChocobo, x);
+			settingDictionary["showfriendpet"] = x => ChangeSetting(nameof(_showFriendPet), ref _showFriendPet, x);
+			settingDictionary["showfriendplayer"] = x => ChangeSetting(nameof(_showFriendPlayer), ref _showFriendPlayer, x);
+			settingDictionary["showfriendchocobo"] = x => ChangeSetting(nameof(_showFriendChocobo), ref _showFriendChocobo, x);
+			settingDictionary["showdeadplayer"] = x => ChangeSetting(nameof(_showDeadPlayer), ref _showDeadPlayer, x);
 		}
 
 		public void Save()
@@ -198,6 +285,7 @@ namespace Visibility.Configuration
 		private void Checkbox(string id, ref bool pluginVariable)
 		{
 			if (!ImGui.Checkbox($"###{id}", ref pluginVariable)) return;
+			ChangeSetting(id);
 			Save();
 		}
 
@@ -207,14 +295,16 @@ namespace Visibility.Configuration
 
 			var scale = ImGui.GetIO().FontGlobalScale;
 
-			ImGui.SetNextWindowSize(new Vector2(500 * scale, 205 * scale), ImGuiCond.Always);
+			ImGui.SetNextWindowSize(new Vector2(500 * scale, 230 * scale), ImGuiCond.Always);
 			ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize);
 
-			if (ImGui.Checkbox($"###{nameof(_plugin.enabled)}", ref _plugin.enabled))
+			/*if (ImGui.Checkbox($"###{nameof(_plugin.enabled)}", ref _plugin.enabled))
 			{
 				Enabled = _plugin.enabled;
 				Save();
-			}
+			}*/
+
+			Checkbox(nameof(_enabled), ref _enabled);
 
 			ImGui.SameLine();
 			ImGui.Text("Enable");
@@ -269,6 +359,18 @@ namespace Visibility.Configuration
 			Checkbox(nameof(_showDeadPlayer), ref _showDeadPlayer);
 			ImGui.NextColumn();
 			Checkbox(nameof(_showCompanyPlayer), ref _showCompanyPlayer);
+			ImGui.NextColumn();
+
+			ImGui.Text("Minions");
+			ImGui.NextColumn();
+			Checkbox(nameof(_hideMinion), ref _hideMinion);
+			ImGui.NextColumn();
+			Checkbox(nameof(_showPartyMinion), ref _showPartyMinion);
+			ImGui.NextColumn();
+			Checkbox(nameof(_showFriendMinion), ref _showFriendMinion);
+			ImGui.NextColumn();
+			ImGui.NextColumn();
+			Checkbox(nameof(_showCompanyMinion), ref _showCompanyMinion);
 			ImGui.NextColumn();
 			ImGui.Separator();
 
