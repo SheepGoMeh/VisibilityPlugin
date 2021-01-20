@@ -189,10 +189,8 @@ namespace Visibility.Utils
 			LocalPlayer = *(BattleChara**)_address.LocalPlayerAddress.ToPointer();
 		}
 
-		private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len1, int len2)
+		private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len)
 		{
-			var len = Math.Min(len1, len2);
-
 			while (len-- != 0)
 			{
 				if (*arr1++ != *arr2++)
@@ -252,7 +250,7 @@ namespace Visibility.Utils
 
 						if (*LocalPlayer->Character.CompanyTag != 0
 							&& LocalPlayer->Character.CurrentWorld == LocalPlayer->Character.HomeWorld
-							&& UnsafeArrayEqual(thisPtr->CompanyTag, LocalPlayer->Character.CompanyTag, 7, 7))
+							&& UnsafeArrayEqual(thisPtr->CompanyTag, LocalPlayer->Character.CompanyTag, 7))
 						{
 							_players[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
