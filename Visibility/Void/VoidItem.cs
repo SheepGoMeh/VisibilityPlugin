@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
 using Dalamud.Game.ClientState.Actors.Types;
 using Newtonsoft.Json;
 
@@ -13,10 +15,16 @@ namespace Visibility.Void
 			set
 			{
 				var name = value.Split(' ');
-				Firstname = name[0];
-				Lastname = name[1];
+				Firstname = name[0].ToUppercase();
+				Lastname = name[1].ToUppercase();
+
+				var nameBytes = Encoding.UTF8.GetBytes(Name + '\0');
+				NameBytes = nameBytes.Length < 30 ? nameBytes : nameBytes.Take(30).ToArray();
 			}
 		}
+
+		[JsonIgnore] public byte[] NameBytes { get; set; }
+
 		public string Firstname { get; set; }
 		public string Lastname { get; set; }
 		public string HomeworldName { get; set; }
@@ -49,10 +57,10 @@ namespace Visibility.Void
 		}
 
 		[JsonConstructor]
-		public VoidItem(string firstname, string lastname, string homeworldName, uint homeworldId, DateTime time, int actorId, string reason, bool manual)
+		public VoidItem(string firstname, string lastname, string homeworldName, uint homeworldId, DateTime time,
+			int actorId, string reason, bool manual)
 		{
-			Firstname = firstname;
-			Lastname = lastname;
+			Name = $"{firstname} {lastname}";
 			Time = time;
 			ActorId = actorId;
 			HomeworldId = homeworldId;

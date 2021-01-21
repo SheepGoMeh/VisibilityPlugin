@@ -202,6 +202,19 @@ namespace Visibility.Utils
 			return true;
 		}
 
+		private static unsafe bool UnsafeArrayEqual(IReadOnlyList<byte> arr1, byte* arr2, int len)
+		{
+			for (var i = 0; i != len; ++i)
+			{
+				if (arr1[i] != *arr2++)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
 		{
 			var localPlayerAddress = _pluginInterface?.ClientState?.Actors?[0]?.Address;
@@ -259,7 +272,10 @@ namespace Visibility.Utils
 							_players[ContainerType.Company].Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_config.VoidList.Any(x => x.ActorId == thisPtr->GameObject.ObjectID))
+						if (_config.VoidList.Any(x => UnsafeArrayEqual(x.NameBytes,
+							                              thisPtr->GameObject.Name,
+							                              x.NameBytes.Length) &&
+						                              x.HomeworldId == thisPtr->HomeWorld))
 						{
 							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
 							HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
