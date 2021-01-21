@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Dalamud.Game.Chat;
 using Dalamud.Game.Chat.SeStringHandling;
+using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Actors;
 using Dalamud.Game.ClientState.Actors.Types;
@@ -287,14 +288,14 @@ namespace Visibility
 			if (!_pluginConfig.Enabled) return;
 			try
 			{
-				if (isHandled) return;
-				var senderName = sender.TextValue;
+				if (isHandled || !(sender.Payloads.SingleOrDefault(x => x.Type == PayloadType.Player) is PlayerPayload playerPayload))
+				{
+					return;
+				}
 
-				if (_pluginConfig.VoidList.SingleOrDefault(
-					x => x.ActorId != 0
-					     && x.ActorId != _pluginInterface.ClientState.LocalPlayer?.ActorId
-					     && x.Name != _pluginInterface.ClientState.LocalPlayer?.Name
-					     && x.Name == senderName) != null)
+				if (_pluginConfig.VoidList.Any(x =>
+					x.HomeworldId == playerPayload.World.RowId 
+					&& x.Name == playerPayload.PlayerName))
 				{
 					isHandled = true;
 				}
