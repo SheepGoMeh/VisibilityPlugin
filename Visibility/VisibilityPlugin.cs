@@ -26,17 +26,11 @@ namespace Visibility
 		private static string VoidCommandName => "/void";
 		private static string VoidTargetCommandName => "/voidtarget";
 
-		private int _ticks;
-		
 		private DalamudPluginInterface _pluginInterface;
 		private VisibilityConfiguration _pluginConfig;
 
 		private bool _drawConfig;
 		
-		private readonly bool[] _oneShot = { false, false, false, false };
-		private readonly int[] _partyActorId = new int[7];
-
-		//private PlaceholderResolver _placeholderResolver;
 		private CharacterDrawResolver _characterDrawResolver;
 
 		private Action<string> Print => s => _pluginInterface?.Framework.Gui.Chat.Print(s);
@@ -65,15 +59,11 @@ namespace Visibility
 				ShowInHelp = true
 			});
 
-			/*_placeholderResolver = new PlaceholderResolver();
-			_placeholderResolver.Init(pluginInterface);*/
-			
 			_characterDrawResolver = new CharacterDrawResolver();
 			_characterDrawResolver.Init(pluginInterface, _pluginConfig);
 
 			_pluginInterface.UiBuilder.OnBuildUi += BuildUi;
 			_pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
-			//_pluginInterface.Framework.OnUpdateEvent += OnUpdateEvent;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
 		}
 
@@ -88,7 +78,6 @@ namespace Visibility
 
 			_pluginInterface.UiBuilder.OnBuildUi -= BuildUi;
 			_pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
-			//_pluginInterface.Framework.OnUpdateEvent -= OnUpdateEvent;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
 			_pluginInterface.CommandManager.RemoveHandler(PluginCommandName);
 			_pluginInterface.CommandManager.RemoveHandler(VoidCommandName);
@@ -303,170 +292,6 @@ namespace Visibility
 			catch (Exception)
 			{
 				// Ignore exception
-			}
-		}
-
-		private void CheckRender<T>(IEnumerable<T> collection, ICollection<int> friendCollection,
-			ICollection<int> companyCollection, ref bool oneShot, bool hide = false, bool showParty = false,
-			bool showFriend = false, bool showCompany = false, bool showDead = false)
-			where T : Actor
-		{
-			if (hide)
-			{
-				foreach (var item in collection)
-				{
-					if (item == _pluginInterface.ClientState.LocalPlayer)
-					{
-						continue;
-					}
-
-					var lookupId = item is BattleNpc battleNpc ? battleNpc.OwnerId : item.ActorId;
-					if ((showParty && _partyActorId.Contains(lookupId))
-					    || (showFriend && friendCollection.Contains(lookupId))
-					    || (showCompany && companyCollection.Contains(lookupId))
-					    || (showDead && (item as Chara).CurrentHp == 0))
-					{
-						item.Render();
-					}
-					else
-					{
-						item.Hide();
-					}
-				}
-
-				_pluginInterface.ClientState.LocalPlayer.Render();
-
-				oneShot = true;
-			}
-			else if (oneShot)
-			{
-				foreach (var item in collection)
-				{
-					item.Render();
-				}
-
-				oneShot = false;
-			}
-		}
-
-		private void OnUpdateEvent(Framework framework)
-		{
-			if (!_pluginConfig.Enabled ||
-			    (_pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas] ||
-			     _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas51])
-			    || _ticks + 20 > Environment.TickCount)
-			{
-				return;
-			}
-
-			_ticks = Environment.TickCount & int.MaxValue;
-
-			/*for (var i = 0; i != _partyActorId.Length; ++i)
-			{
-				_partyActorId[i] = _placeholderResolver.GetTargetActorId($"<{i + 2}>");
-			}*/
-
-			var voidItems = from item in _pluginConfig.VoidList
-				where item.ActorId == 0
-				select item;
-
-			var actorTable = _pluginInterface.ClientState.Actors;
-
-			var friends = new HashSet<int>();
-			var companyMembers = new HashSet<int>();
-
-			var players = new HashSet<PlayerCharacter>();
-			var voidedPlayers = new HashSet<PlayerCharacter>();
-
-			var pets = new HashSet<BattleNpc>();
-			var chocobos = new HashSet<BattleNpc>();
-
-			for (var i = 0; i != actorTable.Length; ++i)
-			{
-				if (actorTable[i] == null) continue;
-				if (actorTable[i].ObjectKind != ObjectKind.Player
-					&& actorTable[i].ObjectKind != ObjectKind.BattleNpc) continue;
-
-				switch (actorTable[i])
-				{
-					case PlayerCharacter playerCharacter when playerCharacter.ActorId == _pluginInterface.ClientState.LocalPlayer?.ActorId:
-						continue;
-					case PlayerCharacter playerCharacter when playerCharacter.HomeWorld.Id == ushort.MaxValue:
-						continue;
-					case PlayerCharacter playerCharacter when playerCharacter.CurrentWorld.Id == ushort.MaxValue:
-						continue;
-					case PlayerCharacter playerCharacter when _pluginConfig.VoidList.SingleOrDefault(x =>
-						x.ActorId != 0 && x.ActorId == playerCharacter.ActorId) != null:
-						voidedPlayers.Add(playerCharacter);
-						break;
-					case PlayerCharacter playerCharacter:
-					{
-						players.Add(playerCharacter);
-
-						if (playerCharacter.IsStatus(StatusFlags.Friend))
-						{
-							friends.Add(playerCharacter.ActorId);
-						}
-
-						if (!string.IsNullOrEmpty(playerCharacter.CompanyTag)
-						    && playerCharacter.CompanyTag == _pluginInterface.ClientState.LocalPlayer?.CompanyTag)
-						{
-							companyMembers.Add(playerCharacter.ActorId);
-						}
-
-						break;
-					}
-					case BattleNpc battleNpc when battleNpc.OwnerId < 0:
-						continue;
-					case BattleNpc battleNpc when battleNpc.OwnerId == _pluginInterface.ClientState.LocalPlayer?.ActorId:
-						continue;
-					case BattleNpc battleNpc when battleNpc.BattleNpcKind == BattleNpcSubKind.Pet && battleNpc.NameId != 6565:
-						pets.Add(battleNpc);
-						break;
-					case BattleNpc battleNpc when (byte)battleNpc.BattleNpcKind == 3:
-						chocobos.Add(battleNpc);
-						break;
-				}
-			}
-
-			CheckRender(chocobos, friends, companyMembers,
-				ref _oneShot[0], _pluginConfig.HideChocobo,
-				_pluginConfig.ShowPartyChocobo,
-				_pluginConfig.ShowFriendChocobo,
-				_pluginConfig.ShowCompanyChocobo);
-
-			CheckRender(pets, friends, companyMembers,
-				ref _oneShot[1], _pluginConfig.HidePet,
-				_pluginConfig.ShowPartyPet,
-				_pluginConfig.ShowFriendPet,
-				_pluginConfig.ShowCompanyPet);
-
-			if (!_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty]
-				|| _pluginConfig.TerritoryTypeWhitelist.Contains(_pluginInterface.ClientState.TerritoryType))
-			{
-				foreach (var item in voidedPlayers)
-				{
-					item.Hide();
-				}
-
-				CheckRender(players, friends, companyMembers,
-					ref _oneShot[2], _pluginConfig.HidePlayer,
-					_pluginConfig.ShowPartyPlayer,
-					_pluginConfig.ShowFriendPlayer,
-					_pluginConfig.ShowCompanyPlayer,
-					_pluginConfig.ShowDeadPlayer);
-			}
-
-			foreach (var item in voidItems)
-			{
-				if (!(players.SingleOrDefault(x => x.HomeWorld.Id == item.HomeworldId && x.Name == item.Name) is
-					PlayerCharacter player))
-				{
-					continue;
-				}
-				
-				item.ActorId = player.ActorId;
-				_pluginConfig.Save();
 			}
 		}
 
