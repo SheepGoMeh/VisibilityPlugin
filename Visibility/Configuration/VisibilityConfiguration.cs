@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Actors;
@@ -20,113 +21,24 @@ namespace Visibility.Configuration
 	{
 		public int Version { get; set; }
 
-		public bool Enabled
-		{
-			get => _enabled;
-			set => _enabled = value;
-		}
-
-		public bool HidePet
-		{
-			get => _hidePet;
-			set => _hidePet = value;
-		}
-
-		public bool HidePlayer
-		{
-			get => _hidePlayer;
-			set => _hidePlayer = value;
-		}
-
-		public bool HideMinion
-		{
-			get => _hideMinion;
-			set => _hideMinion = value;
-		}
-
-		public bool HideChocobo
-		{
-			get => _hideChocobo;
-			set => _hideChocobo = value;
-		}
-
-		public bool ShowCompanyPet
-		{
-			get => _showCompanyPet;
-			set => _showCompanyPet = value;
-		}
-
-		public bool ShowCompanyPlayer
-		{
-			get => _showCompanyPlayer;
-			set => _showCompanyPlayer = value;
-		}
-
-		public bool ShowCompanyMinion
-		{
-			get => _showCompanyMinion;
-			set => _showCompanyMinion = value;
-		}
-
-		public bool ShowCompanyChocobo
-		{
-			get => _showCompanyChocobo;
-			set => _showCompanyChocobo = value;
-		}
-
-		public bool ShowPartyPet
-		{
-			get => _showPartyPet;
-			set => _showPartyPet = value;
-		}
-
-		public bool ShowPartyPlayer
-		{
-			get => _showPartyPlayer;
-			set => _showPartyPlayer = value;
-		}
-
-		public bool ShowPartyMinion
-		{
-			get => _showPartyMinion;
-			set => _showPartyMinion = value;
-		}
-
-		public bool ShowPartyChocobo
-		{
-			get => _showPartyChocobo;
-			set => _showPartyChocobo = value;
-		}
-
-		public bool ShowFriendPet
-		{
-			get => _showFriendPet;
-			set => _showFriendPet = value;
-		}
-
-		public bool ShowFriendPlayer
-		{
-			get => _showFriendPlayer;
-			set => _showFriendPlayer = value;
-		}
-
-		public bool ShowFriendMinion
-		{
-			get => _showFriendMinion;
-			set => _showFriendMinion = value;
-		}
-
-		public bool ShowFriendChocobo
-		{
-			get => _showFriendChocobo;
-			set => _showFriendChocobo = value;
-		}
-
-		public bool ShowDeadPlayer
-		{
-			get => _showDeadPlayer;
-			set => _showDeadPlayer = value;
-		}
+		public bool Enabled { get; set; }
+		public bool HidePet	{ get; set; }
+		public bool HidePlayer { get; set; }
+		public bool HideMinion { get; set; }
+		public bool HideChocobo { get; set; }
+		public bool ShowCompanyPet { get; set; }
+		public bool ShowCompanyPlayer { get; set; }
+		public bool ShowCompanyMinion { get; set; }
+		public bool ShowCompanyChocobo { get; set; }
+		public bool ShowPartyPet { get; set; }
+		public bool ShowPartyPlayer { get; set; }
+		public bool ShowPartyMinion { get; set; }
+		public bool ShowPartyChocobo { get; set; }
+		public bool ShowFriendPet { get; set; }
+		public bool ShowFriendPlayer { get; set; }
+		public bool ShowFriendMinion { get; set; }
+		public bool ShowFriendChocobo { get; set; }
+		public bool ShowDeadPlayer { get; set; }
 
 		public List<VoidItem> VoidList { get; } = new List<VoidItem>();
 
@@ -150,43 +62,6 @@ namespace Visibility.Configuration
 		};
 
 		[NonSerialized]
-		private bool _enabled = true;
-		[NonSerialized]
-		private bool _hidePet = false;
-		[NonSerialized]
-		private bool _hidePlayer = false;
-		[NonSerialized]
-		private bool _hideMinion = false;
-		[NonSerialized]
-		private bool _hideChocobo = false;
-		[NonSerialized]
-		private bool _showPartyPet = false;
-		[NonSerialized]
-		private bool _showPartyPlayer = false;
-		[NonSerialized]
-		private bool _showPartyMinion = false;
-		[NonSerialized]
-		private bool _showPartyChocobo = false;
-		[NonSerialized]
-		private bool _showFriendPet = false;
-		[NonSerialized]
-		private bool _showFriendPlayer = false;
-		[NonSerialized]
-		private bool _showFriendMinion = false;
-		[NonSerialized]
-		private bool _showFriendChocobo = false;
-		[NonSerialized]
-		private bool _showDeadPlayer = false;
-		[NonSerialized]
-		private bool _showCompanyPet = false;
-		[NonSerialized]
-		private bool _showCompanyPlayer = false;
-		[NonSerialized]
-		private bool _showCompanyMinion = false;
-		[NonSerialized]
-		private bool _showCompanyChocobo = false;
-
-		[NonSerialized]
 		public readonly Dictionary<string, Action<int>> settingDictionary = new Dictionary<string, Action<int>>();
 
 		[NonSerialized]
@@ -197,65 +72,72 @@ namespace Visibility.Configuration
 			899
 		};
 
-		private void ChangeSetting(string id)
+		private void ChangeSetting(string propertyName)
 		{
-			switch (id)
+			switch (propertyName)
 			{
-				case nameof(_hidePet):
+				case nameof(HidePet):
 					_plugin.UnhidePets(ContainerType.All);
 					break;
-				case nameof(_hidePlayer):
+				case nameof(HidePlayer):
 					_plugin.UnhidePlayers(ContainerType.All);
 					break;
-				case nameof(_hideMinion):
+				case nameof(HideMinion):
 					_plugin.UnhideMinions(ContainerType.All);
 					break;
-				case nameof(_hideChocobo):
+				case nameof(HideChocobo):
 					_plugin.UnhideChocobos(ContainerType.All);
 					break;
-				case nameof(_showCompanyPet):
+				case nameof(ShowCompanyPet):
 					_plugin.UnhidePets(ContainerType.Company);
 					break;
-				case nameof(_showCompanyPlayer):
+				case nameof(ShowCompanyPlayer):
 					_plugin.UnhidePlayers(ContainerType.Company);
 					break;
-				case nameof(_showCompanyMinion):
+				case nameof(ShowCompanyMinion):
 					_plugin.UnhideMinions(ContainerType.Company);
 					break;
-				case nameof(_showCompanyChocobo):
+				case nameof(ShowCompanyChocobo):
 					_plugin.UnhideChocobos(ContainerType.Company);
 					break;
-				case nameof(_showPartyPet):
+				case nameof(ShowPartyPet):
 					_plugin.UnhidePets(ContainerType.Party);
 					break;
-				case nameof(_showPartyPlayer):
+				case nameof(ShowPartyPlayer):
 					_plugin.UnhidePlayers(ContainerType.Party);
 					break;
-				case nameof(_showPartyMinion):
+				case nameof(ShowPartyMinion):
 					_plugin.UnhideMinions(ContainerType.Party);
 					break;
-				case nameof(_showPartyChocobo):
+				case nameof(ShowPartyChocobo):
 					_plugin.UnhideChocobos(ContainerType.Party);
 					break;
-				case nameof(_showFriendPet):
+				case nameof(ShowFriendPet):
 					_plugin.UnhidePets(ContainerType.Friend);
 					break;
-				case nameof(_showFriendPlayer):
+				case nameof(ShowFriendPlayer):
 					_plugin.UnhidePlayers(ContainerType.Friend);
 					break;
-				case nameof(_showFriendMinion):
+				case nameof(ShowFriendMinion):
 					_plugin.UnhideMinions(ContainerType.Friend);
 					break;
-				case nameof(_showFriendChocobo):
+				case nameof(ShowFriendChocobo):
 					_plugin.UnhideChocobos(ContainerType.Friend);
 					break;
 			}
 		}
-
-		private void ChangeSetting(string id, ref bool var, int val)
+		
+		private FieldInfo GetBackingField(string propertyName)
 		{
-			var = val > 1 ? !var : val > 0;
-			ChangeSetting(id);
+			return GetType().GetField($"<{propertyName}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+		}
+
+		private void ChangeSetting(string propertyName, int val)
+		{
+			var field = GetBackingField(propertyName);
+			var state = (bool) field.GetValue(this);
+			field.SetValue(this, val > 1 ? !state : val > 0);
+			ChangeSetting(propertyName);
 		}
 
 		public void Init(VisibilityPlugin plugin, DalamudPluginInterface pluginInterface)
@@ -263,18 +145,18 @@ namespace Visibility.Configuration
 			_plugin = plugin;
 			_pluginInterface = pluginInterface;
 
-			settingDictionary["hidepet"] = x => ChangeSetting(nameof(_hidePet), ref _hidePet, x);
-			settingDictionary["hideplayer"] = x => ChangeSetting(nameof(_hidePlayer), ref _hidePlayer, x);
-			settingDictionary["showcompanypet"] = x => ChangeSetting(nameof(_showCompanyPet), ref _showCompanyPet, x);
-			settingDictionary["showcompanyplayer"] = x => ChangeSetting(nameof(_showCompanyPlayer), ref _showCompanyPlayer, x);
-			settingDictionary["showcompanychocobo"] = x => ChangeSetting(nameof(_showCompanyChocobo), ref _showCompanyChocobo, x);
-			settingDictionary["showpartypet"] = x => ChangeSetting(nameof(_showPartyPet), ref _showPartyPet, x);
-			settingDictionary["showpartyplayer"] = x => ChangeSetting(nameof(_showPartyPlayer), ref _showPartyPlayer, x);
-			settingDictionary["showpartychocobo"] = x => ChangeSetting(nameof(_showPartyChocobo), ref _showPartyChocobo, x);
-			settingDictionary["showfriendpet"] = x => ChangeSetting(nameof(_showFriendPet), ref _showFriendPet, x);
-			settingDictionary["showfriendplayer"] = x => ChangeSetting(nameof(_showFriendPlayer), ref _showFriendPlayer, x);
-			settingDictionary["showfriendchocobo"] = x => ChangeSetting(nameof(_showFriendChocobo), ref _showFriendChocobo, x);
-			settingDictionary["showdeadplayer"] = x => ChangeSetting(nameof(_showDeadPlayer), ref _showDeadPlayer, x);
+			settingDictionary["hidepet"] = x => ChangeSetting(nameof(HidePet), x);
+			settingDictionary["hideplayer"] = x => ChangeSetting(nameof(HidePlayer), x);
+			settingDictionary["showcompanypet"] = x => ChangeSetting(nameof(ShowCompanyPet), x);
+			settingDictionary["showcompanyplayer"] = x => ChangeSetting(nameof(ShowCompanyPlayer), x);
+			settingDictionary["showcompanychocobo"] = x => ChangeSetting(nameof(ShowCompanyChocobo), x);
+			settingDictionary["showpartypet"] = x => ChangeSetting(nameof(ShowPartyPet), x);
+			settingDictionary["showpartyplayer"] = x => ChangeSetting(nameof(ShowPartyPlayer), x);
+			settingDictionary["showpartychocobo"] = x => ChangeSetting(nameof(ShowPartyChocobo), x);
+			settingDictionary["showfriendpet"] = x => ChangeSetting(nameof(ShowFriendPet), x);
+			settingDictionary["showfriendplayer"] = x => ChangeSetting(nameof(ShowFriendPlayer), x);
+			settingDictionary["showfriendchocobo"] = x => ChangeSetting(nameof(ShowFriendChocobo), x);
+			settingDictionary["showdeadplayer"] = x => ChangeSetting(nameof(ShowDeadPlayer), x);
 		}
 
 		public void Save()
@@ -282,10 +164,11 @@ namespace Visibility.Configuration
 			_pluginInterface.SavePluginConfig(this);
 		}
 
-		private void Checkbox(string id, ref bool pluginVariable)
+		private void Checkbox(string propertyName)
 		{
-			if (!ImGui.Checkbox($"###{id}", ref pluginVariable)) return;
-			ChangeSetting(id);
+			var state = (bool) GetBackingField(propertyName).GetValue(this);
+			if (!ImGui.Checkbox($"###{propertyName}", ref state)) return;
+			ChangeSetting(propertyName, state ? 1 : 0);
 			Save();
 		}
 
@@ -304,7 +187,7 @@ namespace Visibility.Configuration
 				Save();
 			}*/
 
-			Checkbox(nameof(_enabled), ref _enabled);
+			Checkbox(nameof(Enabled));
 
 			ImGui.SameLine();
 			ImGui.Text("Enable");
@@ -326,51 +209,51 @@ namespace Visibility.Configuration
 			ImGui.Separator();
 			ImGui.Text("Pets");
 			ImGui.NextColumn();
-			Checkbox(nameof(_hidePet), ref _hidePet);
+			Checkbox(nameof(HidePet));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showPartyPet), ref _showPartyPet);
+			Checkbox(nameof(ShowPartyPet));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showFriendPet), ref _showFriendPet);
+			Checkbox(nameof(ShowFriendPet));
 			ImGui.NextColumn();
 			ImGui.NextColumn();
-			Checkbox(nameof(_showCompanyPet), ref _showCompanyPet);
+			Checkbox(nameof(ShowCompanyPet));
 			ImGui.NextColumn();
 
 			ImGui.Text("Chocobos");
 			ImGui.NextColumn();
-			Checkbox(nameof(_hideChocobo), ref _hideChocobo);
+			Checkbox(nameof(HideChocobo));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showPartyChocobo), ref _showPartyChocobo);
+			Checkbox(nameof(ShowPartyChocobo));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showFriendChocobo), ref _showFriendChocobo);
+			Checkbox(nameof(ShowFriendChocobo));
 			ImGui.NextColumn();
 			ImGui.NextColumn();
-			Checkbox(nameof(_showCompanyChocobo), ref _showCompanyChocobo);
+			Checkbox(nameof(ShowCompanyChocobo));
 			ImGui.NextColumn();
 
 			ImGui.Text("Players");
 			ImGui.NextColumn();
-			Checkbox(nameof(_hidePlayer), ref _hidePlayer);
+			Checkbox(nameof(HidePlayer));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showPartyPlayer), ref _showPartyPlayer);
+			Checkbox(nameof(ShowPartyPlayer));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showFriendPlayer), ref _showFriendPlayer);
+			Checkbox(nameof(ShowFriendPlayer));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showDeadPlayer), ref _showDeadPlayer);
+			Checkbox(nameof(ShowDeadPlayer));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showCompanyPlayer), ref _showCompanyPlayer);
+			Checkbox(nameof(ShowCompanyPlayer));
 			ImGui.NextColumn();
 
 			ImGui.Text("Minions");
 			ImGui.NextColumn();
-			Checkbox(nameof(_hideMinion), ref _hideMinion);
+			Checkbox(nameof(HideMinion));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showPartyMinion), ref _showPartyMinion);
+			Checkbox(nameof(ShowPartyMinion));
 			ImGui.NextColumn();
-			Checkbox(nameof(_showFriendMinion), ref _showFriendMinion);
+			Checkbox(nameof(ShowFriendMinion));
 			ImGui.NextColumn();
 			ImGui.NextColumn();
-			Checkbox(nameof(_showCompanyMinion), ref _showCompanyMinion);
+			Checkbox(nameof(ShowCompanyMinion));
 			ImGui.NextColumn();
 			ImGui.Separator();
 
