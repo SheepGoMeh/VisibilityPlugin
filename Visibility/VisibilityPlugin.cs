@@ -297,10 +297,10 @@ namespace Visibility
 
 		public void RefreshActors()
 		{
+			var enabledState = _pluginConfig.Enabled;
+			_pluginConfig.Enabled = false;
 			_characterDrawResolver.UnhideAll();
 
-			return;
-			/*
 			var actors = from actor in _pluginInterface.ClientState.Actors
 						 where !(actor is BattleNpc)
 						 select actor;
@@ -319,7 +319,9 @@ namespace Visibility
 			foreach (var actor in battleActors)
 			{
 				actor.Rerender();
-			}*/
+			}
+
+			_pluginConfig.Enabled = enabledState;
 		}
 	}
 }
