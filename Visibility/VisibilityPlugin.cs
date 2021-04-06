@@ -25,6 +25,8 @@ namespace Visibility
 		private static string PluginCommandName => "/pvis";
 		private static string VoidCommandName => "/void";
 		private static string VoidTargetCommandName => "/voidtarget";
+		private static string WhitelistCommandName => "/void";
+		private static string WhitelistTargetCommandName => "/voidtarget";
 
 		private DalamudPluginInterface _pluginInterface;
 		private VisibilityConfiguration _pluginConfig;
@@ -58,6 +60,18 @@ namespace Visibility
 				HelpMessage = $"Adds targeted player to void list.\nUsage: {VoidTargetCommandName} <reason>",
 				ShowInHelp = true
 			});
+			
+			_pluginInterface.CommandManager.AddHandler(WhitelistCommandName, new CommandInfo(WhitelistPlayer)
+			{
+				HelpMessage = $"Adds player to whitelist.\nUsage: {WhitelistCommandName} <firstname> <lastname> <worldname>",
+				ShowInHelp = true
+			});
+			
+			_pluginInterface.CommandManager.AddHandler(WhitelistTargetCommandName, new CommandInfo(WhitelistTargetPlayer)
+			{
+				HelpMessage = $"Adds targeted player to whitelist.\nUsage: {WhitelistTargetCommandName}",
+				ShowInHelp = true
+			});
 
 			_characterDrawResolver = new CharacterDrawResolver();
 			_characterDrawResolver.Init(pluginInterface, _pluginConfig);
@@ -82,6 +96,8 @@ namespace Visibility
 			_pluginInterface.CommandManager.RemoveHandler(PluginCommandName);
 			_pluginInterface.CommandManager.RemoveHandler(VoidCommandName);
 			_pluginInterface.CommandManager.RemoveHandler(VoidTargetCommandName);
+			_pluginInterface.CommandManager.RemoveHandler(WhitelistCommandName);
+			_pluginInterface.CommandManager.RemoveHandler(WhitelistTargetCommandName);
 		}
 
 		public void Dispose()
@@ -259,6 +275,90 @@ namespace Visibility
 			else
 			{
 				Print("VoidList: Invalid target.");
+			}
+		}
+		
+		public void WhitelistPlayer(string command, string arguments)
+		{
+			if (string.IsNullOrEmpty(arguments))
+			{
+				Print("Whitelist: No arguments specified.");
+				return;
+			}
+
+			var args = arguments.Split(new[] { ' ' }, 4);
+
+			if (args.Length < 3)
+			{
+				Print("Whitelist: Too few arguments specified.");
+				return;
+			}
+
+			var dataCenter = _pluginInterface.ClientState.LocalPlayer?.HomeWorld.GameData.DataCenter;
+
+			var world = _pluginInterface.Data.GetExcelSheet<World>()
+				.SingleOrDefault(x => x.DataCenter.Row == dataCenter?.Row && x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
+
+			if (world == default(World))
+			{
+				Print($"Whitelist: '{args[2]}' is not a valid world name.");
+				return;
+			}
+
+			var playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
+
+			var item = (!(_pluginInterface.ClientState.Actors
+				.SingleOrDefault(x => x is PlayerCharacter character
+				                      && character.HomeWorld.Id == world.RowId
+				                      && character.Name.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)) is PlayerCharacter actor)
+				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual")
+				: new VoidItem(actor, args[3], command == "WhitelistUIManual"));
+
+			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode()); 
+
+			if (!_pluginConfig.Whitelist.Any(x =>
+				(x.Name == item.Name && x.HomeworldId == item.HomeworldId) ||
+				(x.ActorId == item.ActorId && x.ActorId != 0)))
+			{
+				_pluginConfig.Whitelist.Add(item);
+				_pluginConfig.Save();
+				_characterDrawResolver.UnhidePlayer((uint) item.ActorId);
+				Print($"Whitelist: {playerName}{icon}{world.Name} has been added.");
+			}
+			else
+			{
+				Print($"Whitelist: {playerName}{icon}{world.Name} entry already exists.");
+			}
+		}
+
+		public void WhitelistTargetPlayer(string command, string arguments)
+		{
+			if (_pluginInterface.ClientState.Actors
+				.SingleOrDefault(x => x is PlayerCharacter
+				                      && x.ActorId != 0
+				                      && x.ActorId != _pluginInterface.ClientState.LocalPlayer?.ActorId
+				                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer?.TargetActorID) is PlayerCharacter actor)
+			{
+				var item = new VoidItem(actor, arguments, false);
+				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
+				
+				if (!_pluginConfig.Whitelist.Any(x =>
+					(x.Name == item.Name && x.HomeworldId == item.HomeworldId) ||
+					(x.ActorId == item.ActorId && x.ActorId != 0)))
+				{
+					_pluginConfig.Whitelist.Add(item);
+					_pluginConfig.Save();
+					_characterDrawResolver.UnhidePlayer((uint) item.ActorId);
+					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
+				}
+				else
+				{
+					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} entry already exists.");
+				}
+			}
+			else
+			{
+				Print("Whitelist: Invalid target.");
 			}
 		}
 

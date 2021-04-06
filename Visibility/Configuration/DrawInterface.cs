@@ -123,123 +123,231 @@ namespace Visibility.Configuration
 			ImGui.NextColumn();
 			ImGui.NextColumn();
 			ImGui.NextColumn();
+			
+			if (ImGui.Button("Whitelist"))
+			{
+				_showListWindow[1] = !_showListWindow[1];
+			}
+			
 			ImGui.NextColumn();
 
 			if (ImGui.Button("VoidList"))
 			{
-				_showVoidListWindow = !_showVoidListWindow;
+				_showListWindow[0] = !_showListWindow[0];
 			}
 
 			ImGui.NextColumn();
 			ImGui.End();
 
-			if (!_showVoidListWindow) return drawConfig;
-
-			ImGui.SetNextWindowSize(new Vector2(700 * scale, 500), ImGuiCond.FirstUseEver);
-			ImGui.Begin($"{_plugin.Name}: VoidList", ref _showVoidListWindow);
-
-			var footer2 = (ImGui.GetStyle().ItemSpacing.Y) / 2 + ImGui.GetFrameHeightWithSpacing();
-			ImGui.BeginChild("scrollingVoidList", new Vector2(0, -footer2), false);
-
-			ImGui.Columns(6, "###voidCols");
-			ImGui.Text("Firstname");
-			ImGui.NextColumn();
-			ImGui.Text("Lastname");
-			ImGui.NextColumn();
-			ImGui.Text("World");
-			ImGui.NextColumn();
-			ImGui.Text("Date");
-			ImGui.NextColumn();
-			ImGui.Text("Reason");
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-
-			VoidItem itemToRemove = null;
-
-			foreach (var item in VoidList)
+			if (_showListWindow[0])
 			{
-				ImGui.TextUnformatted(item.Firstname);
+				ImGui.SetNextWindowSize(new Vector2(700 * scale, 500), ImGuiCond.FirstUseEver);
+				ImGui.Begin($"{_plugin.Name}: VoidList", ref _showListWindow[0]);
+
+				var footer2 = (ImGui.GetStyle().ItemSpacing.Y) / 2 + ImGui.GetFrameHeightWithSpacing();
+				ImGui.BeginChild("scrollingVoidList", new Vector2(0, -footer2), false);
+
+				ImGui.Columns(6, "###voidCols");
+				ImGui.Text("Firstname");
 				ImGui.NextColumn();
-				ImGui.TextUnformatted(item.Lastname);
+				ImGui.Text("Lastname");
 				ImGui.NextColumn();
-				ImGui.TextUnformatted(item.HomeworldName);
+				ImGui.Text("World");
 				ImGui.NextColumn();
-				ImGui.Text(item.Time.ToString(CultureInfo.CurrentCulture));
+				ImGui.Text("Date");
 				ImGui.NextColumn();
-				ImGui.TextUnformatted(item.Reason);
+				ImGui.Text("Reason");
+				ImGui.NextColumn();
 				ImGui.NextColumn();
 
-				if (ImGui.Button($"Remove##{item.Name}"))
+				VoidItem itemToRemove = null;
+
+				foreach (var item in VoidList)
 				{
-					itemToRemove = item;
+					ImGui.TextUnformatted(item.Firstname);
+					ImGui.NextColumn();
+					ImGui.TextUnformatted(item.Lastname);
+					ImGui.NextColumn();
+					ImGui.TextUnformatted(item.HomeworldName);
+					ImGui.NextColumn();
+					ImGui.Text(item.Time.ToString(CultureInfo.CurrentCulture));
+					ImGui.NextColumn();
+					ImGui.TextUnformatted(item.Reason);
+					ImGui.NextColumn();
+
+					if (ImGui.Button($"Remove##{item.Name}"))
+					{
+						itemToRemove = item;
+					}
+
+					ImGui.NextColumn();
 				}
 
-				ImGui.NextColumn();
-			}
-
-			if (itemToRemove != null)
-			{
-				if (_pluginInterface.ClientState.Actors
-					.SingleOrDefault(x => x is PlayerCharacter
-					                      && itemToRemove.ActorId != 0
-					                      && x.ObjectKind != ObjectKind.Companion
-					                      && x.ActorId == itemToRemove.ActorId) is PlayerCharacter actor)
+				if (itemToRemove != null)
 				{
-					actor.Render();
-				}
-
-				VoidList.Remove(itemToRemove);
-				Save();
-			}
-
-			var manual = true;
-
-			if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0)
-			{
-				Array.Clear(_buffer[0], 0, _buffer[0].Length);
-				Array.Clear(_buffer[1], 0, _buffer[1].Length);
-				Array.Clear(_buffer[2], 0, _buffer[2].Length);
-
-				if (_pluginInterface.ClientState.Actors
+					if (_pluginInterface.ClientState.Actors
 						.SingleOrDefault(x => x is PlayerCharacter
+						                      && itemToRemove.ActorId != 0
 						                      && x.ObjectKind != ObjectKind.Companion
-						                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
-							                      ?.TargetActorID) is
-					PlayerCharacter actor)
-				{
-					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[0], 0);
-					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[1], 0);
-					Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[2], 0);
+						                      && x.ActorId == itemToRemove.ActorId) is PlayerCharacter actor)
+					{
+						actor.Render();
+					}
 
-					manual = false;
+					VoidList.Remove(itemToRemove);
+					Save();
 				}
+
+				var manual = true;
+
+				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0)
+				{
+					Array.Clear(_buffer[0], 0, _buffer[0].Length);
+					Array.Clear(_buffer[1], 0, _buffer[1].Length);
+					Array.Clear(_buffer[2], 0, _buffer[2].Length);
+
+					if (_pluginInterface.ClientState.Actors
+							.SingleOrDefault(x => x is PlayerCharacter
+							                      && x.ObjectKind != ObjectKind.Companion
+							                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
+								                      ?.TargetActorID) is
+						PlayerCharacter actor)
+					{
+						Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[0], 0);
+						Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[1], 0);
+						Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[2], 0);
+
+						manual = false;
+					}
+				}
+
+				ImGui.InputText("###playerFirstName", _buffer[0], (uint) _buffer[0].Length,
+					ImGuiInputTextFlags.CharsNoBlank);
+				ImGui.NextColumn();
+				ImGui.InputText("###playerLastName", _buffer[1], (uint) _buffer[1].Length,
+					ImGuiInputTextFlags.CharsNoBlank);
+				ImGui.NextColumn();
+				ImGui.InputText("###homeworldName", _buffer[2], (uint) _buffer[2].Length,
+					ImGuiInputTextFlags.CharsNoBlank);
+				ImGui.NextColumn();
+				ImGui.NextColumn();
+				ImGui.InputText("###reason", _buffer[3], (uint) _buffer[3].Length);
+				ImGui.NextColumn();
+
+				if (ImGui.Button("Void player"))
+				{
+					_plugin.VoidPlayer(manual ? "VoidUIManual" : string.Empty,
+						$"{_buffer[0].ByteToString()} {_buffer[1].ByteToString()} {_buffer[2].ByteToString()} {_buffer[3].ByteToString()}");
+
+					foreach (var item in _buffer)
+						Array.Clear(item, 0, item.Length);
+				}
+
+				ImGui.NextColumn();
+
+				ImGui.EndChild();
 			}
-
-			ImGui.InputText("###playerFirstName", _buffer[0], (uint) _buffer[0].Length,
-				ImGuiInputTextFlags.CharsNoBlank);
-			ImGui.NextColumn();
-			ImGui.InputText("###playerLastName", _buffer[1], (uint) _buffer[1].Length,
-				ImGuiInputTextFlags.CharsNoBlank);
-			ImGui.NextColumn();
-			ImGui.InputText("###homeworldName", _buffer[2], (uint) _buffer[2].Length, ImGuiInputTextFlags.CharsNoBlank);
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-			ImGui.InputText("###reason", _buffer[3], (uint) _buffer[3].Length);
-			ImGui.NextColumn();
-
-			if (ImGui.Button("Void player"))
+			
+			if (_showListWindow[1])
 			{
-				_plugin.VoidPlayer(manual ? "VoidUIManual" : string.Empty,
-					$"{_buffer[0].ByteToString()} {_buffer[1].ByteToString()} {_buffer[2].ByteToString()} {_buffer[3].ByteToString()}");
+				ImGui.SetNextWindowSize(new Vector2(700 * scale, 500), ImGuiCond.FirstUseEver);
+				ImGui.Begin($"{_plugin.Name}: Whitelist", ref _showListWindow[1]);
 
-				foreach (var item in _buffer)
-					Array.Clear(item, 0, item.Length);
+				var footer2 = (ImGui.GetStyle().ItemSpacing.Y) / 2 + ImGui.GetFrameHeightWithSpacing();
+				ImGui.BeginChild("scrollingWhitelist", new Vector2(0, -footer2), false);
+
+				ImGui.Columns(6, "###whitelistCols");
+				ImGui.Text("Firstname");
+				ImGui.NextColumn();
+				ImGui.Text("Lastname");
+				ImGui.NextColumn();
+				ImGui.Text("World");
+				ImGui.NextColumn();
+				ImGui.Text("Date");
+                ImGui.NextColumn();
+                ImGui.Text("Reason");
+				ImGui.NextColumn();
+				ImGui.NextColumn();
+
+				VoidItem itemToRemove = null;
+
+				foreach (var item in Whitelist)
+				{
+					ImGui.TextUnformatted(item.Firstname);
+					ImGui.NextColumn();
+					ImGui.TextUnformatted(item.Lastname);
+					ImGui.NextColumn();
+					ImGui.TextUnformatted(item.HomeworldName);
+					ImGui.NextColumn();
+					ImGui.Text(item.Time.ToString(CultureInfo.CurrentCulture));
+					ImGui.NextColumn();
+					ImGui.TextUnformatted(item.Reason);
+					ImGui.NextColumn();
+
+					if (ImGui.Button($"Remove##{item.Name}"))
+					{
+						itemToRemove = item;
+					}
+					
+					ImGui.NextColumn();
+				}
+
+				if (itemToRemove != null)
+				{
+					Whitelist.Remove(itemToRemove);
+					Save();
+				}
+
+				var manual = true;
+
+				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0)
+				{
+					Array.Clear(_buffer[4], 0, _buffer[4].Length);
+					Array.Clear(_buffer[5], 0, _buffer[5].Length);
+					Array.Clear(_buffer[6], 0, _buffer[6].Length);
+
+					if (_pluginInterface.ClientState.Actors
+							.SingleOrDefault(x => x is PlayerCharacter
+							                      && x.ObjectKind != ObjectKind.Companion
+							                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
+								                      ?.TargetActorID) is
+						PlayerCharacter actor)
+					{
+						Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[4], 0);
+						Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[5], 0);
+						Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[6], 0);
+
+						manual = false;
+					}
+				}
+
+				ImGui.InputText("###playerFirstName", _buffer[4], (uint) _buffer[4].Length,
+					ImGuiInputTextFlags.CharsNoBlank);
+				ImGui.NextColumn();
+				ImGui.InputText("###playerLastName", _buffer[5], (uint) _buffer[5].Length,
+					ImGuiInputTextFlags.CharsNoBlank);
+				ImGui.NextColumn();
+				ImGui.InputText("###homeworldName", _buffer[6], (uint) _buffer[6].Length,
+					ImGuiInputTextFlags.CharsNoBlank);
+				ImGui.NextColumn();
+				ImGui.NextColumn();
+				ImGui.InputText("###reason", _buffer[7], (uint) _buffer[7].Length);
+				ImGui.NextColumn();
+
+				if (ImGui.Button("Add player"))
+				{
+					_plugin.WhitelistPlayer(manual ? "WhitelistUIManual" : string.Empty,
+						$"{_buffer[4].ByteToString()} {_buffer[5].ByteToString()} {_buffer[6].ByteToString()} {_buffer[7].ByteToString()}");
+
+					foreach (var item in _buffer)
+						Array.Clear(item, 0, item.Length);
+				}
+
+				ImGui.NextColumn();
+
+				ImGui.EndChild();
 			}
-
-			ImGui.NextColumn();
-
-			ImGui.EndChild();
-
+			
 			ImGui.End();
 
 			return drawConfig;

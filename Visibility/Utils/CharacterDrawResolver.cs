@@ -184,6 +184,17 @@ namespace Visibility.Utils
 			HiddenObjectIds.Clear();
 		}
 
+		public void UnhidePlayer(uint id)
+		{
+			if (!HiddenObjectIds.Contains(id))
+			{
+				return;
+			}
+
+			ObjectIdsToUnhide.Add(id);
+			HiddenObjectIds.Remove(id);
+		}
+
 		public unsafe void UpdateLocalPlayer()
 		{
 			LocalPlayer = *(BattleChara**)_address.LocalPlayerAddress.ToPointer();
@@ -286,7 +297,11 @@ namespace Visibility.Utils
 							(_config.ShowDeadPlayer && thisPtr->CurrentHp == 0) ||
 							(_config.ShowFriendPlayer && _players[ContainerType.Friend].Contains(thisPtr->GameObject.ObjectID)) ||
 							(_config.ShowCompanyPlayer && _players[ContainerType.Company].Contains(thisPtr->GameObject.ObjectID)) ||
-							(_config.ShowPartyPlayer && _players[ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)))
+							(_config.ShowPartyPlayer && _players[ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)) ||
+							(_config.Whitelist.Any(x => UnsafeArrayEqual(x.NameBytes,
+								                            thisPtr->GameObject.Name,
+								                            x.NameBytes.Length) &&
+							                            x.HomeworldId == thisPtr->HomeWorld)))
 						{
 							break;
 						}

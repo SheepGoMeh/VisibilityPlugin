@@ -33,6 +33,7 @@ namespace Visibility.Configuration
 		public bool ShowDeadPlayer { get; set; }
 
 		public List<VoidItem> VoidList { get; } = new List<VoidItem>();
+		public List<VoidItem> Whitelist { get; } = new List<VoidItem>();
 
 		[NonSerialized]
 		private VisibilityPlugin _plugin;
@@ -41,7 +42,7 @@ namespace Visibility.Configuration
 		private DalamudPluginInterface _pluginInterface;
 
 		[NonSerialized]
-		private bool _showVoidListWindow;
+		private bool[] _showListWindow = {false, false};
 
 		[NonSerialized]
 		private readonly byte[][] _buffer =
@@ -49,6 +50,9 @@ namespace Visibility.Configuration
 			new byte[16],
 			new byte[16],
 			new byte[128],
+			new byte[128],
+			new byte[16],
+			new byte[16],
 			new byte[128],
 			new byte[128]
 		};
