@@ -216,7 +216,7 @@ namespace Visibility
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual")
 				: new VoidItem(actor, args[3], command == "VoidUIManual"));
 
-			var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
+			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode()); 
 
 			if (!_pluginConfig.VoidList.Any(x =>
 				(x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId) ||
