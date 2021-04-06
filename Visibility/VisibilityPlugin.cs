@@ -224,7 +224,7 @@ namespace Visibility
 			{
 				_pluginConfig.VoidList.Add(voidItem);
 				_pluginConfig.Save();
-				Print($"VoidList: {playerName}{icon}{world.Name} has been added to the void list.");
+				Print($"VoidList: {playerName}{icon}{world.Name} has been added.");
 			}
 			else
 			{
@@ -249,7 +249,7 @@ namespace Visibility
 				{
 					_pluginConfig.VoidList.Add(voidItem);
 					_pluginConfig.Save();
-					Print($"VoidList: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added to the void list.");
+					Print($"VoidList: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
 				}
 				else
 				{
