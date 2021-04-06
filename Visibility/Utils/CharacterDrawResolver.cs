@@ -341,6 +341,19 @@ namespace Visibility.Utils
 						HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 						break;
 					}
+				case (byte) ObjectKind.BattleNpc
+					when thisPtr->GameObject.SubKind == (byte) BattleNpcSubKind.Pet && thisPtr->NameID == 6565
+					: // Earthly Star
+					if (_config.HideStar
+					    && _pluginInterface.ClientState.Condition[ConditionFlag.InCombat]
+					    && thisPtr->GameObject.OwnerID != LocalPlayer->Character.GameObject.ObjectID
+					    && !_players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
+					{
+						thisPtr->GameObject.RenderFlags |= (int) VisibilityFlags.Invisible;
+						HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+					}
+
+					break;
 				case (byte) ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == 3:
 					if (!_config.HideChocobo
 					    || thisPtr->GameObject.OwnerID == LocalPlayer->Character.GameObject.ObjectID)

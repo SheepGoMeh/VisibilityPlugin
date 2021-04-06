@@ -26,6 +26,7 @@ namespace Visibility.Configuration
 		public bool HidePlayer { get; set; }
 		public bool HideMinion { get; set; }
 		public bool HideChocobo { get; set; }
+		public bool HideStar { get; set; }
 		public bool ShowCompanyPet { get; set; }
 		public bool ShowCompanyPlayer { get; set; }
 		public bool ShowCompanyMinion { get; set; }
@@ -146,6 +147,7 @@ namespace Visibility.Configuration
 			_pluginInterface = pluginInterface;
 
 			settingDictionary["hidepet"] = x => ChangeSetting(nameof(HidePet), x);
+			settingDictionary["hidestar"] = x => ChangeSetting(nameof(HideStar), x);
 			settingDictionary["hideplayer"] = x => ChangeSetting(nameof(HidePlayer), x);
 			settingDictionary["showcompanypet"] = x => ChangeSetting(nameof(ShowCompanyPet), x);
 			settingDictionary["showcompanyplayer"] = x => ChangeSetting(nameof(ShowCompanyPlayer), x);
@@ -178,7 +180,7 @@ namespace Visibility.Configuration
 
 			var scale = ImGui.GetIO().FontGlobalScale;
 
-			ImGui.SetNextWindowSize(new Vector2(500 * scale, 230 * scale), ImGuiCond.Always);
+			ImGui.SetNextWindowSize(new Vector2(500 * scale, 262 * scale), ImGuiCond.Always);
 			ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize);
 
 			/*if (ImGui.Checkbox($"###{nameof(_plugin.enabled)}", ref _plugin.enabled))
@@ -256,6 +258,21 @@ namespace Visibility.Configuration
 			Checkbox(nameof(ShowCompanyMinion));
 			ImGui.NextColumn();
 			ImGui.Separator();
+			
+			ImGui.Columns(1, "###cols", false);
+
+			Checkbox(nameof(HideStar));
+			ImGui.SameLine();
+			ImGui.Text("Hide non-party Earthly Star");
+			if (ImGui.IsItemHovered())
+			{
+				ImGui.SetTooltip("Hides Earthly Star not belonging to players in your party (Only works in combat)");
+			}
+			
+			ImGui.NextColumn();
+			ImGui.Separator();
+			
+			ImGui.Columns(6, "###cols", false);
 
 			if (ImGui.Button("Refresh"))
 			{
