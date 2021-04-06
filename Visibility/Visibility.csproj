@@ -73,6 +73,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\DrawInterface.cs" />
     <Compile Include="Configuration\VisibilityConfiguration.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="Extensions.cs" />
