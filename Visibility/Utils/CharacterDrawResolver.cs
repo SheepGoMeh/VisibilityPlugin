@@ -217,7 +217,7 @@ namespace Visibility.Utils
 
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
 		{
-			var localPlayerAddress = _pluginInterface?.ClientState?.Actors?[0]?.Address;
+			var localPlayerAddress = _pluginInterface?.ClientState?.LocalPlayer?.Address;
 			
 			if (localPlayerAddress.HasValue && LocalPlayer != (BattleChara*)localPlayerAddress.Value)
 			{
