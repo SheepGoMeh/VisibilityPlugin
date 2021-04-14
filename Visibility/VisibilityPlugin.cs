@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -32,6 +33,7 @@ namespace Visibility
 		private VisibilityConfiguration _pluginConfig;
 
 		private bool _drawConfig;
+		private bool _refresh;
 		
 		private CharacterDrawResolver _characterDrawResolver;
 
@@ -76,9 +78,28 @@ namespace Visibility
 			_characterDrawResolver = new CharacterDrawResolver();
 			_characterDrawResolver.Init(pluginInterface, _pluginConfig);
 
+			_pluginInterface.Framework.OnUpdateEvent += FrameworkOnOnUpdateEvent;
 			_pluginInterface.UiBuilder.OnBuildUi += BuildUi;
 			_pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
+		}
+
+		private void FrameworkOnOnUpdateEvent(Framework framework)
+		{
+			if (!_refresh)
+			{
+				return;
+			}
+
+			_refresh = false;
+			_pluginConfig.Enabled = false;
+			_characterDrawResolver.UnhideAll();
+
+			Task.Run(async () =>
+			{
+				await Task.Delay(250);
+				_pluginConfig.Enabled = true;
+			});
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -90,6 +111,7 @@ namespace Visibility
 
 			_characterDrawResolver.Dispose();
 
+			_pluginInterface.Framework.OnUpdateEvent -= FrameworkOnOnUpdateEvent;
 			_pluginInterface.UiBuilder.OnBuildUi -= BuildUi;
 			_pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
 			_pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
@@ -397,31 +419,10 @@ namespace Visibility
 
 		public void RefreshActors()
 		{
-			var enabledState = _pluginConfig.Enabled;
-			_pluginConfig.Enabled = false;
-			_characterDrawResolver.UnhideAll();
-
-			var actors = from actor in _pluginInterface.ClientState.Actors
-						 where !(actor is BattleNpc)
-						 select actor;
-
-			var battleActors = from actor in _pluginInterface.ClientState.Actors
-							   where actor is BattleNpc npc
-							   && npc.BattleNpcKind != BattleNpcSubKind.Enemy
-							   && npc.OwnerId != _pluginInterface.ClientState.LocalPlayer?.ActorId
-							   select actor as BattleNpc;
-
-			foreach (var actor in actors)
+			if (_pluginConfig.Enabled)
 			{
-				actor.Rerender();
+				_refresh = true;
 			}
-
-			foreach (var actor in battleActors)
-			{
-				actor.Rerender();
-			}
-
-			_pluginConfig.Enabled = enabledState;
 		}
 	}
 }

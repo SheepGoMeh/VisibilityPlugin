@@ -178,10 +178,33 @@ namespace Visibility.Utils
 			HiddenMinionObjectIds.ExceptWith(_minions[type]);
 		}
 
-		public void UnhideAll()
+		public unsafe void UnhideAll()
 		{
-			ObjectIdsToUnhide.UnionWith(HiddenObjectIds);
-			HiddenObjectIds.Clear();
+			foreach (var actor in _pluginInterface.ClientState.Actors)
+			{
+				var thisPtr = (Character*) actor.Address;
+
+				if (thisPtr->GameObject.ObjectKind == (byte) ObjectKind.Companion)
+				{
+					if (!HiddenMinionObjectIds.Contains(thisPtr->CompanionOwnerID))
+					{
+						continue;
+					}
+					
+					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+					MinionObjectIdsToUnhide.Remove(thisPtr->CompanionOwnerID);
+				}
+				else
+				{
+					if (!HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+					{
+						continue;
+					}
+					
+					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+					HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+				}
+			}
 		}
 
 		public void UnhidePlayer(uint id)
