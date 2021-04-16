@@ -419,10 +419,7 @@ namespace Visibility
 
 		public void RefreshActors()
 		{
-			if (_pluginConfig.Enabled)
-			{
-				_refresh = true;
-			}
+			_refresh = _pluginConfig.Enabled;
 		}
 	}
 }
