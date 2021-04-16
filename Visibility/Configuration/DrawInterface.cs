@@ -12,6 +12,22 @@ namespace Visibility.Configuration
 {
 	public partial class VisibilityConfiguration
 	{
+		private static readonly Vector4 VersionColor = new Vector4(.5f, .5f, .5f, 1f);
+
+		private static readonly string VersionString =
+			System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+		private void CenteredCheckbox(string propertyName)
+		{
+			var state = (bool) GetBackingField(propertyName).GetValue(this);
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() +
+			                    (ImGui.GetColumnWidth() + 2 * ImGui.GetStyle().FramePadding.X) / 2 -
+			                    2 * ImGui.GetStyle().ItemSpacing.X - 2 * ImGui.GetStyle().CellPadding.X);
+			if (!ImGui.Checkbox($"###{propertyName}", ref state)) return;
+			ChangeSetting(propertyName, state ? 1 : 0);
+			Save();
+		}
+
 		private void Checkbox(string propertyName)
 		{
 			var state = (bool) GetBackingField(propertyName).GetValue(this);
@@ -20,82 +36,96 @@ namespace Visibility.Configuration
 			Save();
 		}
 
+		private static void CenteredText(string text)
+		{
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetColumnWidth() - ImGui.CalcTextSize(text).X) / 2 -
+			                    2 * ImGui.GetStyle().CellPadding.X);
+			ImGui.Text(text);
+		}
+
 		public bool DrawConfigUi()
 		{
 			var drawConfig = true;
 
 			var scale = ImGui.GetIO().FontGlobalScale;
 
-			ImGui.SetNextWindowSize(new Vector2(500 * scale, 262 * scale), ImGuiCond.Always);
+			ImGui.SetNextWindowSize(new Vector2(500 * scale, 0), ImGuiCond.Always);
 			ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize);
 
 			Checkbox(nameof(Enabled));
 
 			ImGui.SameLine();
 			ImGui.Text("Enable");
+			var cursorY = ImGui.GetCursorPosY();
+			ImGui.SameLine(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
+			               ImGui.GetScrollX());
+			ImGui.SetCursorPosY(cursorY / 2);
+			ImGui.TextColored(VersionColor, VersionString);
+			ImGui.SetCursorPosY(cursorY);
 			ImGui.Separator();
 
 			ImGui.Columns(6, "###cols", false);
 
 			ImGui.NextColumn();
-			ImGui.Text("Hide all");
+			CenteredText("Hide all");
 			ImGui.NextColumn();
-			ImGui.Text("Show party");
+			CenteredText("Show party");
 			ImGui.NextColumn();
-			ImGui.Text("Show friends");
+			CenteredText("Show friends");
 			ImGui.NextColumn();
-			ImGui.Text("Show dead");
+			CenteredText("Show FC");
 			ImGui.NextColumn();
-			ImGui.Text("Show FC");
+			CenteredText("Show dead");
 			ImGui.NextColumn();
 			ImGui.Separator();
+
+			ImGui.Text("Players");
+			ImGui.NextColumn();
+			CenteredCheckbox(nameof(HidePlayer));
+			ImGui.NextColumn();
+			CenteredCheckbox(nameof(ShowPartyPlayer));
+			ImGui.NextColumn();
+			CenteredCheckbox(nameof(ShowFriendPlayer));
+			ImGui.NextColumn();
+			CenteredCheckbox(nameof(ShowCompanyPlayer));
+			ImGui.NextColumn();
+			CenteredCheckbox(nameof(ShowDeadPlayer));
+			ImGui.NextColumn();
+
 			ImGui.Text("Pets");
 			ImGui.NextColumn();
-			Checkbox(nameof(HidePet));
+			CenteredCheckbox(nameof(HidePet));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowPartyPet));
+			CenteredCheckbox(nameof(ShowPartyPet));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowFriendPet));
+			CenteredCheckbox(nameof(ShowFriendPet));
 			ImGui.NextColumn();
+			CenteredCheckbox(nameof(ShowCompanyPet));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowCompanyPet));
 			ImGui.NextColumn();
 
 			ImGui.Text("Chocobos");
 			ImGui.NextColumn();
-			Checkbox(nameof(HideChocobo));
+			CenteredCheckbox(nameof(HideChocobo));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowPartyChocobo));
+			CenteredCheckbox(nameof(ShowPartyChocobo));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowFriendChocobo));
+			CenteredCheckbox(nameof(ShowFriendChocobo));
 			ImGui.NextColumn();
+			CenteredCheckbox(nameof(ShowCompanyChocobo));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowCompanyChocobo));
-			ImGui.NextColumn();
-
-			ImGui.Text("Players");
-			ImGui.NextColumn();
-			Checkbox(nameof(HidePlayer));
-			ImGui.NextColumn();
-			Checkbox(nameof(ShowPartyPlayer));
-			ImGui.NextColumn();
-			Checkbox(nameof(ShowFriendPlayer));
-			ImGui.NextColumn();
-			Checkbox(nameof(ShowDeadPlayer));
-			ImGui.NextColumn();
-			Checkbox(nameof(ShowCompanyPlayer));
 			ImGui.NextColumn();
 
 			ImGui.Text("Minions");
 			ImGui.NextColumn();
-			Checkbox(nameof(HideMinion));
+			CenteredCheckbox(nameof(HideMinion));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowPartyMinion));
+			CenteredCheckbox(nameof(ShowPartyMinion));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowFriendMinion));
+			CenteredCheckbox(nameof(ShowFriendMinion));
 			ImGui.NextColumn();
+			CenteredCheckbox(nameof(ShowCompanyMinion));
 			ImGui.NextColumn();
-			Checkbox(nameof(ShowCompanyMinion));
 			ImGui.NextColumn();
 			ImGui.Separator();
 
@@ -112,31 +142,30 @@ namespace Visibility.Configuration
 			ImGui.NextColumn();
 			ImGui.Separator();
 
-			ImGui.Columns(6, "###cols", false);
+			ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
 
 			if (ImGui.Button("Refresh"))
 			{
 				_plugin.RefreshActors();
 			}
 
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-			
+			ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("Whitelist").X -
+			               ImGui.CalcTextSize("VoidList").X - 4 * ImGui.GetStyle().FramePadding.X -
+			               ImGui.GetStyle().ItemSpacing.X * scale);
+
 			if (ImGui.Button("Whitelist"))
 			{
 				_showListWindow[1] = !_showListWindow[1];
 			}
-			
-			ImGui.NextColumn();
+
+			ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("VoidList").X -
+			               2 * ImGui.GetStyle().FramePadding.X);
 
 			if (ImGui.Button("VoidList"))
 			{
 				_showListWindow[0] = !_showListWindow[0];
 			}
 
-			ImGui.NextColumn();
 			ImGui.End();
 
 			if (_showListWindow[0])
@@ -202,11 +231,11 @@ namespace Visibility.Configuration
 
 				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0
 				    && _pluginInterface.ClientState.Actors
-						.SingleOrDefault(x => x is PlayerCharacter
-						                      && x.ObjectKind != ObjectKind.Companion
-						                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
-							                      ?.TargetActorID) is
-					PlayerCharacter actor)
+						    .SingleOrDefault(x => x is PlayerCharacter
+						                          && x.ObjectKind != ObjectKind.Companion
+						                          && x.ActorId == _pluginInterface.ClientState.LocalPlayer
+							                          ?.TargetActorID) is
+					    PlayerCharacter actor)
 				{
 					Array.Clear(_buffer[0], 0, _buffer[0].Length);
 					Array.Clear(_buffer[1], 0, _buffer[1].Length);
@@ -245,7 +274,7 @@ namespace Visibility.Configuration
 
 				ImGui.EndChild();
 			}
-			
+
 			if (_showListWindow[1])
 			{
 				ImGui.SetNextWindowSize(new Vector2(700 * scale, 500), ImGuiCond.FirstUseEver);
@@ -262,8 +291,8 @@ namespace Visibility.Configuration
 				ImGui.Text("World");
 				ImGui.NextColumn();
 				ImGui.Text("Date");
-                ImGui.NextColumn();
-                ImGui.Text("Reason");
+				ImGui.NextColumn();
+				ImGui.Text("Reason");
 				ImGui.NextColumn();
 				ImGui.NextColumn();
 
@@ -286,7 +315,7 @@ namespace Visibility.Configuration
 					{
 						itemToRemove = item;
 					}
-					
+
 					ImGui.NextColumn();
 				}
 
@@ -299,12 +328,12 @@ namespace Visibility.Configuration
 				var manual = true;
 
 				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0
-					&& _pluginInterface.ClientState.Actors
-						.SingleOrDefault(x => x is PlayerCharacter
-						                      && x.ObjectKind != ObjectKind.Companion
-						                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
-							                      ?.TargetActorID) is
-					PlayerCharacter actor)
+				    && _pluginInterface.ClientState.Actors
+						    .SingleOrDefault(x => x is PlayerCharacter
+						                          && x.ObjectKind != ObjectKind.Companion
+						                          && x.ActorId == _pluginInterface.ClientState.LocalPlayer
+							                          ?.TargetActorID) is
+					    PlayerCharacter actor)
 				{
 					Array.Clear(_buffer[4], 0, _buffer[4].Length);
 					Array.Clear(_buffer[5], 0, _buffer[5].Length);
@@ -343,7 +372,7 @@ namespace Visibility.Configuration
 
 				ImGui.EndChild();
 			}
-			
+
 			ImGui.End();
 
 			return drawConfig;
