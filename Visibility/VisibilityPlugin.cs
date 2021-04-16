@@ -91,14 +91,15 @@ namespace Visibility
 				return;
 			}
 
-			_refresh = false;
 			_pluginConfig.Enabled = false;
 			_characterDrawResolver.UnhideAll();
+			_refresh = false;
 
 			Task.Run(async () =>
 			{
 				await Task.Delay(250);
 				_pluginConfig.Enabled = true;
+				Print("Refresh complete.");
 			});
 		}
 
@@ -155,6 +156,11 @@ namespace Visibility
 
 		private void PluginCommand(string command, string arguments)
 		{
+			if (_refresh)
+			{
+				return;
+			}
+
 			if (string.IsNullOrEmpty(arguments))
 			{
 				_drawConfig = !_drawConfig;
@@ -166,6 +172,7 @@ namespace Visibility
 				if (args[0].Equals("help", StringComparison.InvariantCultureIgnoreCase))
 				{
 					Print($"{PluginCommandName} help - This help menu");
+					Print($"{PluginCommandName} refresh - Refreshes hidden actors");
 					Print($"{PluginCommandName} <setting> <on/off/toggle> - Sets a setting to on, off or toggles it");
 					Print("Available values:");
 
@@ -174,6 +181,11 @@ namespace Visibility
 						Print($"{key}");
 					}
 					
+					return;
+				}
+				else if (args[0].Equals("refresh", StringComparison.InvariantCulture))
+				{
+					RefreshActors();
 					return;
 				}
 
