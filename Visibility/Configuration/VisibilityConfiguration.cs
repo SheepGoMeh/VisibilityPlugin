@@ -141,6 +141,7 @@ namespace Visibility.Configuration
 			_plugin = plugin;
 			_pluginInterface = pluginInterface;
 
+			settingDictionary["enabled"] = x => ChangeSetting(nameof(Enabled), x);
 			settingDictionary["hidepet"] = x => ChangeSetting(nameof(HidePet), x);
 			settingDictionary["hidestar"] = x => ChangeSetting(nameof(HideStar), x);
 			settingDictionary["hideplayer"] = x => ChangeSetting(nameof(HidePlayer), x);
