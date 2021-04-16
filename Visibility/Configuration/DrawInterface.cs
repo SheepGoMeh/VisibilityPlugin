@@ -302,10 +302,6 @@ namespace Visibility.Configuration
 
 				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0)
 				{
-					Array.Clear(_buffer[4], 0, _buffer[4].Length);
-					Array.Clear(_buffer[5], 0, _buffer[5].Length);
-					Array.Clear(_buffer[6], 0, _buffer[6].Length);
-
 					if (_pluginInterface.ClientState.Actors
 							.SingleOrDefault(x => x is PlayerCharacter
 							                      && x.ObjectKind != ObjectKind.Companion
@@ -313,6 +309,10 @@ namespace Visibility.Configuration
 								                      ?.TargetActorID) is
 						PlayerCharacter actor)
 					{
+						Array.Clear(_buffer[4], 0, _buffer[4].Length);
+						Array.Clear(_buffer[5], 0, _buffer[5].Length);
+						Array.Clear(_buffer[6], 0, _buffer[6].Length);
+
 						Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[4], 0);
 						Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[5], 0);
 						Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[6], 0);
