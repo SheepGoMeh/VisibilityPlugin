@@ -189,9 +189,9 @@ namespace Visibility.Configuration
 						.SingleOrDefault(x => x is PlayerCharacter
 						                      && itemToRemove.ActorId != 0
 						                      && x.ObjectKind != ObjectKind.Companion
-						                      && x.ActorId == itemToRemove.ActorId) is PlayerCharacter actor)
+						                      && x.ActorId == itemToRemove.ActorId) is PlayerCharacter a)
 					{
-						actor.Render();
+						a.Render();
 					}
 
 					VoidList.Remove(itemToRemove);
@@ -200,25 +200,23 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0)
+				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0
+				    && _pluginInterface.ClientState.Actors
+						.SingleOrDefault(x => x is PlayerCharacter
+						                      && x.ObjectKind != ObjectKind.Companion
+						                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
+							                      ?.TargetActorID) is
+					PlayerCharacter actor)
 				{
-					if (_pluginInterface.ClientState.Actors
-							.SingleOrDefault(x => x is PlayerCharacter
-							                      && x.ObjectKind != ObjectKind.Companion
-							                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
-								                      ?.TargetActorID) is
-						PlayerCharacter actor)
-					{
-						Array.Clear(_buffer[0], 0, _buffer[0].Length);
-						Array.Clear(_buffer[1], 0, _buffer[1].Length);
-						Array.Clear(_buffer[2], 0, _buffer[2].Length);
+					Array.Clear(_buffer[0], 0, _buffer[0].Length);
+					Array.Clear(_buffer[1], 0, _buffer[1].Length);
+					Array.Clear(_buffer[2], 0, _buffer[2].Length);
 
-						Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[0], 0);
-						Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[1], 0);
-						Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[2], 0);
+					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[0], 0);
+					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[1], 0);
+					Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[2], 0);
 
-						manual = false;
-					}
+					manual = false;
 				}
 
 				ImGui.InputText("###playerFirstName", _buffer[0], (uint) _buffer[0].Length,
@@ -300,25 +298,23 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0)
+				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0
+					&& _pluginInterface.ClientState.Actors
+						.SingleOrDefault(x => x is PlayerCharacter
+						                      && x.ObjectKind != ObjectKind.Companion
+						                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
+							                      ?.TargetActorID) is
+					PlayerCharacter actor)
 				{
-					if (_pluginInterface.ClientState.Actors
-							.SingleOrDefault(x => x is PlayerCharacter
-							                      && x.ObjectKind != ObjectKind.Companion
-							                      && x.ActorId == _pluginInterface.ClientState.LocalPlayer
-								                      ?.TargetActorID) is
-						PlayerCharacter actor)
-					{
-						Array.Clear(_buffer[4], 0, _buffer[4].Length);
-						Array.Clear(_buffer[5], 0, _buffer[5].Length);
-						Array.Clear(_buffer[6], 0, _buffer[6].Length);
+					Array.Clear(_buffer[4], 0, _buffer[4].Length);
+					Array.Clear(_buffer[5], 0, _buffer[5].Length);
+					Array.Clear(_buffer[6], 0, _buffer[6].Length);
 
-						Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[4], 0);
-						Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[5], 0);
-						Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[6], 0);
+					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[4], 0);
+					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[5], 0);
+					Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[6], 0);
 
-						manual = false;
-					}
+					manual = false;
 				}
 
 				ImGui.InputText("###playerFirstName", _buffer[4], (uint) _buffer[4].Length,
