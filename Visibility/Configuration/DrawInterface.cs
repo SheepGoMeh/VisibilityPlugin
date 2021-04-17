@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
@@ -16,6 +17,11 @@ namespace Visibility.Configuration
 
 		private static readonly string VersionString =
 			System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+		private readonly IEnumerable<VoidItem>[] _sortedContainer = new IEnumerable<VoidItem>[2];
+
+		private readonly bool[] _sortAscending = {true, true};
+		private readonly Func<VoidItem, object>[] _sortKeySelector = new Func<VoidItem, object>[2];
 
 		private void CenteredCheckbox(string propertyName)
 		{
@@ -47,169 +53,229 @@ namespace Visibility.Configuration
 		{
 			var drawConfig = true;
 
-			var scale = ImGui.GetIO().FontGlobalScale;
+			ImGui.SetNextWindowSize(new Vector2(500 * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
 
-			ImGui.SetNextWindowSize(new Vector2(500 * scale, 0), ImGuiCond.Always);
-			ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize);
-
-			Checkbox(nameof(Enabled));
-
-			ImGui.SameLine();
-			ImGui.Text("Enable");
-			var cursorY = ImGui.GetCursorPosY();
-			ImGui.SameLine(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
-			               ImGui.GetScrollX());
-			ImGui.SetCursorPosY(cursorY / 2);
-			ImGui.TextColored(VersionColor, VersionString);
-			ImGui.SetCursorPosY(cursorY);
-			ImGui.Separator();
-
-			ImGui.Columns(6, "###cols", false);
-
-			ImGui.NextColumn();
-			CenteredText("Hide all");
-			ImGui.NextColumn();
-			CenteredText("Show party");
-			ImGui.NextColumn();
-			CenteredText("Show friends");
-			ImGui.NextColumn();
-			CenteredText("Show FC");
-			ImGui.NextColumn();
-			CenteredText("Show dead");
-			ImGui.NextColumn();
-			ImGui.Separator();
-
-			ImGui.Text("Players");
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(HidePlayer));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowPartyPlayer));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowFriendPlayer));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowCompanyPlayer));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowDeadPlayer));
-			ImGui.NextColumn();
-
-			ImGui.Text("Pets");
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(HidePet));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowPartyPet));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowFriendPet));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowCompanyPet));
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-
-			ImGui.Text("Chocobos");
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(HideChocobo));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowPartyChocobo));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowFriendChocobo));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowCompanyChocobo));
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-
-			ImGui.Text("Minions");
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(HideMinion));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowPartyMinion));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowFriendMinion));
-			ImGui.NextColumn();
-			CenteredCheckbox(nameof(ShowCompanyMinion));
-			ImGui.NextColumn();
-			ImGui.NextColumn();
-			ImGui.Separator();
-
-			ImGui.Columns(1, "###cols", false);
-
-			Checkbox(nameof(HideStar));
-			ImGui.SameLine();
-			ImGui.Text("Hide non-party Earthly Star");
-			if (ImGui.IsItemHovered())
+			if (ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
 			{
-				ImGui.SetTooltip("Hides Earthly Star not belonging to players in your party (Only works in combat)");
+				Checkbox(nameof(Enabled));
+
+				ImGui.SameLine();
+				ImGui.Text("Enable");
+				var cursorY = ImGui.GetCursorPosY();
+				ImGui.SameLine(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
+				               ImGui.GetScrollX());
+				ImGui.SetCursorPosY(cursorY / 2);
+				ImGui.TextColored(VersionColor, VersionString);
+				ImGui.SetCursorPosY(cursorY);
+				ImGui.Separator();
+
+				ImGui.Columns(6, "###cols", false);
+
+				ImGui.NextColumn();
+				CenteredText("Hide all");
+				ImGui.NextColumn();
+				CenteredText("Show party");
+				ImGui.NextColumn();
+				CenteredText("Show friends");
+				ImGui.NextColumn();
+				CenteredText("Show FC");
+				ImGui.NextColumn();
+				CenteredText("Show dead");
+				ImGui.NextColumn();
+				ImGui.Separator();
+
+				ImGui.Text("Players");
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(HidePlayer));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowPartyPlayer));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowFriendPlayer));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowCompanyPlayer));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowDeadPlayer));
+				ImGui.NextColumn();
+
+				ImGui.Text("Pets");
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(HidePet));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowPartyPet));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowFriendPet));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowCompanyPet));
+				ImGui.NextColumn();
+				ImGui.NextColumn();
+
+				ImGui.Text("Chocobos");
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(HideChocobo));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowPartyChocobo));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowFriendChocobo));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowCompanyChocobo));
+				ImGui.NextColumn();
+				ImGui.NextColumn();
+
+				ImGui.Text("Minions");
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(HideMinion));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowPartyMinion));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowFriendMinion));
+				ImGui.NextColumn();
+				CenteredCheckbox(nameof(ShowCompanyMinion));
+				ImGui.NextColumn();
+				ImGui.NextColumn();
+				ImGui.Separator();
+
+				ImGui.Columns(1, "###cols", false);
+
+				Checkbox(nameof(HideStar));
+				ImGui.SameLine();
+				ImGui.Text("Hide non-party Earthly Star");
+				if (ImGui.IsItemHovered())
+				{
+					ImGui.SetTooltip(
+						"Hides Earthly Star not belonging to players in your party (Only works in combat)");
+				}
+
+				ImGui.NextColumn();
+				ImGui.Separator();
+
+				ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
+
+				if (ImGui.Button("Refresh"))
+				{
+					_plugin.RefreshActors();
+				}
+
+				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("Whitelist").X -
+				               ImGui.CalcTextSize("VoidList").X - 4 * ImGui.GetStyle().FramePadding.X -
+				               ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
+
+				if (ImGui.Button("Whitelist"))
+				{
+					_showListWindow[1] = !_showListWindow[1];
+				}
+
+				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("VoidList").X -
+				               2 * ImGui.GetStyle().FramePadding.X);
+
+				if (ImGui.Button("VoidList"))
+				{
+					_showListWindow[0] = !_showListWindow[0];
+				}
+
+				ImGui.End();
 			}
-
-			ImGui.NextColumn();
-			ImGui.Separator();
-
-			ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
-
-			if (ImGui.Button("Refresh"))
-			{
-				_plugin.RefreshActors();
-			}
-
-			ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("Whitelist").X -
-			               ImGui.CalcTextSize("VoidList").X - 4 * ImGui.GetStyle().FramePadding.X -
-			               ImGui.GetStyle().ItemSpacing.X * scale);
-
-			if (ImGui.Button("Whitelist"))
-			{
-				_showListWindow[1] = !_showListWindow[1];
-			}
-
-			ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("VoidList").X -
-			               2 * ImGui.GetStyle().FramePadding.X);
-
-			if (ImGui.Button("VoidList"))
-			{
-				_showListWindow[0] = !_showListWindow[0];
-			}
-
-			ImGui.End();
 
 			if (_showListWindow[0])
 			{
-				ImGui.SetNextWindowSize(new Vector2(700 * scale, 500), ImGuiCond.FirstUseEver);
-				ImGui.Begin($"{_plugin.Name}: VoidList", ref _showListWindow[0]);
+				DrawVoidList();
+			}
 
-				var footer2 = (ImGui.GetStyle().ItemSpacing.Y) / 2 + ImGui.GetFrameHeightWithSpacing();
-				ImGui.BeginChild("scrollingVoidList", new Vector2(0, -footer2), false);
+			if (_showListWindow[1])
+			{
+				DrawWhitelist();
+			}
 
-				ImGui.Columns(6, "###voidCols");
-				ImGui.Text("Firstname");
-				ImGui.NextColumn();
-				ImGui.Text("Lastname");
-				ImGui.NextColumn();
-				ImGui.Text("World");
-				ImGui.NextColumn();
-				ImGui.Text("Date");
-				ImGui.NextColumn();
-				ImGui.Text("Reason");
-				ImGui.NextColumn();
-				ImGui.NextColumn();
+			return drawConfig;
+		}
+
+		private static IEnumerable<VoidItem> SortContainer(IEnumerable<VoidItem> container,
+			Func<VoidItem, object> keySelector, bool isAscending, out Func<VoidItem, object> keySelectorOut)
+		{
+			keySelectorOut = keySelector;
+			return keySelector == null ? container :
+				isAscending ? container.OrderBy(keySelector) : container.OrderByDescending(keySelector);
+		}
+
+		private void DrawVoidList()
+		{
+			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
+			if (!ImGui.Begin($"{_plugin.Name}: VoidList", ref _showListWindow[0]))
+			{
+				return;
+			}
+
+			if (ImGui.BeginTable("VoidListTable", 6,
+				ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
+			{
+				ImGui.TableSetupColumn("Firstname");
+				ImGui.TableSetupColumn("Lastname");
+				ImGui.TableSetupColumn("World");
+				ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn("Reason");
+				ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupScrollFreeze(0, 1);
+				ImGui.TableHeadersRow();
 
 				VoidItem itemToRemove = null;
 
-				foreach (var item in VoidList)
+				if (_sortedContainer[0] == null)
 				{
+					_sortedContainer[0] = VoidList;
+				}
+
+				var sortSpecs = ImGui.TableGetSortSpecs();
+
+				if (sortSpecs.SpecsDirty)
+				{
+					_sortAscending[0] = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending;
+
+					switch (sortSpecs.Specs.ColumnIndex)
+					{
+						case 0:
+							_sortedContainer[0] = SortContainer(VoidList, x => x.Firstname,
+								_sortAscending[0], out _sortKeySelector[0]);
+							break;
+						case 1:
+							_sortedContainer[0] = SortContainer(VoidList, x => x.Lastname,
+								_sortAscending[0], out _sortKeySelector[0]);
+							break;
+						case 2:
+							_sortedContainer[0] = SortContainer(VoidList, x => x.HomeworldName,
+								_sortAscending[0], out _sortKeySelector[0]);
+							break;
+						case 3:
+							_sortedContainer[0] = SortContainer(VoidList, x => x.Time,
+								_sortAscending[0], out _sortKeySelector[0]);
+							break;
+						case 4:
+							_sortedContainer[0] = SortContainer(VoidList, x => x.Reason,
+								_sortAscending[0], out _sortKeySelector[0]);
+							break;
+					}
+
+					sortSpecs.SpecsDirty = false;
+				}
+
+				foreach (var item in _sortedContainer[0])
+				{
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Firstname);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Lastname);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.HomeworldName);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.Text(item.Time.ToString(CultureInfo.CurrentCulture));
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Reason);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 
 					if (ImGui.Button($"Remove##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
 
-					ImGui.NextColumn();
+					ImGui.TableNextRow();
 				}
 
 				if (itemToRemove != null)
@@ -225,6 +291,9 @@ namespace Visibility.Configuration
 
 					VoidList.Remove(itemToRemove);
 					Save();
+
+					_sortedContainer[0] = SortContainer(VoidList, _sortKeySelector[0], _sortAscending[0],
+						out _sortKeySelector[0]);
 				}
 
 				var manual = true;
@@ -248,18 +317,19 @@ namespace Visibility.Configuration
 					manual = false;
 				}
 
+				ImGui.TableNextColumn();
 				ImGui.InputText("###playerFirstName", _buffer[0], (uint) _buffer[0].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
 				ImGui.InputText("###playerLastName", _buffer[1], (uint) _buffer[1].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
 				ImGui.InputText("###homeworldName", _buffer[2], (uint) _buffer[2].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
-				ImGui.NextColumn();
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
+				ImGui.TableNextColumn();
 				ImGui.InputText("###reason", _buffer[3], (uint) _buffer[3].Length);
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
 
 				if (ImGui.Button("Void player"))
 				{
@@ -268,61 +338,105 @@ namespace Visibility.Configuration
 
 					foreach (var item in _buffer)
 						Array.Clear(item, 0, item.Length);
+
+					_sortedContainer[0] = SortContainer(VoidList, _sortKeySelector[0], _sortAscending[0],
+						out _sortKeySelector[0]);
 				}
 
-				ImGui.NextColumn();
-
-				ImGui.EndChild();
+				ImGui.EndTable();
 			}
 
-			if (_showListWindow[1])
+			ImGui.End();
+		}
+
+		private void DrawWhitelist()
+		{
+			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
+			if (!ImGui.Begin($"{_plugin.Name}: Whitelist", ref _showListWindow[1]))
 			{
-				ImGui.SetNextWindowSize(new Vector2(700 * scale, 500), ImGuiCond.FirstUseEver);
-				ImGui.Begin($"{_plugin.Name}: Whitelist", ref _showListWindow[1]);
+				return;
+			}
 
-				var footer2 = (ImGui.GetStyle().ItemSpacing.Y) / 2 + ImGui.GetFrameHeightWithSpacing();
-				ImGui.BeginChild("scrollingWhitelist", new Vector2(0, -footer2), false);
-
-				ImGui.Columns(6, "###whitelistCols");
-				ImGui.Text("Firstname");
-				ImGui.NextColumn();
-				ImGui.Text("Lastname");
-				ImGui.NextColumn();
-				ImGui.Text("World");
-				ImGui.NextColumn();
-				ImGui.Text("Date");
-				ImGui.NextColumn();
-				ImGui.Text("Reason");
-				ImGui.NextColumn();
-				ImGui.NextColumn();
+			if (ImGui.BeginTable("WhitelistTable", 6,
+				ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
+			{
+				ImGui.TableSetupColumn("Firstname");
+				ImGui.TableSetupColumn("Lastname");
+				ImGui.TableSetupColumn("World");
+				ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn("Reason");
+				ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupScrollFreeze(0, 1);
+				ImGui.TableHeadersRow();
 
 				VoidItem itemToRemove = null;
 
-				foreach (var item in Whitelist)
+				if (_sortedContainer[1] == null)
 				{
+					_sortedContainer[1] = Whitelist;
+				}
+
+				var sortSpecs = ImGui.TableGetSortSpecs();
+
+				if (sortSpecs.SpecsDirty)
+				{
+					_sortAscending[1] = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending;
+
+					switch (sortSpecs.Specs.ColumnIndex)
+					{
+						case 0:
+							_sortedContainer[1] = SortContainer(Whitelist, x => x.Firstname,
+								_sortAscending[1], out _sortKeySelector[1]);
+							break;
+						case 1:
+							_sortedContainer[1] = SortContainer(Whitelist, x => x.Lastname,
+								_sortAscending[1], out _sortKeySelector[1]);
+							break;
+						case 2:
+							_sortedContainer[1] = SortContainer(Whitelist, x => x.HomeworldName,
+								_sortAscending[1], out _sortKeySelector[1]);
+							break;
+						case 3:
+							_sortedContainer[1] = SortContainer(Whitelist, x => x.Time,
+								_sortAscending[1], out _sortKeySelector[1]);
+							break;
+						case 4:
+							_sortedContainer[1] = SortContainer(Whitelist, x => x.Reason,
+								_sortAscending[1], out _sortKeySelector[1]);
+							break;
+					}
+
+					sortSpecs.SpecsDirty = false;
+				}
+
+				foreach (var item in _sortedContainer[1])
+				{
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Firstname);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Lastname);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.HomeworldName);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.Text(item.Time.ToString(CultureInfo.CurrentCulture));
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Reason);
-					ImGui.NextColumn();
+					ImGui.TableNextColumn();
 
 					if (ImGui.Button($"Remove##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
 
-					ImGui.NextColumn();
+					ImGui.TableNextRow();
 				}
 
 				if (itemToRemove != null)
 				{
 					Whitelist.Remove(itemToRemove);
 					Save();
+					_sortedContainer[1] = SortContainer(Whitelist, _sortKeySelector[1], _sortAscending[1],
+						out _sortKeySelector[1]);
 				}
 
 				var manual = true;
@@ -346,18 +460,19 @@ namespace Visibility.Configuration
 					manual = false;
 				}
 
+				ImGui.TableNextColumn();
 				ImGui.InputText("###playerFirstName", _buffer[4], (uint) _buffer[4].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
 				ImGui.InputText("###playerLastName", _buffer[5], (uint) _buffer[5].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
 				ImGui.InputText("###homeworldName", _buffer[6], (uint) _buffer[6].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
-				ImGui.NextColumn();
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
+				ImGui.TableNextColumn();
 				ImGui.InputText("###reason", _buffer[7], (uint) _buffer[7].Length);
-				ImGui.NextColumn();
+				ImGui.TableNextColumn();
 
 				if (ImGui.Button("Add player"))
 				{
@@ -366,16 +481,15 @@ namespace Visibility.Configuration
 
 					foreach (var item in _buffer)
 						Array.Clear(item, 0, item.Length);
+
+					_sortedContainer[1] = SortContainer(Whitelist, _sortKeySelector[1], _sortAscending[1],
+						out _sortKeySelector[1]);
 				}
 
-				ImGui.NextColumn();
-
-				ImGui.EndChild();
+				ImGui.EndTable();
 			}
 
 			ImGui.End();
-
-			return drawConfig;
 		}
 	}
 }
