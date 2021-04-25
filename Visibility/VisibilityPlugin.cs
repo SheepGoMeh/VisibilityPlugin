@@ -34,6 +34,7 @@ namespace Visibility
 
 		private bool _drawConfig;
 		private bool _refresh;
+		public bool Disable;
 		
 		private CharacterDrawResolver _characterDrawResolver;
 
@@ -86,21 +87,26 @@ namespace Visibility
 
 		private void FrameworkOnOnUpdateEvent(Framework framework)
 		{
-			if (!_refresh)
+			if (Disable)
 			{
-				return;
+				_refresh = false;
+				Disable = false;
+
+				_characterDrawResolver.UnhideAll();
 			}
-
-			_pluginConfig.Enabled = false;
-			_characterDrawResolver.UnhideAll();
-			_refresh = false;
-
-			Task.Run(async () =>
+			else if (_refresh)
 			{
-				await Task.Delay(250);
-				_pluginConfig.Enabled = true;
-				Print("Refresh complete.");
-			});
+				_pluginConfig.Enabled = false;
+				_characterDrawResolver.UnhideAll();
+				_refresh = false;
+
+				Task.Run(async () =>
+				{
+					await Task.Delay(250);
+					_pluginConfig.Enabled = true;
+					Print("Refresh complete.");
+				});
+			}
 		}
 
 		protected virtual void Dispose(bool disposing)
