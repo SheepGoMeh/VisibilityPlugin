@@ -26,8 +26,8 @@ namespace Visibility
 		private static string PluginCommandName => "/pvis";
 		private static string VoidCommandName => "/void";
 		private static string VoidTargetCommandName => "/voidtarget";
-		private static string WhitelistCommandName => "/void";
-		private static string WhitelistTargetCommandName => "/voidtarget";
+		private static string WhitelistCommandName => "/whitelist";
+		private static string WhitelistTargetCommandName => "/whitelisttarget";
 
 		private DalamudPluginInterface _pluginInterface;
 		private VisibilityConfiguration _pluginConfig;
