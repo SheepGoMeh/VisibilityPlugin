@@ -63,9 +63,9 @@ namespace Visibility.Configuration
 		[NonSerialized]
 		public readonly HashSet<ushort> TerritoryTypeWhitelist = new HashSet<ushort>
 		{
-			792,
-			898,
-			899
+			792, // The Fall of Belah'dia 
+			899, // The Falling City of Nym
+			900, // The Endeavor
 		};
 
 		private void ChangeSetting(string propertyName)
