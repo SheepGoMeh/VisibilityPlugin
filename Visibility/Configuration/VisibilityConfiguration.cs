@@ -66,6 +66,7 @@ namespace Visibility.Configuration
 			792, // The Fall of Belah'dia 
 			899, // The Falling City of Nym
 			900, // The Endeavor
+			939, // The Diadem
 		};
 
 		private void ChangeSetting(string propertyName)
