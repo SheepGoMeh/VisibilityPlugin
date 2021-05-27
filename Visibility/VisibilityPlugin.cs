@@ -122,6 +122,7 @@ namespace Visibility
 				return;
 			}
 
+			Common.Dispose();
 			_contextMenu.Dispose();
 			_characterDrawResolver.Dispose();
 
