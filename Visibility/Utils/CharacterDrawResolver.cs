@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Dalamud.Game.ClientState;
@@ -289,7 +290,8 @@ namespace Visibility.Utils
 						}
 
 						if ((_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty]
-							|| _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas])
+							|| _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas]
+							|| _pluginInterface.ClientState.Condition[ConditionFlag.WatchingCutscene])
 							&& !_config.TerritoryTypeWhitelist.Contains(_pluginInterface.ClientState.TerritoryType))
 						{
 							break;
