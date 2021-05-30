@@ -122,8 +122,8 @@ namespace Visibility
 				return;
 			}
 
-			Common.Dispose();
 			PluginContextMenu.Dispose();
+			Common.Dispose();
 			_characterDrawResolver.Dispose();
 
 			PluginInterface.Framework.OnUpdateEvent -= FrameworkOnOnUpdateEvent;
