@@ -85,6 +85,11 @@ namespace Visibility
 			Common = new XivCommonBase(PluginInterface, Hooks.ContextMenu);
 			PluginContextMenu = new ContextMenu(this);
 
+			if (PluginConfiguration.EnableContextMenu)
+			{
+				PluginContextMenu.Toggle();
+			}
+
 			PluginInterface.Framework.OnUpdateEvent += FrameworkOnOnUpdateEvent;
 			PluginInterface.UiBuilder.OnBuildUi += BuildUi;
 			PluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;

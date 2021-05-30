@@ -18,6 +18,7 @@ namespace Visibility.Configuration
 		public bool HideMinion { get; set; }
 		public bool HideChocobo { get; set; }
 		public bool HideStar { get; set; }
+		public bool EnableContextMenu { get; set; }
 		public bool ShowCompanyPet { get; set; }
 		public bool ShowCompanyPlayer { get; set; }
 		public bool ShowCompanyMinion { get; set; }
@@ -87,6 +88,9 @@ namespace Visibility.Configuration
 					break;
 				case nameof(HideChocobo):
 					_plugin.UnhideChocobos(ContainerType.All);
+					break;
+				case nameof(EnableContextMenu):
+					_plugin.PluginContextMenu.Toggle();
 					break;
 				case nameof(ShowCompanyPet):
 					_plugin.UnhidePets(ContainerType.Company);

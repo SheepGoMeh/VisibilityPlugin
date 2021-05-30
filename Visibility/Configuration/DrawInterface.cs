@@ -146,6 +146,16 @@ namespace Visibility.Configuration
 				}
 
 				ImGui.NextColumn();
+
+				Checkbox(nameof(EnableContextMenu));
+				ImGui.SameLine();
+				ImGui.Text("Enable Context Menu");
+				if (ImGui.IsItemHovered())
+				{
+					ImGui.SetTooltip("Enables context menu (Right-Click menu) on a player name in chat");
+				}
+
+				ImGui.NextColumn();
 				ImGui.Separator();
 
 				ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);

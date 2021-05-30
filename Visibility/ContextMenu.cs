@@ -10,12 +10,26 @@ namespace Visibility
 {
 	public class ContextMenu : IDisposable
 	{
+		private bool _enabled;
 		private VisibilityPlugin Plugin { get; }
 
 		public ContextMenu(VisibilityPlugin plugin)
 		{
 			Plugin = plugin;
-			Plugin.Common.Functions.ContextMenu.OpenContextMenu += OnOpenContextMenu;
+		}
+
+		public void Toggle()
+		{
+			if (_enabled)
+			{
+				Plugin.Common.Functions.ContextMenu.OpenContextMenu -= OnOpenContextMenu;
+			}
+			else
+			{
+				Plugin.Common.Functions.ContextMenu.OpenContextMenu += OnOpenContextMenu;
+			}
+
+			_enabled = !_enabled;
 		}
 
 		public void Dispose()
