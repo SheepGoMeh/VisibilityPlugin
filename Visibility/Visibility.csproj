@@ -95,7 +95,7 @@
     <PackageReference Include="ILMerge.Fody" Version="1.16.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="XivCommon" Version="1.5.0" />
+    <PackageReference Include="XivCommon" Version="1.6.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />
