@@ -91,6 +91,7 @@
     <Compile Include="Void\VoidItem.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="DalamudPackager" Version="1.2.1" />
     <PackageReference Include="ILMerge.Fody" Version="1.16.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
