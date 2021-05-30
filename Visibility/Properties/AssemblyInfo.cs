@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Visibility.Properties")]
-[assembly: AssemblyCopyright("Copyright © Dragon 2020")]
+[assembly: AssemblyCopyright("Copyright © Dragon 2020-2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
