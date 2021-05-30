@@ -37,7 +37,7 @@ namespace Visibility
 		private bool _refresh;
 		public bool Disable;
 		public XivCommonBase Common;
-		private ContextMenu _contextMenu;
+		public ContextMenu PluginContextMenu;
 		
 		private CharacterDrawResolver _characterDrawResolver;
 
@@ -83,7 +83,7 @@ namespace Visibility
 			_characterDrawResolver.Init(pluginInterface, PluginConfiguration);
 
 			Common = new XivCommonBase(PluginInterface, Hooks.ContextMenu);
-			_contextMenu = new ContextMenu(this);
+			PluginContextMenu = new ContextMenu(this);
 
 			PluginInterface.Framework.OnUpdateEvent += FrameworkOnOnUpdateEvent;
 			PluginInterface.UiBuilder.OnBuildUi += BuildUi;
@@ -123,7 +123,7 @@ namespace Visibility
 			}
 
 			Common.Dispose();
-			_contextMenu.Dispose();
+			PluginContextMenu.Dispose();
 			_characterDrawResolver.Dispose();
 
 			PluginInterface.Framework.OnUpdateEvent -= FrameworkOnOnUpdateEvent;
