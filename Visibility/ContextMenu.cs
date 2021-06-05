@@ -59,7 +59,7 @@ namespace Visibility
 			var world = Plugin.PluginInterface.Data.GetExcelSheet<World>()
 				.SingleOrDefault(x => x.RowId == args.ActorWorld);
 
-			if (world == default(World))
+			if (world == null)
 			{
 				return;
 			}
@@ -93,7 +93,7 @@ namespace Visibility
 			var world = Plugin.PluginInterface.Data.GetExcelSheet<World>()
 				.SingleOrDefault(x => x.RowId == args.ActorWorld);
 
-			if (world == default(World))
+			if (world == null)
 			{
 				return;
 			}
