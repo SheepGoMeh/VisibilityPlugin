@@ -181,9 +181,9 @@ namespace Visibility.Configuration
 				{
 					_showListWindow[0] = !_showListWindow[0];
 				}
-
-				ImGui.End();
 			}
+
+			ImGui.End();
 
 			if (_showListWindow[0])
 			{
@@ -211,6 +211,7 @@ namespace Visibility.Configuration
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
 			if (!ImGui.Begin($"{_plugin.Name}: VoidList", ref _showListWindow[0]))
 			{
+				ImGui.End();
 				return;
 			}
 
@@ -364,6 +365,7 @@ namespace Visibility.Configuration
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
 			if (!ImGui.Begin($"{_plugin.Name}: Whitelist", ref _showListWindow[1]))
 			{
+				ImGui.End();
 				return;
 			}
 
