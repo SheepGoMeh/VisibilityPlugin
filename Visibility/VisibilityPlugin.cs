@@ -284,11 +284,10 @@ namespace Visibility
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual")
 				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual"));
 
-			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode()); 
+			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode());
 
 			if (!PluginConfiguration.VoidList.Any(x =>
-				(x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId) ||
-				(x.ActorId == voidItem.ActorId && x.ActorId != 0)))
+				x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId))
 			{
 				PluginConfiguration.VoidList.Add(voidItem);
 				PluginConfiguration.Save();
@@ -312,8 +311,7 @@ namespace Visibility
 				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
 				
 				if (!PluginConfiguration.VoidList.Any(x =>
-					(x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId) ||
-					(x.ActorId == voidItem.ActorId && x.ActorId != 0)))
+					x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId))
 				{
 					PluginConfiguration.VoidList.Add(voidItem);
 					PluginConfiguration.Save();
@@ -358,22 +356,28 @@ namespace Visibility
 
 			var playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
-			var item = (!(PluginInterface.ClientState.Actors
-				.SingleOrDefault(x => x is PlayerCharacter character
-				                      && character.HomeWorld.Id == world.RowId
-				                      && character.Name.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)) is PlayerCharacter actor)
+			var actor = PluginInterface.ClientState.Actors
+				.SingleOrDefault(x =>
+					x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
+					character.Name.Equals(playerName, StringComparison.Ordinal)) as PlayerCharacter;
+
+			var item = actor == null
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual")
-				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual"));
+				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual");
 
 			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode()); 
 
 			if (!PluginConfiguration.Whitelist.Any(x =>
-				(x.Name == item.Name && x.HomeworldId == item.HomeworldId) ||
-				(x.ActorId == item.ActorId && x.ActorId != 0)))
+				x.Name == item.Name && x.HomeworldId == item.HomeworldId))
 			{
 				PluginConfiguration.Whitelist.Add(item);
 				PluginConfiguration.Save();
-				_characterDrawResolver.UnhidePlayer((uint) item.ActorId);
+
+				if (actor != null)
+				{
+					_characterDrawResolver.UnhidePlayer((uint) actor.ActorId);
+				}
+
 				Print($"Whitelist: {playerName}{icon}{world.Name} has been added.");
 			}
 			else
@@ -394,12 +398,11 @@ namespace Visibility
 				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
 				
 				if (!PluginConfiguration.Whitelist.Any(x =>
-					(x.Name == item.Name && x.HomeworldId == item.HomeworldId) ||
-					(x.ActorId == item.ActorId && x.ActorId != 0)))
+					x.Name == item.Name && x.HomeworldId == item.HomeworldId))
 				{
 					PluginConfiguration.Whitelist.Add(item);
 					PluginConfiguration.Save();
-					_characterDrawResolver.UnhidePlayer((uint) item.ActorId);
+					_characterDrawResolver.UnhidePlayer((uint) actor.ActorId);
 					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
 				}
 				else
