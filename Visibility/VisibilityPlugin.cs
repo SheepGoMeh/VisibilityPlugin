@@ -173,6 +173,11 @@ namespace Visibility
 			_characterDrawResolver.UnhideChocobos(type);
 		}
 
+		public void UnhidePlayer(uint id)
+		{
+			_characterDrawResolver.UnhidePlayer(id);
+		}
+
 		private void PluginCommand(string command, string arguments)
 		{
 			if (_refresh)
@@ -375,7 +380,7 @@ namespace Visibility
 
 				if (actor != null)
 				{
-					_characterDrawResolver.UnhidePlayer((uint) actor.ActorId);
+					UnhidePlayer((uint) actor.ActorId);
 				}
 
 				Print($"Whitelist: {playerName}{icon}{world.Name} has been added.");
@@ -402,7 +407,7 @@ namespace Visibility
 				{
 					PluginConfiguration.Whitelist.Add(item);
 					PluginConfiguration.Save();
-					_characterDrawResolver.UnhidePlayer((uint) actor.ActorId);
+					UnhidePlayer((uint) actor.ActorId);
 					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
 				}
 				else

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
 using XivCommon.Functions.ContextMenu;
 
@@ -38,18 +39,24 @@ namespace Visibility
 		}
 		
 		private void OnOpenContextMenu(ContextMenuOpenArgs args) {
-			if (args.ParentAddonName is not "ChatLog" || args.ContentIdLower == 0)
+			if (args.ParentAddonName is not "ChatLog")
+			{
+				return;
+			}
+
+			if (args.ActorWorld is ushort.MaxValue or 0 || args.Text?.Payloads.Count != 1 ||
+			    args.Text?.Payloads[0] is not TextPayload textPayload)
 			{
 				return;
 			}
 
 			args.Items.Add(Plugin.PluginConfiguration.VoidList.SingleOrDefault(x =>
-				x.Name == args.Text && x.HomeworldId == args.ActorWorld) == null
+				x.Name == textPayload.Text && x.HomeworldId == args.ActorWorld) == null
 				? new NormalContextMenuItem("Add to VoidList", AddToVoidList)
 				: new NormalContextMenuItem("Remove from VoidList", RemoveFromVoidList));
 
 			args.Items.Add(Plugin.PluginConfiguration.Whitelist.SingleOrDefault(x =>
-				x.Name == args.Text && x.HomeworldId == args.ActorWorld) == null
+				x.Name == textPayload.Text && x.HomeworldId == args.ActorWorld) == null
 				? new NormalContextMenuItem("Add to Whitelist", AddToWhitelist)
 				: new NormalContextMenuItem("Remove from Whitelist", RemoveFromWhitelist));
 		}
@@ -70,7 +77,7 @@ namespace Visibility
 		private void RemoveFromVoidList(ContextMenuItemSelectedArgs args)
 		{
 			var entry = Plugin.PluginConfiguration.VoidList.SingleOrDefault(x =>
-				x.Name == args.Text && x.HomeworldId == args.ActorWorld);
+				x.Name == args.Text?.TextValue && x.HomeworldId == args.ActorWorld);
 
 			if (entry == null)
 			{
@@ -85,6 +92,8 @@ namespace Visibility
 			}).Encode());
 
 			Plugin.PluginConfiguration.VoidList.Remove(entry);
+			Plugin.PluginConfiguration.Save();
+			Plugin.UnhidePlayer(args.ActorId);
 			Plugin.Print(message);
 		}
 		
@@ -104,7 +113,7 @@ namespace Visibility
 		private void RemoveFromWhitelist(ContextMenuItemSelectedArgs args)
 		{
 			var entry = Plugin.PluginConfiguration.Whitelist.SingleOrDefault(x =>
-				x.Name == args.Text && x.HomeworldId == args.ActorWorld);
+				x.Name == args.Text?.TextValue && x.HomeworldId == args.ActorWorld);
 
 			if (entry == null)
 			{
@@ -119,6 +128,7 @@ namespace Visibility
 			}).Encode());
 
 			Plugin.PluginConfiguration.Whitelist.Remove(entry);
+			Plugin.PluginConfiguration.Save();
 			Plugin.Print(message);
 		}
 	}
