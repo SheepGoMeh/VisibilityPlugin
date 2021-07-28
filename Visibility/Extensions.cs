@@ -2,27 +2,29 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Dalamud.Game.ClientState.Actors;
-using Dalamud.Game.ClientState.Actors.Types;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.BaseTypes;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 
 namespace Visibility
 {
 	public static class Extensions
 	{
-		public static bool IsStatus(this Actor actor, StatusFlags flag)
+		public static bool IsStatus(this GameObject obj, StatusFlags flag)
 		{
-			return (Marshal.ReadByte(actor.Address + 0x1906) & (byte) flag) > 0;
+			return (Marshal.ReadByte(obj.Address + 0x1906) & (byte) flag) > 0;
 		}
 
-		public static string GetFirstname(this Actor actor)
+		public static string GetFirstname(this GameObject obj)
 		{
-			return actor.Name.Split(' ')[0];
+			return obj.Name.TextValue.Split(' ')[0];
 		}
 
-		public static string GetLastname(this Actor actor)
+		public static string GetLastname(this GameObject obj)
 		{
-			return actor.Name.Split(' ')[1];
+			return obj.Name.TextValue.Split(' ')[1];
 		}
 
 		public static string ByteToString(this byte[] arr)
@@ -42,16 +44,16 @@ namespace Visibility
 			return new string(arr);
 		}
 
-		public static async void Rerender(this Actor a)
+		public static async void Rerender(this GameObject o)
 		{
 			await Task.Run(async () =>
 			{
 				try
 				{
-					var addrRenderToggle = a.Address + 0x104;
+					var addrRenderToggle = o.Address + 0x104;
 					var renderToggle = Marshal.ReadInt32(addrRenderToggle);
 
-					if (a is PlayerCharacter)
+					if (o is PlayerCharacter)
 					{
 						renderToggle |= (int)VisibilityFlags.Invisible;
 						Marshal.WriteInt32(addrRenderToggle, renderToggle);
@@ -78,16 +80,16 @@ namespace Visibility
 			});
 		}
 
-		public static async void Render(this Actor a)
+		public static async void Render(this GameObject o)
 		{
 			await Task.Run(() =>
 			{
 				try
 				{
-					var addrRenderToggle = a.Address + 0x104;
+					var addrRenderToggle = o.Address + 0x104;
 					var renderToggle = Marshal.ReadInt32(addrRenderToggle);
 					if ((renderToggle & (int) VisibilityFlags.Invisible) != (int) VisibilityFlags.Invisible &&
-					    (a.ObjectKind != ObjectKind.MountType ||
+					    (o.ObjectKind != ObjectKind.MountType ||
 					     (renderToggle & (int) VisibilityFlags.Unknown15) != (int) VisibilityFlags.Unknown15)) return;
 					renderToggle &= ~(int)VisibilityFlags.Invisible;
 					Marshal.WriteInt32(addrRenderToggle, renderToggle);
@@ -101,13 +103,13 @@ namespace Visibility
 			});
 		}
 
-		public static async void Hide(this Actor a)
+		public static async void Hide(this GameObject o)
 		{
 			await Task.Run(() =>
 			{
 				try
 				{
-					var addrRenderToggle = a.Address + 0x104;
+					var addrRenderToggle = o.Address + 0x104;
 					var renderToggle = Marshal.ReadInt32(addrRenderToggle);
 
 					renderToggle |= (int)VisibilityFlags.Invisible;

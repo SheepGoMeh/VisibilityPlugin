@@ -7,9 +7,6 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Actors;
-using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Game.ClientState.Actors.Types.NonPlayer;
 using Dalamud.Game.Command;
 using Dalamud.Game.Internal;
 using Dalamud.Plugin;
@@ -18,6 +15,8 @@ using Visibility.Configuration;
 using Visibility.Utils;
 using Visibility.Void;
 using XivCommon;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game;
 
 namespace Visibility
 {
@@ -282,10 +281,10 @@ namespace Visibility
 
 			var playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
-			var voidItem = (!(PluginInterface.ClientState.Actors
+			var voidItem = (!(PluginInterface.ClientState.Objects
 				.SingleOrDefault(x => x is PlayerCharacter character
 				                      && character.HomeWorld.Id == world.RowId
-				                      && character.Name.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)) is PlayerCharacter actor)
+				                      && character.Name.TextValue.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)) is PlayerCharacter actor)
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual")
 				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual"));
 
@@ -306,11 +305,11 @@ namespace Visibility
 
 		public void VoidTargetPlayer(string command, string arguments)
 		{
-			if (PluginInterface.ClientState.Actors
+			if (PluginInterface.ClientState.Objects
 				.SingleOrDefault(x => x is PlayerCharacter
-				                      && x.ActorId != 0
-				                      && x.ActorId != PluginInterface.ClientState.LocalPlayer?.ActorId
-				                      && x.ActorId == PluginInterface.ClientState.LocalPlayer?.TargetActorID) is PlayerCharacter actor)
+				                      && x.ObjectId != 0
+				                      && x.ObjectId != PluginInterface.ClientState.LocalPlayer?.ObjectId
+				                      && x.ObjectId == PluginInterface.ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter actor)
 			{
 				var voidItem = new VoidItem(actor, arguments, false);
 				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
@@ -361,14 +360,14 @@ namespace Visibility
 
 			var playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
-			var actor = PluginInterface.ClientState.Actors
+			var obj = PluginInterface.ClientState.Objects
 				.SingleOrDefault(x =>
 					x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
-					character.Name.Equals(playerName, StringComparison.Ordinal)) as PlayerCharacter;
+					character.Name.TextValue.Equals(playerName, StringComparison.Ordinal)) as PlayerCharacter;
 
-			var item = actor == null
+			var item = obj == null
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual")
-				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual");
+				: new VoidItem(obj, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual");
 
 			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode()); 
 
@@ -378,9 +377,9 @@ namespace Visibility
 				PluginConfiguration.Whitelist.Add(item);
 				PluginConfiguration.Save();
 
-				if (actor != null)
+				if (obj != null)
 				{
-					UnhidePlayer((uint) actor.ActorId);
+					UnhidePlayer((uint) obj.ObjectId);
 				}
 
 				Print($"Whitelist: {playerName}{icon}{world.Name} has been added.");
@@ -393,13 +392,13 @@ namespace Visibility
 
 		public void WhitelistTargetPlayer(string command, string arguments)
 		{
-			if (PluginInterface.ClientState.Actors
+			if (PluginInterface.ClientState.Objects
 				.SingleOrDefault(x => x is PlayerCharacter
-				                      && x.ActorId != 0
-				                      && x.ActorId != PluginInterface.ClientState.LocalPlayer?.ActorId
-				                      && x.ActorId == PluginInterface.ClientState.LocalPlayer?.TargetActorID) is PlayerCharacter actor)
+				                      && x.ObjectId != 0
+				                      && x.ObjectId != PluginInterface.ClientState.LocalPlayer?.ObjectId
+				                      && x.ObjectId == PluginInterface.ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter obj)
 			{
-				var item = new VoidItem(actor, arguments, false);
+				var item = new VoidItem(obj, arguments, false);
 				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
 				
 				if (!PluginConfiguration.Whitelist.Any(x =>
@@ -407,12 +406,12 @@ namespace Visibility
 				{
 					PluginConfiguration.Whitelist.Add(item);
 					PluginConfiguration.Save();
-					UnhidePlayer((uint) actor.ActorId);
-					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
+					UnhidePlayer((uint) obj.ObjectId);
+					Print($"Whitelist: {obj.Name}{icon}{obj.HomeWorld.GameData.Name} has been added.");
 				}
 				else
 				{
-					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} entry already exists.");
+					Print($"Whitelist: {obj.Name}{icon}{obj.HomeWorld.GameData.Name} entry already exists.");
 				}
 			}
 			else

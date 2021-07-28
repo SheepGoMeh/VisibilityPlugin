@@ -5,13 +5,12 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Actors;
-using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Game.ClientState.Actors.Types.NonPlayer;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Visibility.Configuration;
-using Visibility.Structs.Client.Game.Character;
 
 namespace Visibility.Utils
 {
@@ -87,19 +86,19 @@ namespace Visibility.Utils
 
 		#endregion
 
-		private unsafe BattleChara* LocalPlayer;
+		private unsafe FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara* LocalPlayer;
 
 		// void Client::Game::Character::Character::EnableDraw(Client::Game::Character::Character* thisPtr);
-		private unsafe delegate void CharacterEnableDrawPrototype(Character* thisPtr);
+		private unsafe delegate void CharacterEnableDrawPrototype(FFXIVClientStructs.FFXIV.Client.Game.Character.Character* thisPtr);
 
 		// void Client::Game::Character::Character::DisableDraw(Client::Game::Character::Character* thisPtr);
-		private unsafe delegate void CharacterDisableDrawPrototype(Character* thisPtr);
+		private unsafe delegate void CharacterDisableDrawPrototype(FFXIVClientStructs.FFXIV.Client.Game.Character.Character* thisPtr);
 
 		// void Client::Game::Character::Companion::EnableDraw(Client::Game::Character::Companion* thisPtr);
-		private unsafe delegate void CompanionEnableDrawPrototype(Companion* thisPtr);
+		private unsafe delegate void CompanionEnableDrawPrototype(FFXIVClientStructs.FFXIV.Client.Game.Character.Companion* thisPtr);
 
 		// void dtor_Client::Game::Character::Character(Client::Game::Character::Character* thisPtr);
-		private unsafe delegate void CharacterDtorPrototype(Character* thisPtr);
+		private unsafe delegate void CharacterDtorPrototype(FFXIVClientStructs.FFXIV.Client.Game.Character.Character* thisPtr);
 
 		private Hook<CharacterEnableDrawPrototype> hookCharacterEnableDraw;
 		private Hook<CharacterDisableDrawPrototype> hookCharacterDisableDraw;
@@ -118,10 +117,10 @@ namespace Visibility.Utils
 
 			LocalPlayer = *(BattleChara**)_address.LocalPlayerAddress.ToPointer();
 
-			hookCharacterEnableDraw = new Hook<CharacterEnableDrawPrototype>(_address.CharacterEnableDrawAddress, new CharacterEnableDrawPrototype(CharacterEnableDrawDetour), this);
-			hookCharacterDisableDraw = new Hook<CharacterDisableDrawPrototype>(_address.CharacterDisableDrawAddress, new CharacterDisableDrawPrototype(CharacterDisableDrawDetour), this);
-			hookCompanionEnableDraw = new Hook<CompanionEnableDrawPrototype>(_address.CompanionEnableDrawAddress, new CompanionEnableDrawPrototype(CompanionEnableDrawDetour), this);
-			hookCharacterDtor = new Hook<CharacterDtorPrototype>(_address.CharacterDtorAddress, new CharacterDtorPrototype(CharacterDtorDetour), this);
+			hookCharacterEnableDraw = new Hook<CharacterEnableDrawPrototype>(_address.CharacterEnableDrawAddress, CharacterEnableDrawDetour);
+			hookCharacterDisableDraw = new Hook<CharacterDisableDrawPrototype>(_address.CharacterDisableDrawAddress, CharacterDisableDrawDetour);
+			hookCompanionEnableDraw = new Hook<CompanionEnableDrawPrototype>(_address.CompanionEnableDrawAddress, CompanionEnableDrawDetour);
+			hookCharacterDtor = new Hook<CharacterDtorPrototype>(_address.CharacterDtorAddress, CharacterDtorDetour);
 
 			hookCharacterEnableDraw.Enable();
 			hookCharacterDisableDraw.Enable();
@@ -181,9 +180,9 @@ namespace Visibility.Utils
 
 		public unsafe void UnhideAll()
 		{
-			foreach (var actor in _pluginInterface.ClientState.Actors)
+			foreach (var obj in _pluginInterface.ClientState.Objects)
 			{
-				var thisPtr = (Character*) actor.Address;
+				var thisPtr = (Character*) obj.Address;
 
 				if (thisPtr->GameObject.ObjectKind == (byte) ObjectKind.Companion)
 				{
@@ -297,9 +296,9 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (*LocalPlayer->Character.CompanyTag != 0
+						if (*LocalPlayer->Character.FreeCompanyTag != 0
 							&& LocalPlayer->Character.CurrentWorld == LocalPlayer->Character.HomeWorld
-							&& UnsafeArrayEqual(thisPtr->CompanyTag, LocalPlayer->Character.CompanyTag, 7))
+							&& UnsafeArrayEqual(thisPtr->FreeCompanyTag, LocalPlayer->Character.FreeCompanyTag, 7))
 						{
 							_players[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
@@ -319,7 +318,7 @@ namespace Visibility.Utils
 						}
 
 						if (!_config.HidePlayer ||
-							(_config.ShowDeadPlayer && thisPtr->CurrentHp == 0) ||
+							(_config.ShowDeadPlayer && thisPtr->Health == 0) ||
 							(_config.ShowFriendPlayer && _players[ContainerType.Friend].Contains(thisPtr->GameObject.ObjectID)) ||
 							(_config.ShowCompanyPlayer && _players[ContainerType.Company].Contains(thisPtr->GameObject.ObjectID)) ||
 							(_config.ShowPartyPlayer && _players[ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)) ||
@@ -440,7 +439,7 @@ namespace Visibility.Utils
 			if (_config.HidePlayer
 				&& _config.ShowDeadPlayer
 				&& thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
-				&& thisPtr->CurrentHp == 0
+				&& thisPtr->Health == 0
 				&& HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
 			{
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
