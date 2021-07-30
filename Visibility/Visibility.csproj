@@ -15,6 +15,11 @@
       <HintPath>..\..\DalamudNet5\bin\Debug\Dalamud.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
+      <HintPath>..\..\DalamudNet5\bin\Debug\FFXIVClientStructs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="ImGui.NET">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
       <HintPath>..\..\DalamudNet5\bin\Debug\ImGui.NET.dll</HintPath>

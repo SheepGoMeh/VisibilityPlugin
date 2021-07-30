@@ -4,8 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using Dalamud.Game.ClientState.Actors;
-using Dalamud.Game.ClientState.Actors.Types;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
 using ImGuiNET;
 using Visibility.Void;
 
@@ -291,7 +292,7 @@ namespace Visibility.Configuration
 
 				if (itemToRemove != null)
 				{
-					if (_pluginInterface.ClientState.Actors
+					if (_pluginInterface.ClientState.Objects
 						.SingleOrDefault(x =>
 							x is PlayerCharacter playerCharacter &&
 							playerCharacter.Name.TextValue.Equals(itemToRemove.Name, StringComparison.Ordinal) &&
@@ -309,12 +310,12 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0
-				    && _pluginInterface.ClientState.Actors
+				if (_pluginInterface.ClientState.LocalPlayer?.TargetObjectId > 0
+				    && _pluginInterface.ClientState.Objects
 						    .SingleOrDefault(x => x is PlayerCharacter
 						                          && x.ObjectKind != ObjectKind.Companion
-						                          && x.ActorId == _pluginInterface.ClientState.LocalPlayer
-							                          ?.TargetActorID) is
+						                          && x.ObjectId == _pluginInterface.ClientState.LocalPlayer
+							                          ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
 					Array.Clear(_buffer[0], 0, _buffer[0].Length);
@@ -453,12 +454,12 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_pluginInterface.ClientState.LocalPlayer?.TargetActorID > 0
-				    && _pluginInterface.ClientState.Actors
+				if (_pluginInterface.ClientState.LocalPlayer?.TargetObjectId > 0
+				    && _pluginInterface.ClientState.Objects
 						    .SingleOrDefault(x => x is PlayerCharacter
 						                          && x.ObjectKind != ObjectKind.Companion
-						                          && x.ActorId == _pluginInterface.ClientState.LocalPlayer
-							                          ?.TargetActorID) is
+						                          && x.ObjectId == _pluginInterface.ClientState.LocalPlayer
+							                          ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
 					Array.Clear(_buffer[4], 0, _buffer[4].Length);

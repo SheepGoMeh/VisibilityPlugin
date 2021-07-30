@@ -5,13 +5,14 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Actors;
-using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Game.ClientState.Actors.Types.NonPlayer;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Visibility.Configuration;
-using Visibility.Structs.Client.Game.Character;
 
 namespace Visibility.Utils
 {
@@ -181,7 +182,7 @@ namespace Visibility.Utils
 
 		public unsafe void UnhideAll()
 		{
-			foreach (var actor in _pluginInterface.ClientState.Actors)
+			foreach (var actor in _pluginInterface.ClientState.Objects)
 			{
 				var thisPtr = (Character*) actor.Address;
 
@@ -297,9 +298,9 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (*LocalPlayer->Character.CompanyTag != 0
+						if (*LocalPlayer->Character.FreeCompanyTag != 0
 							&& LocalPlayer->Character.CurrentWorld == LocalPlayer->Character.HomeWorld
-							&& UnsafeArrayEqual(thisPtr->CompanyTag, LocalPlayer->Character.CompanyTag, 7))
+							&& UnsafeArrayEqual(thisPtr->FreeCompanyTag, LocalPlayer->Character.FreeCompanyTag, 7))
 						{
 							_players[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
@@ -319,7 +320,7 @@ namespace Visibility.Utils
 						}
 
 						if (!_config.HidePlayer ||
-							(_config.ShowDeadPlayer && thisPtr->CurrentHp == 0) ||
+							(_config.ShowDeadPlayer && thisPtr->Health == 0) ||
 							(_config.ShowFriendPlayer && _players[ContainerType.Friend].Contains(thisPtr->GameObject.ObjectID)) ||
 							(_config.ShowCompanyPlayer && _players[ContainerType.Company].Contains(thisPtr->GameObject.ObjectID)) ||
 							(_config.ShowPartyPlayer && _players[ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)) ||
@@ -440,7 +441,7 @@ namespace Visibility.Utils
 			if (_config.HidePlayer
 				&& _config.ShowDeadPlayer
 				&& thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
-				&& thisPtr->CurrentHp == 0
+				&& thisPtr->Health == 0
 				&& HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
 			{
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
