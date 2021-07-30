@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dalamud.Game;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -272,7 +273,7 @@ namespace Visibility
 			var voidItem = (!(PluginInterface.ClientState.Actors
 				.SingleOrDefault(x => x is PlayerCharacter character
 				                      && character.HomeWorld.Id == world.RowId
-				                      && character.Name.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)) is PlayerCharacter actor)
+				                      && character.Name.TextValue.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)) is PlayerCharacter actor)
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual")
 				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual"));
 
@@ -351,7 +352,7 @@ namespace Visibility
 			var actor = PluginInterface.ClientState.Actors
 				.SingleOrDefault(x =>
 					x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
-					character.Name.Equals(playerName, StringComparison.Ordinal)) as PlayerCharacter;
+					character.Name.TextValue.Equals(playerName, StringComparison.Ordinal)) as PlayerCharacter;
 
 			var item = actor == null
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual")

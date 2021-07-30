@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using Dalamud.Game.ClientState.Actors.Types;
 using Visibility.Structs.Client.Game.Object;
-using Dalamud.Game.ClientState.Structs;
 
 namespace Visibility.Structs.Client.Game.Character
 {

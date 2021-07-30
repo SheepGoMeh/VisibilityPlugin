@@ -294,7 +294,7 @@ namespace Visibility.Configuration
 					if (_pluginInterface.ClientState.Actors
 						.SingleOrDefault(x =>
 							x is PlayerCharacter playerCharacter &&
-							playerCharacter.Name.Equals(itemToRemove.Name, StringComparison.Ordinal) &&
+							playerCharacter.Name.TextValue.Equals(itemToRemove.Name, StringComparison.Ordinal) &&
 							playerCharacter.HomeWorld.Id == itemToRemove.HomeworldId) is PlayerCharacter a)
 					{
 						a.Render();

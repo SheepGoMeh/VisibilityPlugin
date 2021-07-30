@@ -29,16 +29,14 @@ namespace Visibility.Void
 		public string Lastname { get; set; }
 		public string HomeworldName { get; set; }
 		public DateTime Time { get; set; }
-		public int ActorId { get; set; }
 		public uint HomeworldId { get; set; }
 		public string Reason { get; set; }
 		public bool Manual { get; set; }
 
 		public VoidItem(PlayerCharacter actor, string reason, bool manual)
 		{
-			Name = actor.Name;
+			Name = actor.Name.TextValue;
 			Time = DateTime.Now;
-			ActorId = actor.ActorId;
 			HomeworldId = actor.HomeWorld.Id;
 			HomeworldName = actor.HomeWorld.GameData.Name;
 			Reason = reason;
@@ -49,20 +47,6 @@ namespace Visibility.Void
 		{
 			Name = name;
 			Time = DateTime.Now;
-			ActorId = 0;
-			HomeworldId = homeworldId;
-			HomeworldName = homeworldName;
-			Reason = reason;
-			Manual = manual;
-		}
-
-		[JsonConstructor]
-		public VoidItem(string firstname, string lastname, string homeworldName, uint homeworldId, DateTime time,
-			int actorId, string reason, bool manual)
-		{
-			Name = $"{firstname} {lastname}";
-			Time = time;
-			ActorId = actorId;
 			HomeworldId = homeworldId;
 			HomeworldName = homeworldName;
 			Reason = reason;

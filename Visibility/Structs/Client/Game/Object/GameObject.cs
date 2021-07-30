@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using Dalamud.Game.ClientState.Structs;
+using Dalamud.Game.ClientState.Actors.Types;
 
 namespace Visibility.Structs.Client.Game.Object
 {

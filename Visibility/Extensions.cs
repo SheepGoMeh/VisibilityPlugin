@@ -17,12 +17,12 @@ namespace Visibility
 
 		public static string GetFirstname(this Actor actor)
 		{
-			return actor.Name.Split(' ')[0];
+			return actor.Name.TextValue.Split(' ')[0];
 		}
 
 		public static string GetLastname(this Actor actor)
 		{
-			return actor.Name.Split(' ')[1];
+			return actor.Name.TextValue.Split(' ')[1];
 		}
 
 		public static string ByteToString(this byte[] arr)
