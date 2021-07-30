@@ -71,10 +71,14 @@ namespace Visibility
 						Marshal.WriteInt32(addrRenderToggle, renderToggle);
 					}
 				}
+#if DEBUG
 				catch (Exception ex)
 				{
-#if DEBUG
 					PluginLog.LogError(ex.ToString());
+#else
+				catch (Exception)
+				{
+					// ignored
 #endif
 				}
 			});
@@ -94,10 +98,14 @@ namespace Visibility
 					renderToggle &= ~(int)VisibilityFlags.Invisible;
 					Marshal.WriteInt32(addrRenderToggle, renderToggle);
 				}
+#if DEBUG
 				catch (Exception ex)
 				{
-#if DEBUG
 					PluginLog.LogError(ex.ToString());
+#else
+				catch (Exception)
+				{
+					// ignored
 #endif
 				}
 			});
@@ -115,10 +123,14 @@ namespace Visibility
 					renderToggle |= (int)VisibilityFlags.Invisible;
 					Marshal.WriteInt32(addrRenderToggle, renderToggle);
 				}
+#if DEBUG
 				catch (Exception ex)
 				{
-#if DEBUG
 					PluginLog.LogError(ex.ToString());
+#else
+				catch (Exception)
+				{
+					// ignored
 #endif
 				}
 			});
