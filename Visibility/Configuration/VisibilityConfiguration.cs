@@ -90,7 +90,6 @@ namespace Visibility.Configuration
 					_plugin.UnhideChocobos(ContainerType.All);
 					break;
 				case nameof(EnableContextMenu):
-					_plugin.PluginContextMenu.Toggle();
 					break;
 				case nameof(ShowCompanyPet):
 					_plugin.UnhidePets(ContainerType.Company);

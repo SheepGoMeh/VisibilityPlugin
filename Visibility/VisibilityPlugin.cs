@@ -17,7 +17,6 @@ using Lumina.Excel.GeneratedSheets;
 using Visibility.Configuration;
 using Visibility.Utils;
 using Visibility.Void;
-using XivCommon;
 
 namespace Visibility
 {
@@ -36,8 +35,6 @@ namespace Visibility
 		private bool _drawConfig;
 		private bool _refresh;
 		public bool Disable;
-		public XivCommonBase Common;
-		public ContextMenu PluginContextMenu;
 		
 		private CharacterDrawResolver _characterDrawResolver;
 
@@ -82,14 +79,6 @@ namespace Visibility
 			_characterDrawResolver = new CharacterDrawResolver();
 			_characterDrawResolver.Init(pluginInterface, PluginConfiguration);
 
-			Common = new XivCommonBase(PluginInterface, Hooks.ContextMenu);
-			PluginContextMenu = new ContextMenu(this);
-
-			if (PluginConfiguration.EnableContextMenu)
-			{
-				PluginContextMenu.Toggle();
-			}
-
 			PluginInterface.Framework.OnUpdateEvent += FrameworkOnOnUpdateEvent;
 			PluginInterface.UiBuilder.OnBuildUi += BuildUi;
 			PluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
@@ -127,8 +116,6 @@ namespace Visibility
 				return;
 			}
 
-			PluginContextMenu.Dispose();
-			Common.Dispose();
 			_characterDrawResolver.Dispose();
 
 			PluginInterface.Framework.OnUpdateEvent -= FrameworkOnOnUpdateEvent;
