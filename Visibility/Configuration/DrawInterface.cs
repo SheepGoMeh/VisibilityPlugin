@@ -49,11 +49,13 @@ namespace Visibility.Configuration
 			ImGui.Text(text);
 		}
 
+		private float _totalWidth;
+
 		public bool DrawConfigUi()
 		{
 			var drawConfig = true;
 
-			ImGui.SetNextWindowSize(new Vector2(500 * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
+			ImGui.SetNextWindowSize(new Vector2(Math.Max(300f, _totalWidth) * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
 
 			if (ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
 			{
@@ -70,6 +72,38 @@ namespace Visibility.Configuration
 				ImGui.Separator();
 
 				ImGui.Columns(6, "###cols", false);
+
+				var maxWidth = 0f;
+
+				maxWidth = Math.Max(maxWidth, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionPlayers).X);
+				maxWidth = Math.Max(maxWidth, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionPets).X);
+				maxWidth = Math.Max(maxWidth, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionChocobos).X);
+				maxWidth = Math.Max(maxWidth, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionMinions).X);
+				
+				ImGui.SetColumnWidth(0, maxWidth + ImGui.GetStyle().CellPadding.X * 2);
+
+				_totalWidth = maxWidth + ImGui.GetStyle().CellPadding.X * 2;
+				
+				_totalWidth += ImGui.CalcTextSize(_plugin.PluginLocalization.OptionHideAll).X +
+				               ImGui.GetStyle().CellPadding.X * 2;
+				
+				_totalWidth += ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowParty).X +
+				               ImGui.GetStyle().CellPadding.X * 2;
+				
+				_totalWidth += ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowFriends).X +
+				               ImGui.GetStyle().CellPadding.X * 2;
+				
+				_totalWidth += ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowFc).X +
+				               ImGui.GetStyle().CellPadding.X * 2;
+				
+				_totalWidth += ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowDead).X +
+				               ImGui.GetStyle().CellPadding.X * 2;
+				
+				ImGui.SetColumnWidth(1, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionHideAll).X + ImGui.GetStyle().CellPadding.X * 2);
+				ImGui.SetColumnWidth(2, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowParty).X + ImGui.GetStyle().CellPadding.X * 2);
+				ImGui.SetColumnWidth(3, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowFriends).X + ImGui.GetStyle().CellPadding.X * 2);
+				ImGui.SetColumnWidth(4, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowFc).X + ImGui.GetStyle().CellPadding.X * 2);
+				ImGui.SetColumnWidth(5, ImGui.CalcTextSize(_plugin.PluginLocalization.OptionShowDead).X + ImGui.GetStyle().CellPadding.X * 2);
 
 				ImGui.NextColumn();
 				CenteredText(_plugin.PluginLocalization.OptionHideAll);
