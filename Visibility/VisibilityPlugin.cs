@@ -30,6 +30,7 @@ namespace Visibility
 		private static string WhitelistCommandName => "/whitelist";
 		private static string WhitelistTargetCommandName => "/whitelisttarget";
 
+		public Localization PluginLocalization;
 		public DalamudPluginInterface PluginInterface;
 		public VisibilityConfiguration PluginConfiguration;
 
@@ -48,34 +49,35 @@ namespace Visibility
 			PluginInterface = pluginInterface;
 			PluginConfiguration = pluginInterface.GetPluginConfig() as VisibilityConfiguration ?? new VisibilityConfiguration();
 			PluginConfiguration.Init(this, pluginInterface);
+			PluginLocalization = new Localization(Localization.Language.English);
 
 			PluginInterface.CommandManager.AddHandler(PluginCommandName, new CommandInfo(PluginCommand)
 			{
-				HelpMessage = $"Shows the config for the visibility plugin.\nAdditional help available via '{PluginCommandName} help'",
+				HelpMessage = PluginLocalization.PluginCommandHelpMessage,
 				ShowInHelp = true
 			});
 
 			PluginInterface.CommandManager.AddHandler(VoidCommandName, new CommandInfo(VoidPlayer)
 			{
-				HelpMessage = $"Adds player to void list.\nUsage: {VoidCommandName} <firstname> <lastname> <worldname> <reason>",
+				HelpMessage = PluginLocalization.VoidPlayerHelpMessage,
 				ShowInHelp = true
 			});
 			
 			PluginInterface.CommandManager.AddHandler(VoidTargetCommandName, new CommandInfo(VoidTargetPlayer)
 			{
-				HelpMessage = $"Adds targeted player to void list.\nUsage: {VoidTargetCommandName} <reason>",
+				HelpMessage = PluginLocalization.VoidTargetPlayerHelpMessage,
 				ShowInHelp = true
 			});
 			
 			PluginInterface.CommandManager.AddHandler(WhitelistCommandName, new CommandInfo(WhitelistPlayer)
 			{
-				HelpMessage = $"Adds player to whitelist.\nUsage: {WhitelistCommandName} <firstname> <lastname> <worldname>",
+				HelpMessage = PluginLocalization.WhitelistPlayerHelpMessage,
 				ShowInHelp = true
 			});
 			
 			PluginInterface.CommandManager.AddHandler(WhitelistTargetCommandName, new CommandInfo(WhitelistTargetPlayer)
 			{
-				HelpMessage = $"Adds targeted player to whitelist.\nUsage: {WhitelistTargetCommandName}",
+				HelpMessage = PluginLocalization.WhitelistTargetPlayerHelpMessage,
 				ShowInHelp = true
 			});
 
