@@ -10,6 +10,8 @@ namespace Visibility
 {
 	public static class Extensions
 	{
+		public static string Format(this string format, params object[] args) => string.Format(format, args);
+
 		public static bool IsStatus(this Actor actor, StatusFlags flag)
 		{
 			return (Marshal.ReadByte(actor.Address + 0x1906) & (byte) flag) > 0;
