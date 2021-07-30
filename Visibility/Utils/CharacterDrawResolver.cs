@@ -118,10 +118,10 @@ namespace Visibility.Utils
 
 			LocalPlayer = *(BattleChara**)_address.LocalPlayerAddress.ToPointer();
 
-			hookCharacterEnableDraw = new Hook<CharacterEnableDrawPrototype>(_address.CharacterEnableDrawAddress, new CharacterEnableDrawPrototype(CharacterEnableDrawDetour), this);
-			hookCharacterDisableDraw = new Hook<CharacterDisableDrawPrototype>(_address.CharacterDisableDrawAddress, new CharacterDisableDrawPrototype(CharacterDisableDrawDetour), this);
-			hookCompanionEnableDraw = new Hook<CompanionEnableDrawPrototype>(_address.CompanionEnableDrawAddress, new CompanionEnableDrawPrototype(CompanionEnableDrawDetour), this);
-			hookCharacterDtor = new Hook<CharacterDtorPrototype>(_address.CharacterDtorAddress, new CharacterDtorPrototype(CharacterDtorDetour), this);
+			hookCharacterEnableDraw = new Hook<CharacterEnableDrawPrototype>(_address.CharacterEnableDrawAddress, CharacterEnableDrawDetour);
+			hookCharacterDisableDraw = new Hook<CharacterDisableDrawPrototype>(_address.CharacterDisableDrawAddress, CharacterDisableDrawDetour);
+			hookCompanionEnableDraw = new Hook<CompanionEnableDrawPrototype>(_address.CompanionEnableDrawAddress, CompanionEnableDrawDetour);
+			hookCharacterDtor = new Hook<CharacterDtorPrototype>(_address.CharacterDtorAddress, CharacterDtorDetour);
 
 			hookCharacterEnableDraw.Enable();
 			hookCharacterDisableDraw.Enable();
