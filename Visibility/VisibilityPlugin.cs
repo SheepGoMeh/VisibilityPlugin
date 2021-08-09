@@ -92,12 +92,12 @@ namespace Visibility
 				_refresh = false;
 				Disable = false;
 
-				_characterDrawResolver.UnhideAll();
+				_characterDrawResolver.ShowAll();
 			}
 			else if (_refresh)
 			{
 				PluginConfiguration.Enabled = false;
-				_characterDrawResolver.UnhideAll();
+				_characterDrawResolver.ShowAll();
 				_refresh = false;
 
 				Task.Run(async () =>
@@ -135,34 +135,34 @@ namespace Visibility
 			GC.SuppressFinalize(this);
 		}
 
-		public void Unhide(UnitType unitType, ContainerType containerType)
+		public void Show(UnitType unitType, ContainerType containerType)
 		{
-			_characterDrawResolver.Unhide(unitType, containerType);
+			_characterDrawResolver.Show(unitType, containerType);
 		}
 
-		public void UnhidePlayers(ContainerType type)
+		public void ShowPlayers(ContainerType type)
 		{
-			_characterDrawResolver.UnhidePlayers(type);
+			_characterDrawResolver.ShowPlayers(type);
 		}
 		
-		public void UnhidePets(ContainerType type)
+		public void ShowPets(ContainerType type)
 		{
-			_characterDrawResolver.UnhidePets(type);
+			_characterDrawResolver.ShowPets(type);
 		}
 
-		public void UnhideMinions(ContainerType type)
+		public void ShowMinions(ContainerType type)
 		{
-			_characterDrawResolver.UnhideMinions(type);
+			_characterDrawResolver.ShowMinions(type);
 		}
 
-		public void UnhideChocobos(ContainerType type)
+		public void ShowChocobos(ContainerType type)
 		{
-			_characterDrawResolver.UnhideChocobos(type);
+			_characterDrawResolver.ShowChocobos(type);
 		}
 
-		public void UnhidePlayer(uint id)
+		public void ShowPlayer(uint id)
 		{
-			_characterDrawResolver.UnhidePlayer(id);
+			_characterDrawResolver.ShowPlayer(id);
 		}
 
 		private void PluginCommand(string command, string arguments)
@@ -367,7 +367,7 @@ namespace Visibility
 
 				if (actor != null)
 				{
-					UnhidePlayer((uint) actor.ObjectId);
+					ShowPlayer((uint) actor.ObjectId);
 				}
 
 				Print($"Whitelist: {playerName}{icon}{world.Name} has been added.");
@@ -394,7 +394,7 @@ namespace Visibility
 				{
 					PluginConfiguration.Whitelist.Add(item);
 					PluginConfiguration.Save();
-					UnhidePlayer((uint) actor.ObjectId);
+					ShowPlayer((uint) actor.ObjectId);
 					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
 				}
 				else

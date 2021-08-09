@@ -78,54 +78,54 @@ namespace Visibility.Configuration
 					_plugin.Disable = !Enabled;
 					break;
 				case nameof(HidePet):
-					_plugin.UnhidePets(ContainerType.All);
+					_plugin.ShowPets(ContainerType.All);
 					break;
 				case nameof(HidePlayer):
-					_plugin.UnhidePlayers(ContainerType.All);
+					_plugin.ShowPlayers(ContainerType.All);
 					break;
 				case nameof(HideMinion):
-					_plugin.UnhideMinions(ContainerType.All);
+					_plugin.ShowMinions(ContainerType.All);
 					break;
 				case nameof(HideChocobo):
-					_plugin.UnhideChocobos(ContainerType.All);
+					_plugin.ShowChocobos(ContainerType.All);
 					break;
 				case nameof(EnableContextMenu):
 					break;
 				case nameof(ShowCompanyPet):
-					_plugin.UnhidePets(ContainerType.Company);
+					_plugin.ShowPets(ContainerType.Company);
 					break;
 				case nameof(ShowCompanyPlayer):
-					_plugin.UnhidePlayers(ContainerType.Company);
+					_plugin.ShowPlayers(ContainerType.Company);
 					break;
 				case nameof(ShowCompanyMinion):
-					_plugin.UnhideMinions(ContainerType.Company);
+					_plugin.ShowMinions(ContainerType.Company);
 					break;
 				case nameof(ShowCompanyChocobo):
-					_plugin.UnhideChocobos(ContainerType.Company);
+					_plugin.ShowChocobos(ContainerType.Company);
 					break;
 				case nameof(ShowPartyPet):
-					_plugin.UnhidePets(ContainerType.Party);
+					_plugin.ShowPets(ContainerType.Party);
 					break;
 				case nameof(ShowPartyPlayer):
-					_plugin.UnhidePlayers(ContainerType.Party);
+					_plugin.ShowPlayers(ContainerType.Party);
 					break;
 				case nameof(ShowPartyMinion):
-					_plugin.UnhideMinions(ContainerType.Party);
+					_plugin.ShowMinions(ContainerType.Party);
 					break;
 				case nameof(ShowPartyChocobo):
-					_plugin.UnhideChocobos(ContainerType.Party);
+					_plugin.ShowChocobos(ContainerType.Party);
 					break;
 				case nameof(ShowFriendPet):
-					_plugin.UnhidePets(ContainerType.Friend);
+					_plugin.ShowPets(ContainerType.Friend);
 					break;
 				case nameof(ShowFriendPlayer):
-					_plugin.UnhidePlayers(ContainerType.Friend);
+					_plugin.ShowPlayers(ContainerType.Friend);
 					break;
 				case nameof(ShowFriendMinion):
-					_plugin.UnhideMinions(ContainerType.Friend);
+					_plugin.ShowMinions(ContainerType.Friend);
 					break;
 				case nameof(ShowFriendChocobo):
-					_plugin.UnhideChocobos(ContainerType.Friend);
+					_plugin.ShowChocobos(ContainerType.Friend);
 					break;
 			}
 		}

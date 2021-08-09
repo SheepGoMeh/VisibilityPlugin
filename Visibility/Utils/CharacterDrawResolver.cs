@@ -35,7 +35,7 @@ namespace Visibility.Utils
 	internal class CharacterDrawResolver
 	{
 		private HashSet<uint> HiddenObjectIds = new HashSet<uint>();
-		private HashSet<uint> ObjectIdsToUnhide = new HashSet<uint>();
+		private HashSet<uint> ObjectIdsToShow = new HashSet<uint>();
 
 		private readonly Dictionary<UnitType, Dictionary<ContainerType, HashSet<uint>>> _containers = new()
 		{
@@ -78,7 +78,7 @@ namespace Visibility.Utils
 		};
 
 		private HashSet<uint> HiddenMinionObjectIds = new HashSet<uint>();
-		private HashSet<uint> MinionObjectIdsToUnhide = new HashSet<uint>();
+		private HashSet<uint> MinionObjectIdsToShow = new HashSet<uint>();
 
 		private unsafe BattleChara* LocalPlayer;
 
@@ -122,21 +122,21 @@ namespace Visibility.Utils
 			hookCharacterDtor.Enable();
 		}
 
-		public void Unhide(UnitType unitType, ContainerType containerType)
+		public void Show(UnitType unitType, ContainerType containerType)
 		{
-			ObjectIdsToUnhide.UnionWith(_containers[unitType][containerType]);
+			ObjectIdsToShow.UnionWith(_containers[unitType][containerType]);
 			HiddenObjectIds.ExceptWith(_containers[unitType][containerType]);
 		}
 
-		public void UnhidePlayers(ContainerType type) => Unhide(UnitType.Players, type);
+		public void ShowPlayers(ContainerType type) => Show(UnitType.Players, type);
 
-		public void UnhidePets(ContainerType type) => Unhide(UnitType.Pets, type);
+		public void ShowPets(ContainerType type) => Show(UnitType.Pets, type);
 
-		public void UnhideChocobos(ContainerType type) => Unhide(UnitType.Chocobos, type);
+		public void ShowChocobos(ContainerType type) => Show(UnitType.Chocobos, type);
 
-		public void UnhideMinions(ContainerType type) => Unhide(UnitType.Minions, type);
+		public void ShowMinions(ContainerType type) => Show(UnitType.Minions, type);
 
-		public unsafe void UnhideAll()
+		public unsafe void ShowAll()
 		{
 			foreach (var actor in _pluginInterface.ClientState.Objects)
 			{
@@ -150,7 +150,7 @@ namespace Visibility.Utils
 					}
 					
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					MinionObjectIdsToUnhide.Remove(thisPtr->CompanionOwnerID);
+					MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 				}
 				else
 				{
@@ -165,14 +165,14 @@ namespace Visibility.Utils
 			}
 		}
 
-		public void UnhidePlayer(uint id)
+		public void ShowPlayer(uint id)
 		{
 			if (!HiddenObjectIds.Contains(id))
 			{
 				return;
 			}
 
-			ObjectIdsToUnhide.Add(id);
+			ObjectIdsToShow.Add(id);
 			HiddenObjectIds.Remove(id);
 		}
 
@@ -403,15 +403,15 @@ namespace Visibility.Utils
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
-			else if (ObjectIdsToUnhide.Contains(thisPtr->GameObject.ObjectID))
+			else if (ObjectIdsToShow.Contains(thisPtr->GameObject.ObjectID))
 			{
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				ObjectIdsToUnhide.Remove(thisPtr->GameObject.ObjectID);
+				ObjectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
 			}
-			else if (MinionObjectIdsToUnhide.Contains(thisPtr->CompanionOwnerID))
+			else if (MinionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID))
 			{
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				MinionObjectIdsToUnhide.Remove(thisPtr->CompanionOwnerID);
+				MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 			}
 
 			hookCharacterDisableDraw.Original(thisPtr);
