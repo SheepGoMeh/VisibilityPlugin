@@ -183,28 +183,50 @@ namespace Visibility.Utils
 
 		private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len)
 		{
-			while (len-- != 0)
+			for (var i = 0; i * sizeof(long) < len; i++, arr1 += sizeof(long), arr2 += sizeof(long))
 			{
-				if (*arr1++ != *arr2++)
+				if (*(long*) arr1 != *(long*) arr2)
 				{
 					return false;
 				}
 			}
 
-			return true;
+			if ((len & sizeof(int)) != 0)
+			{
+				if (*(int*) arr1 != *(int*) arr2)
+				{
+					return false;
+				}
+
+				arr1 += sizeof(int);
+				arr2 += sizeof(int);
+			}
+
+			if ((len & sizeof(short)) != 0)
+			{
+				if (*(short*) arr1 != *(short*) arr2)
+				{
+					return false;
+				}
+
+				arr1 += sizeof(short);
+				arr2 += sizeof(short);
+			}
+
+			if ((len & sizeof(byte)) == 0)
+			{
+				return true;
+			}
+
+			return *arr1 == *arr2;
 		}
 
-		private static unsafe bool UnsafeArrayEqual(IReadOnlyList<byte> arr1, byte* arr2, int len)
+		private static unsafe bool UnsafeArrayEqual(byte[] arr1, byte* arr2, int len)
 		{
-			for (var i = 0; i != len; ++i)
+			fixed (byte* a1 = arr1)
 			{
-				if (arr1[i] != *arr2++)
-				{
-					return false;
-				}
+				return UnsafeArrayEqual(a1, arr2, len);
 			}
-
-			return true;
 		}
 
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
