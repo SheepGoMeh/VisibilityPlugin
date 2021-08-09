@@ -37,56 +37,48 @@ namespace Visibility.Utils
 		private HashSet<uint> HiddenObjectIds = new HashSet<uint>();
 		private HashSet<uint> ObjectIdsToUnhide = new HashSet<uint>();
 
-		#region Players
-
-		private Dictionary<ContainerType, HashSet<uint>> _players = new Dictionary<ContainerType, HashSet<uint>>
+		private readonly Dictionary<UnitType, Dictionary<ContainerType, HashSet<uint>>> _containers = new()
 		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
-		};
-
-		#endregion
-
-		#region Pets
-
-		private Dictionary<ContainerType, HashSet<uint>> _pets = new Dictionary<ContainerType, HashSet<uint>>
-		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
-		};
-
-		#endregion
-
-		#region Chocobos
-
-		private Dictionary<ContainerType, HashSet<uint>> _chocobos = new Dictionary<ContainerType, HashSet<uint>>
-		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
-		};
-
-		#endregion
-
-		#region Minions
-
-		private Dictionary<ContainerType, HashSet<uint>> _minions = new Dictionary<ContainerType, HashSet<uint>>
-		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
+			{
+				UnitType.Players, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
+			{
+				UnitType.Pets, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
+			{
+				UnitType.Chocobos, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
+			{
+				UnitType.Minions, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
 		};
 
 		private HashSet<uint> HiddenMinionObjectIds = new HashSet<uint>();
 		private HashSet<uint> MinionObjectIdsToUnhide = new HashSet<uint>();
-
-		#endregion
 
 		private unsafe BattleChara* LocalPlayer;
 
@@ -132,53 +124,17 @@ namespace Visibility.Utils
 
 		public void Unhide(UnitType unitType, ContainerType containerType)
 		{
-			HashSet<uint> container;
-
-			switch (unitType)
-			{
-				case UnitType.Players:
-					container = _players[containerType];
-					break;
-				case UnitType.Pets:
-					container = _pets[containerType];
-					break;
-				case UnitType.Chocobos:
-					container = _chocobos[containerType];
-					break;
-				case UnitType.Minions:
-					container = _minions[containerType];
-					break;
-				default:
-					return;
-			}
-
-			ObjectIdsToUnhide.UnionWith(container);
-			HiddenObjectIds.ExceptWith(container);
+			ObjectIdsToUnhide.UnionWith(_containers[unitType][containerType]);
+			HiddenObjectIds.ExceptWith(_containers[unitType][containerType]);
 		}
 
-		public void UnhidePlayers(ContainerType type)
-		{
-			ObjectIdsToUnhide.UnionWith(_players[type]);
-			HiddenObjectIds.ExceptWith(_players[type]);
-		}
+		public void UnhidePlayers(ContainerType type) => Unhide(UnitType.Players, type);
 
-		public void UnhidePets(ContainerType type)
-		{
-			ObjectIdsToUnhide.UnionWith(_pets[type]);
-			HiddenObjectIds.ExceptWith(_pets[type]);
-		}
+		public void UnhidePets(ContainerType type) => Unhide(UnitType.Pets, type);
 
-		public void UnhideChocobos(ContainerType type)
-		{
-			ObjectIdsToUnhide.UnionWith(_chocobos[type]);
-			HiddenObjectIds.ExceptWith(_chocobos[type]);
-		}
+		public void UnhideChocobos(ContainerType type) => Unhide(UnitType.Chocobos, type);
 
-		public void UnhideMinions(ContainerType type)
-		{
-			MinionObjectIdsToUnhide.UnionWith(_minions[type]);
-			HiddenMinionObjectIds.ExceptWith(_minions[type]);
-		}
+		public void UnhideMinions(ContainerType type) => Unhide(UnitType.Minions, type);
 
 		public unsafe void UnhideAll()
 		{
@@ -270,24 +226,24 @@ namespace Visibility.Utils
 							break;
 						}
 
-						_players[ContainerType.All].Add(thisPtr->GameObject.ObjectID);
+						_containers[UnitType.Players][ContainerType.All].Add(thisPtr->GameObject.ObjectID);
 
 						if ((thisPtr->StatusFlags & (byte)StatusFlags.Friend) > 0)
 						{
-							_players[ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
 						}
 						else
 						{
-							_players[ContainerType.Friend].Remove(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Friend].Remove(thisPtr->GameObject.ObjectID);
 						}
 
 						if ((thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
 						{
-							_players[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
 						else
 						{
-							_players[ContainerType.Party].Remove(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Party].Remove(thisPtr->GameObject.ObjectID);
 						}
 
 						if ((_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty]
@@ -302,11 +258,11 @@ namespace Visibility.Utils
 							&& LocalPlayer->Character.CurrentWorld == LocalPlayer->Character.HomeWorld
 							&& UnsafeArrayEqual(thisPtr->FreeCompanyTag, LocalPlayer->Character.FreeCompanyTag, 7))
 						{
-							_players[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 						else
 						{
-							_players[ContainerType.Company].Remove(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Company].Remove(thisPtr->GameObject.ObjectID);
 						}
 
 						if (_config.VoidList.Any(x => UnsafeArrayEqual(x.NameBytes,
@@ -321,9 +277,9 @@ namespace Visibility.Utils
 
 						if (!_config.HidePlayer ||
 							(_config.ShowDeadPlayer && thisPtr->Health == 0) ||
-							(_config.ShowFriendPlayer && _players[ContainerType.Friend].Contains(thisPtr->GameObject.ObjectID)) ||
-							(_config.ShowCompanyPlayer && _players[ContainerType.Company].Contains(thisPtr->GameObject.ObjectID)) ||
-							(_config.ShowPartyPlayer && _players[ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)) ||
+							(_config.ShowFriendPlayer && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.ObjectID)) ||
+							(_config.ShowCompanyPlayer && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.ObjectID)) ||
+							(_config.ShowPartyPlayer && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)) ||
 							(_config.Whitelist.Any(x => UnsafeArrayEqual(x.NameBytes,
 								                            thisPtr->GameObject.Name,
 								                            x.NameBytes.Length) &&
@@ -344,26 +300,26 @@ namespace Visibility.Utils
 							break;
 						}
 
-						_pets[ContainerType.All].Add(thisPtr->GameObject.ObjectID);
+						_containers[UnitType.Pets][ContainerType.All].Add(thisPtr->GameObject.ObjectID);
 
-						if (_players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_pets[ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Pets][ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_pets[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Pets][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_pets[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Pets][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((_config.ShowFriendPet && _players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowCompanyPet && _players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowPartyPet && _players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
+						if ((_config.ShowFriendPet && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+							|| (_config.ShowCompanyPet && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+							|| (_config.ShowPartyPet && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
 						{
 							break;
 						}
@@ -379,7 +335,7 @@ namespace Visibility.Utils
 						if (_config.HideStar
 						    && _pluginInterface.ClientState.Condition[ConditionFlag.InCombat]
 						    && thisPtr->GameObject.OwnerID != LocalPlayer->Character.GameObject.ObjectID
-						    && !_players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
+						    && !_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
 						{
 							thisPtr->GameObject.RenderFlags |= (int) VisibilityFlags.Invisible;
 							HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
@@ -393,26 +349,26 @@ namespace Visibility.Utils
 							break;
 						}
 
-						_chocobos[ContainerType.All].Add(thisPtr->GameObject.ObjectID);
+						_containers[UnitType.Chocobos][ContainerType.All].Add(thisPtr->GameObject.ObjectID);
 
-						if (_players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_chocobos[ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Chocobos][ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_chocobos[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Chocobos][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_chocobos[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Chocobos][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((_config.ShowFriendChocobo && _players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowCompanyChocobo && _players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowPartyChocobo && _players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
+						if ((_config.ShowFriendChocobo && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+							|| (_config.ShowCompanyChocobo && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+							|| (_config.ShowPartyChocobo && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
 						{
 							break;
 						}
@@ -433,7 +389,7 @@ namespace Visibility.Utils
 			if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
 				&& (thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
 			{
-				_players[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+				_containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
@@ -467,26 +423,26 @@ namespace Visibility.Utils
 				&& _config.HideMinion
 				&& thisPtr->Character.CompanionOwnerID != LocalPlayer->Character.GameObject.ObjectID)
 			{
-				_minions[ContainerType.All].Add(thisPtr->Character.CompanionOwnerID);
+				_containers[UnitType.Minions][ContainerType.All].Add(thisPtr->Character.CompanionOwnerID);
 
-				if (_players[ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
+				if (_containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
 				{
-					_minions[ContainerType.Friend].Add(thisPtr->Character.CompanionOwnerID);
+					_containers[UnitType.Minions][ContainerType.Friend].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if (_players[ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID))
+				if (_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID))
 				{
-					_minions[ContainerType.Party].Add(thisPtr->Character.CompanionOwnerID);
+					_containers[UnitType.Minions][ContainerType.Party].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if (_players[ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
+				if (_containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
 				{
-					_minions[ContainerType.Company].Add(thisPtr->Character.CompanionOwnerID);
+					_containers[UnitType.Minions][ContainerType.Company].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if ((_config.ShowFriendMinion && _players[ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
-					|| (_config.ShowCompanyMinion && _players[ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
-					|| (_config.ShowPartyMinion && _players[ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID)))
+				if ((_config.ShowFriendMinion && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
+					|| (_config.ShowCompanyMinion && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
+					|| (_config.ShowPartyMinion && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID)))
 				{
 				}
 				else
@@ -510,12 +466,12 @@ namespace Visibility.Utils
 				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				HiddenMinionObjectIds.Remove(thisPtr->GameObject.ObjectID);
 
-				foreach (ContainerType type in Enum.GetValues(typeof(ContainerType)))
+				foreach (var container in _containers)
 				{
-					_players[type].Remove(thisPtr->GameObject.ObjectID);
-					_pets[type].Remove(thisPtr->GameObject.ObjectID);
-					_chocobos[type].Remove(thisPtr->GameObject.ObjectID);
-					_minions[type].Remove(thisPtr->GameObject.ObjectID);
+					foreach (var set in container.Value)
+					{
+						set.Value.Remove(thisPtr->GameObject.ObjectID);
+					}
 				}
 			}
 
