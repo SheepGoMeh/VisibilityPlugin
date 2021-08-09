@@ -367,7 +367,7 @@ namespace Visibility
 
 				if (actor != null)
 				{
-					ShowPlayer((uint) actor.ObjectId);
+					ShowPlayer(actor.ObjectId);
 				}
 
 				Print($"Whitelist: {playerName}{icon}{world.Name} has been added.");
@@ -394,7 +394,7 @@ namespace Visibility
 				{
 					PluginConfiguration.Whitelist.Add(item);
 					PluginConfiguration.Save();
-					ShowPlayer((uint) actor.ObjectId);
+					ShowPlayer(actor.ObjectId);
 					Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
 				}
 				else
