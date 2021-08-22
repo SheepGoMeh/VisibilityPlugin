@@ -40,9 +40,6 @@ namespace Visibility.Configuration
 		private VisibilityPlugin _plugin;
 
 		[NonSerialized]
-		private DalamudPluginInterface _pluginInterface;
-
-		[NonSerialized]
 		private bool[] _showListWindow = {false, false};
 
 		[NonSerialized]
@@ -143,10 +140,9 @@ namespace Visibility.Configuration
 			ChangeSetting(propertyName);
 		}
 
-		public void Init(VisibilityPlugin plugin, DalamudPluginInterface pluginInterface)
+		public void Init(VisibilityPlugin plugin)
 		{
 			_plugin = plugin;
-			_pluginInterface = pluginInterface;
 
 			settingDictionary["enabled"] = x => ChangeSetting(nameof(Enabled), x);
 			settingDictionary["hidepet"] = x => ChangeSetting(nameof(HidePet), x);
@@ -166,7 +162,7 @@ namespace Visibility.Configuration
 
 		public void Save()
 		{
-			_pluginInterface.SavePluginConfig(this);
+			_plugin.PluginInterface.SavePluginConfig(this);
 		}
 	}
 }

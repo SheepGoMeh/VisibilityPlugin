@@ -2,11 +2,10 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.ClientState.Objects.BaseTypes;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Plugin;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Logging;
 
 namespace Visibility
 {

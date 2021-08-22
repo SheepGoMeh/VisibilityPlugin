@@ -12,37 +12,30 @@
   <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
-      <HintPath>..\..\DalamudNet5\bin\Debug\Dalamud.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
-      <HintPath>..\..\DalamudNet5\bin\Debug\FFXIVClientStructs.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ImGui.NET">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
-      <HintPath>..\..\DalamudNet5\bin\Debug\ImGui.NET.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ImGuiScene">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
-      <HintPath>..\..\DalamudNet5\bin\Debug\ImGuiScene.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Lumina">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
-      <HintPath>..\..\DalamudNet5\bin\Debug\Lumina.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Lumina.Excel">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
-      <HintPath>..\..\DalamudNet5\bin\Debug\Lumina.Excel.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Newtonsoft.Json.dll</HintPath>
-      <HintPath>..\..\DalamudNet5\bin\Debug\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -51,5 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="ContextMenu.cs" />
+    <Compile Remove="Utils\PlaceholderResolver.cs" />
   </ItemGroup>
 </Project>

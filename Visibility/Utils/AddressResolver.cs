@@ -6,7 +6,6 @@ namespace Visibility.Utils
 {
 	internal class AddressResolver : BaseAddressResolver
 	{
-		public IntPtr ResolvePlaceholderText { get; private set; }
 		public IntPtr LocalPlayerAddress { get; private set; } 
 		public IntPtr CharacterDtorAddress { get; private set; }
 

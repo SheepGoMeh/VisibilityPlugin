@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using ImGuiNET;
 using Visibility.Void;
@@ -292,7 +293,7 @@ namespace Visibility.Configuration
 
 				if (itemToRemove != null)
 				{
-					if (_pluginInterface.ClientState.Objects
+					if (_plugin.ObjectTable
 						.SingleOrDefault(x =>
 							x is PlayerCharacter playerCharacter &&
 							playerCharacter.Name.TextValue.Equals(itemToRemove.Name, StringComparison.Ordinal) &&
@@ -310,11 +311,11 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_pluginInterface.ClientState.LocalPlayer?.TargetObjectId > 0
-				    && _pluginInterface.ClientState.Objects
+				if (_plugin.ClientState.LocalPlayer.TargetObjectId > 0
+				    && _plugin.ObjectTable
 						    .SingleOrDefault(x => x is PlayerCharacter
 						                          && x.ObjectKind != ObjectKind.Companion
-						                          && x.ObjectId == _pluginInterface.ClientState.LocalPlayer
+						                          && x.ObjectId == _plugin.ClientState.LocalPlayer
 							                          ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
@@ -454,11 +455,11 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_pluginInterface.ClientState.LocalPlayer?.TargetObjectId > 0
-				    && _pluginInterface.ClientState.Objects
+				if (_plugin.ClientState.LocalPlayer.TargetObjectId > 0
+				    && _plugin.ObjectTable
 						    .SingleOrDefault(x => x is PlayerCharacter
 						                          && x.ObjectKind != ObjectKind.Companion
-						                          && x.ObjectId == _pluginInterface.ClientState.LocalPlayer
+						                          && x.ObjectId == _plugin.ClientState.LocalPlayer
 							                          ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
