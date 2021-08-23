@@ -72,7 +72,10 @@ namespace Visibility.Configuration
 			switch (propertyName)
 			{
 				case nameof(Enabled):
-					_plugin.Disable = !Enabled;
+					if (!_plugin.Disable) // Make sure the disable event is finished before enabling again
+					{
+						_plugin.Disable = !Enabled;
+					}
 					break;
 				case nameof(HidePet):
 					_plugin.ShowPets(ContainerType.All);

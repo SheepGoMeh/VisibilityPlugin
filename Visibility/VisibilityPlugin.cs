@@ -106,23 +106,26 @@ namespace Visibility
 		{
 			if (Disable)
 			{
-				_refresh = false;
+				_characterDrawResolver.ShowAll();
+
 				Disable = false;
 
-				_characterDrawResolver.ShowAll();
+				if (_refresh)
+				{
+					Task.Run(async () =>
+					{
+						await Task.Delay(250);
+						Configuration.Enabled = true;
+						ChatGui.Print("Refresh complete.");
+					});
+				}
+				
+				_refresh = false;
 			}
 			else if (_refresh)
 			{
+				Disable = true;
 				Configuration.Enabled = false;
-				_characterDrawResolver.ShowAll();
-				_refresh = false;
-
-				Task.Run(async () =>
-				{
-					await Task.Delay(250);
-					Configuration.Enabled = true;
-					ChatGui.Print("Refresh complete.");
-				});
 			}
 		}
 
