@@ -19,7 +19,7 @@ namespace Visibility.Void
 				Lastname = name[1].ToUppercase();
 
 				var nameBytes = Encoding.UTF8.GetBytes(Name + '\0');
-				NameBytes = nameBytes.Length < 30 ? nameBytes : nameBytes.Take(30).ToArray();
+				NameBytes = nameBytes.Length < 64 ? nameBytes : nameBytes.Take(64).ToArray();
 			}
 		}
 
