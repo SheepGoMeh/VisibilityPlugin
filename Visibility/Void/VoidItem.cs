@@ -52,5 +52,17 @@ namespace Visibility.Void
 			Reason = reason;
 			Manual = manual;
 		}
+
+		[JsonConstructor]
+		public VoidItem(string firstname, string lastname, string homeworldName, DateTime time, uint homeworldId,
+			string reason, bool manual)
+		{
+			Name = $"{firstname} {lastname}";
+			HomeworldName = homeworldName;
+			Time = time;
+			HomeworldId = homeworldId;
+			Reason = reason;
+			Manual = manual;
+		}
 	}
 }
