@@ -173,42 +173,9 @@ namespace Visibility.Utils
 
 		private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len)
 		{
-			for (var i = 0; i * sizeof(long) < len; i++, arr1 += sizeof(long), arr2 += sizeof(long))
-			{
-				if (*(long*) arr1 != *(long*) arr2)
-				{
-					return false;
-				}
-			}
-
-			if ((len & sizeof(int)) != 0)
-			{
-				if (*(int*) arr1 != *(int*) arr2)
-				{
-					return false;
-				}
-
-				arr1 += sizeof(int);
-				arr2 += sizeof(int);
-			}
-
-			if ((len & sizeof(short)) != 0)
-			{
-				if (*(short*) arr1 != *(short*) arr2)
-				{
-					return false;
-				}
-
-				arr1 += sizeof(short);
-				arr2 += sizeof(short);
-			}
-
-			if ((len & sizeof(byte)) == 0)
-			{
-				return true;
-			}
-
-			return *arr1 == *arr2;
+			var a1 = new ReadOnlySpan<byte>(arr1, len);
+			var a2 = new ReadOnlySpan<byte>(arr2, len);
+			return a1.SequenceEqual(a2);
 		}
 
 		private static unsafe bool UnsafeArrayEqual(byte[] arr1, byte* arr2, int len)
