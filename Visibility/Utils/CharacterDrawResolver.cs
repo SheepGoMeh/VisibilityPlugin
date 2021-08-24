@@ -329,7 +329,7 @@ namespace Visibility.Utils
 						}
 
 						break;
-					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == 3:
+					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Chocobo:
 						if (!_plugin.Configuration.HideChocobo
 							|| thisPtr->GameObject.OwnerID == LocalPlayer->Character.GameObject.ObjectID)
 						{
