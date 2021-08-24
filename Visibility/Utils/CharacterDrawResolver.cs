@@ -114,8 +114,16 @@ namespace Visibility.Utils
 
 		public void Show(UnitType unitType, ContainerType containerType)
 		{
-			ObjectIdsToShow.UnionWith(_containers[unitType][containerType]);
-			HiddenObjectIds.ExceptWith(_containers[unitType][containerType]);
+			if (unitType == UnitType.Minions)
+			{
+				MinionObjectIdsToShow.UnionWith(_containers[unitType][containerType]);
+				HiddenMinionObjectIds.ExceptWith(_containers[unitType][containerType]);
+			}
+			else
+			{
+				ObjectIdsToShow.UnionWith(_containers[unitType][containerType]);
+				HiddenObjectIds.ExceptWith(_containers[unitType][containerType]);
+			}
 		}
 
 		public void ShowPlayers(ContainerType type) => Show(UnitType.Players, type);
