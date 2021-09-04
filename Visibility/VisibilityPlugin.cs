@@ -103,7 +103,7 @@ namespace Visibility
 			PluginInterface.UiBuilder.Draw += BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 			ChatGui.ChatMessage += OnChatMessage;
-			Common = new XivCommonBase(PluginInterface, Hooks.ContextMenu);
+			Common = new XivCommonBase(Hooks.ContextMenu);
 			PluginContextMenu = new ContextMenu(this);
 
 			if (Configuration.EnableContextMenu)
