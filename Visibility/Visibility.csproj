@@ -41,9 +41,18 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="1.2.2" />
+    <PackageReference Include="ILRepack" Version="2.1.0-beta1" />
     <PackageReference Include="XivCommon" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Utils\PlaceholderResolver.cs" />
   </ItemGroup>
+  <Target Name="ILRepack" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <InputAssemblies Include="$(TargetPath)" />
+      <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
+      <InputAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'XivCommon'" />
+    </ItemGroup>
+    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(AppData)\XIVLauncher\addon\Hooks\dev /out:$(TargetDir)..\$(Configuration).ILMerge\$(TargetFileName) @(InputAssemblies, ' ')" />
+  </Target>
 </Project>
