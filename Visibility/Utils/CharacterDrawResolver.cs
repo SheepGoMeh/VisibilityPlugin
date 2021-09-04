@@ -470,15 +470,10 @@ namespace Visibility.Utils
 			if (!disposing)
 				return;
 
-			hookCharacterEnableDraw.Disable();
-			hookCharacterDisableDraw.Disable();
-			hookCompanionEnableDraw.Disable();
-			hookCharacterDtor.Dispose();
-
-			hookCharacterEnableDraw.Dispose();
-			hookCharacterDisableDraw.Dispose();
-			hookCompanionEnableDraw.Dispose();
-			hookCharacterDtor.Dispose();
+			hookCharacterEnableDraw?.Dispose();
+			hookCharacterDisableDraw?.Dispose();
+			hookCompanionEnableDraw?.Dispose();
+			hookCharacterDtor?.Dispose();
 		}
 
 		public void Dispose()
