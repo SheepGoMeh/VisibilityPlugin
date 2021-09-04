@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="1.2.2" />
-    <PackageReference Include="XivCommon" Version="2.0.0" />
+    <PackageReference Include="XivCommon" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Utils\PlaceholderResolver.cs" />
