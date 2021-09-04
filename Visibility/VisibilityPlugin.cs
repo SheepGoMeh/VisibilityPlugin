@@ -95,7 +95,7 @@ namespace Visibility
 			_characterDrawResolver = new CharacterDrawResolver();
 			_characterDrawResolver.Init(this);
 
-			Framework.OnUpdateEvent += FrameworkOnOnUpdateEvent;
+			Framework.Update += FrameworkOnOnUpdateEvent;
 			
 			PluginInterface.UiBuilder.Draw += BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
@@ -138,7 +138,7 @@ namespace Visibility
 
 			_characterDrawResolver.Dispose();
 
-			Framework.OnUpdateEvent -= FrameworkOnOnUpdateEvent;
+			Framework.Update -= FrameworkOnOnUpdateEvent;
 			PluginInterface.UiBuilder.Draw -= BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 			ChatGui.ChatMessage -= OnChatMessage;
@@ -425,7 +425,7 @@ namespace Visibility
 			}
 		}
 
-		private void OpenConfigUi(object sender, EventArgs eventArgs)
+		private void OpenConfigUi()
 		{
 			_drawConfig = !_drawConfig;
 		}
