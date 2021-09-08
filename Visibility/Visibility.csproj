@@ -48,6 +48,11 @@
     <PackageReference Include="XivCommon" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\res\icon.png" Link="images\icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <Content Include="..\res\visibility.png" Link="images\image1.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <Content Include="..\res\voidlist.png" Link="images\image2.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="Utils\PlaceholderResolver.cs" />
   </ItemGroup>
   <Target Name="ILRepack" AfterTargets="PostBuildEvent">
@@ -57,5 +62,8 @@
       <InputAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'XivCommon'" />
     </ItemGroup>
     <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(AppData)\XIVLauncher\addon\Hooks\dev /out:$(TargetPath) @(InputAssemblies, ' ')" />
+  </Target>
+  <Target Name="PackagePlugin" AfterTargets="ILRepack" Condition="'$(Configuration)' == 'Release'">
+    <DalamudPackager ProjectDir="$(ProjectDir)" OutputPath="$(OutputPath)" AssemblyName="$(AssemblyName)" MakeZip="true" />
   </Target>
 </Project>
