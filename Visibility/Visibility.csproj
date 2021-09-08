@@ -56,6 +56,6 @@
       <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
       <InputAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'XivCommon'" />
     </ItemGroup>
-    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(AppData)\XIVLauncher\addon\Hooks\dev /out:$(TargetDir)..\$(Configuration).ILMerge\$(TargetFileName) @(InputAssemblies, ' ')" />
+    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(AppData)\XIVLauncher\addon\Hooks\dev /out:$(TargetPath) @(InputAssemblies, ' ')" />
   </Target>
 </Project>
