@@ -55,106 +55,118 @@ namespace Visibility.Configuration
 		{
 			var drawConfig = true;
 
-			ImGui.SetNextWindowSize(new Vector2(500 * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
+			ImGui.SetNextWindowSize(new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
 
 			if (ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
 			{
 				Checkbox(nameof(Enabled));
 
 				ImGui.SameLine();
-				ImGui.Text("Enable");
+				ImGui.Text(_plugin.PluginLocalization.OptionEnable);
 				var cursorY = ImGui.GetCursorPosY();
+				var comboWidth = ImGui.CalcTextSize(_plugin.PluginLocalization.GetString("LanguageName", Localization.Language.English)).X * 2 + ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale;
+				ImGui.SameLine(ImGui.GetContentRegionMax().X / 2 - ImGui.CalcTextSize(_plugin.PluginLocalization.OptionLanguage).X - comboWidth);
+				ImGui.Text(_plugin.PluginLocalization.OptionLanguage);
+				ImGui.SameLine();
+				ImGui.PushItemWidth(comboWidth);
+				if (ImGui.BeginCombo("###language", _plugin.PluginLocalization.LanguageName))
+				{
+					foreach (var language in _plugin.PluginLocalization.AvailableLanguages.Where(language =>
+						ImGui.Selectable(_plugin.PluginLocalization.GetString("LanguageName", language))))
+					{
+						_plugin.Configuration.Language = language;
+						_plugin.PluginLocalization.CurrentLanguage = language;
+						Save();
+					}
+
+					ImGui.EndCombo();
+				}
+				ImGui.PopItemWidth();
 				ImGui.SameLine(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
 				               ImGui.GetScrollX());
 				ImGui.SetCursorPosY(cursorY / 2);
 				ImGui.TextColored(VersionColor, VersionString);
 				ImGui.SetCursorPosY(cursorY);
-				ImGui.Separator();
 
-				ImGui.Columns(6, "###cols", false);
+				if (ImGui.BeginTable("###cols", 6, ImGuiTableFlags.BordersOuterH))
+				{
+					ImGui.TableSetupColumn(string.Empty, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionHideAll, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowParty, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowFriends, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowFc, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowDead, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableHeadersRow();
 
-				ImGui.NextColumn();
-				CenteredText("Hide all");
-				ImGui.NextColumn();
-				CenteredText("Show party");
-				ImGui.NextColumn();
-				CenteredText("Show friends");
-				ImGui.NextColumn();
-				CenteredText("Show FC");
-				ImGui.NextColumn();
-				CenteredText("Show dead");
-				ImGui.NextColumn();
-				ImGui.Separator();
+					ImGui.TableNextColumn();
+					ImGui.Text(_plugin.PluginLocalization.OptionPlayers);
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(HidePlayer));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowPartyPlayer));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowFriendPlayer));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowCompanyPlayer));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowDeadPlayer));
+					ImGui.TableNextRow();
 
-				ImGui.Text("Players");
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(HidePlayer));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowPartyPlayer));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowFriendPlayer));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowCompanyPlayer));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowDeadPlayer));
-				ImGui.NextColumn();
+					ImGui.TableNextColumn();
+					ImGui.Text(_plugin.PluginLocalization.OptionPets);
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(HidePet));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowPartyPet));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowFriendPet));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowCompanyPet));
+					ImGui.TableNextRow();
 
-				ImGui.Text("Pets");
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(HidePet));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowPartyPet));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowFriendPet));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowCompanyPet));
-				ImGui.NextColumn();
-				ImGui.NextColumn();
+					ImGui.TableNextColumn();
+					ImGui.Text(_plugin.PluginLocalization.OptionChocobos);
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(HideChocobo));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowPartyChocobo));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowFriendChocobo));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowCompanyChocobo));
+					ImGui.TableNextRow();
 
-				ImGui.Text("Chocobos");
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(HideChocobo));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowPartyChocobo));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowFriendChocobo));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowCompanyChocobo));
-				ImGui.NextColumn();
-				ImGui.NextColumn();
-
-				ImGui.Text("Minions");
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(HideMinion));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowPartyMinion));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowFriendMinion));
-				ImGui.NextColumn();
-				CenteredCheckbox(nameof(ShowCompanyMinion));
-				ImGui.NextColumn();
-				ImGui.NextColumn();
-				ImGui.Separator();
-
-				ImGui.Columns(1, "###cols", false);
+					ImGui.TableNextColumn();
+					ImGui.Text(_plugin.PluginLocalization.OptionMinions);
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(HideMinion));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowPartyMinion));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowFriendMinion));
+					ImGui.TableNextColumn();
+					CenteredCheckbox(nameof(ShowCompanyMinion));
+					ImGui.TableNextRow();
+					
+					ImGui.EndTable();
+				}
 
 				Checkbox(nameof(HideStar));
 				ImGui.SameLine();
-				ImGui.Text("Hide non-party Earthly Star");
+				ImGui.Text(_plugin.PluginLocalization.OptionEarthlyStar);
 				if (ImGui.IsItemHovered())
 				{
-					ImGui.SetTooltip(
-						"Hides Earthly Star not belonging to players in your party (Only works in combat)");
+					ImGui.SetTooltip(_plugin.PluginLocalization.OptionEarthlyStarTip);
 				}
 
 				ImGui.NextColumn();
 
 				Checkbox(nameof(EnableContextMenu));
 				ImGui.SameLine();
-				ImGui.Text("Enable Context Menu");
+				ImGui.Text(_plugin.PluginLocalization.OptionContextMenu);
 				if (ImGui.IsItemHovered())
 				{
-					ImGui.SetTooltip("Enables context menu (Right-Click menu) on a player name in chat");
+					ImGui.SetTooltip(_plugin.PluginLocalization.OptionContextMenuTip);
 				}
 
 				ImGui.NextColumn();
@@ -162,24 +174,24 @@ namespace Visibility.Configuration
 
 				ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
 
-				if (ImGui.Button("Refresh"))
+				if (ImGui.Button(_plugin.PluginLocalization.OptionRefresh))
 				{
 					_plugin.RefreshActors();
 				}
 
-				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("Whitelist").X -
-				               ImGui.CalcTextSize("VoidList").X - 4 * ImGui.GetStyle().FramePadding.X -
+				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(_plugin.PluginLocalization.WhitelistName).X -
+				               ImGui.CalcTextSize(_plugin.PluginLocalization.VoidListName).X - 4 * ImGui.GetStyle().FramePadding.X -
 				               ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
 
-				if (ImGui.Button("Whitelist"))
+				if (ImGui.Button(_plugin.PluginLocalization.WhitelistName))
 				{
 					_showListWindow[1] = !_showListWindow[1];
 				}
 
-				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize("VoidList").X -
+				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(_plugin.PluginLocalization.VoidListName).X -
 				               2 * ImGui.GetStyle().FramePadding.X);
 
-				if (ImGui.Button("VoidList"))
+				if (ImGui.Button(_plugin.PluginLocalization.VoidListName))
 				{
 					_showListWindow[0] = !_showListWindow[0];
 				}
@@ -211,7 +223,7 @@ namespace Visibility.Configuration
 		private void DrawVoidList()
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
-			if (!ImGui.Begin($"{_plugin.Name}: VoidList", ref _showListWindow[0]))
+			if (!ImGui.Begin($"{_plugin.Name}: {_plugin.PluginLocalization.VoidListName}", ref _showListWindow[0]))
 			{
 				ImGui.End();
 				return;
@@ -220,12 +232,12 @@ namespace Visibility.Configuration
 			if (ImGui.BeginTable("VoidListTable", 6,
 				ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
 			{
-				ImGui.TableSetupColumn("Firstname");
-				ImGui.TableSetupColumn("Lastname");
-				ImGui.TableSetupColumn("World");
-				ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.DefaultSort);
-				ImGui.TableSetupColumn("Reason");
-				ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnFirstname);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnLastname);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnWorld);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnReason);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
@@ -283,7 +295,7 @@ namespace Visibility.Configuration
 					ImGui.TextUnformatted(item.Reason);
 					ImGui.TableNextColumn();
 
-					if (ImGui.Button($"Remove##{item.Name}"))
+					if (ImGui.Button($"{_plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
@@ -344,7 +356,7 @@ namespace Visibility.Configuration
 				ImGui.InputText("###reason", _buffer[3], (uint) _buffer[3].Length);
 				ImGui.TableNextColumn();
 
-				if (ImGui.Button("Void player"))
+				if (ImGui.Button(_plugin.PluginLocalization.OptionAddPlayer))
 				{
 					_plugin.VoidPlayer(manual ? "VoidUIManual" : string.Empty,
 						$"{_buffer[0].ByteToString()} {_buffer[1].ByteToString()} {_buffer[2].ByteToString()} {_buffer[3].ByteToString()}");
@@ -365,7 +377,7 @@ namespace Visibility.Configuration
 		private void DrawWhitelist()
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
-			if (!ImGui.Begin($"{_plugin.Name}: Whitelist", ref _showListWindow[1]))
+			if (!ImGui.Begin($"{_plugin.Name}: {_plugin.PluginLocalization.WhitelistName}", ref _showListWindow[1]))
 			{
 				ImGui.End();
 				return;
@@ -374,12 +386,12 @@ namespace Visibility.Configuration
 			if (ImGui.BeginTable("WhitelistTable", 6,
 				ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
 			{
-				ImGui.TableSetupColumn("Firstname");
-				ImGui.TableSetupColumn("Lastname");
-				ImGui.TableSetupColumn("World");
-				ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.DefaultSort);
-				ImGui.TableSetupColumn("Reason");
-				ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnFirstname);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnLastname);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnWorld);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnReason);
+				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
@@ -437,7 +449,7 @@ namespace Visibility.Configuration
 					ImGui.TextUnformatted(item.Reason);
 					ImGui.TableNextColumn();
 
-					if (ImGui.Button($"Remove##{item.Name}"))
+					if (ImGui.Button($"{_plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
@@ -488,7 +500,7 @@ namespace Visibility.Configuration
 				ImGui.InputText("###reason", _buffer[7], (uint) _buffer[7].Length);
 				ImGui.TableNextColumn();
 
-				if (ImGui.Button("Add player"))
+				if (ImGui.Button(_plugin.PluginLocalization.OptionAddPlayer))
 				{
 					_plugin.WhitelistPlayer(manual ? "WhitelistUIManual" : string.Empty,
 						$"{_buffer[4].ByteToString()} {_buffer[5].ByteToString()} {_buffer[6].ByteToString()} {_buffer[7].ByteToString()}");

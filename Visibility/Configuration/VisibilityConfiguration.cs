@@ -12,6 +12,8 @@ namespace Visibility.Configuration
 	{
 		public int Version { get; set; }
 
+		public Localization.Language Language { get; set; }
+
 		public bool Enabled { get; set; }
 		public bool HidePet	{ get; set; }
 		public bool HidePlayer { get; set; }

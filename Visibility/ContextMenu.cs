@@ -52,13 +52,19 @@ namespace Visibility
 
 			args.Items.Add(Plugin.Configuration.VoidList.SingleOrDefault(x =>
 				x.Name == textPayload.Text && x.HomeworldId == args.ObjectWorld) == null
-				? new NormalContextMenuItem("Add to VoidList", AddToVoidList)
-				: new NormalContextMenuItem("Remove from VoidList", RemoveFromVoidList));
+				? new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.VoidListName), AddToVoidList)
+				: new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.VoidListName),
+					RemoveFromVoidList));
 
 			args.Items.Add(Plugin.Configuration.Whitelist.SingleOrDefault(x =>
 				x.Name == textPayload.Text && x.HomeworldId == args.ObjectWorld) == null
-				? new NormalContextMenuItem("Add to Whitelist", AddToWhitelist)
-				: new NormalContextMenuItem("Remove from Whitelist", RemoveFromWhitelist));
+				? new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.WhitelistName), AddToWhitelist)
+				: new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.WhitelistName),
+					RemoveFromWhitelist));
 		}
 
 		private void AddToVoidList(ContextMenuItemSelectedArgs args)

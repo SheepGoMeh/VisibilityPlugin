@@ -30,6 +30,7 @@ namespace Visibility
 		private static string WhitelistCommandName => "/whitelist";
 		private static string WhitelistTargetCommandName => "/whitelisttarget";
 
+		public Localization PluginLocalization;
 		public DalamudPluginInterface PluginInterface;
 		public VisibilityConfiguration Configuration;
 		public CommandManager CommandManager;
@@ -64,34 +65,35 @@ namespace Visibility
 			PluginInterface = dalamudPluginInterface;
 			Configuration = PluginInterface.GetPluginConfig() as VisibilityConfiguration ?? new VisibilityConfiguration();
 			Configuration.Init(this);
+			PluginLocalization = new Localization(Configuration.Language);
 
 			CommandManager.AddHandler(PluginCommandName, new CommandInfo(PluginCommand)
 			{
-				HelpMessage = $"Shows the config for the visibility plugin.\nAdditional help available via '{PluginCommandName} help'",
+				HelpMessage = PluginLocalization.PluginCommandHelpMessage,
 				ShowInHelp = true
 			});
 
 			CommandManager.AddHandler(VoidCommandName, new CommandInfo(VoidPlayer)
 			{
-				HelpMessage = $"Adds player to void list.\nUsage: {VoidCommandName} <firstname> <lastname> <worldname> <reason>",
+				HelpMessage = PluginLocalization.VoidPlayerHelpMessage,
 				ShowInHelp = true
 			});
 			
 			CommandManager.AddHandler(VoidTargetCommandName, new CommandInfo(VoidTargetPlayer)
 			{
-				HelpMessage = $"Adds targeted player to void list.\nUsage: {VoidTargetCommandName} <reason>",
+				HelpMessage = PluginLocalization.VoidTargetPlayerHelpMessage,
 				ShowInHelp = true
 			});
 			
 			CommandManager.AddHandler(WhitelistCommandName, new CommandInfo(WhitelistPlayer)
 			{
-				HelpMessage = $"Adds player to whitelist.\nUsage: {WhitelistCommandName} <firstname> <lastname> <worldname>",
+				HelpMessage = PluginLocalization.WhitelistPlayerHelpMessage,
 				ShowInHelp = true
 			});
 			
 			CommandManager.AddHandler(WhitelistTargetCommandName, new CommandInfo(WhitelistTargetPlayer)
 			{
-				HelpMessage = $"Adds targeted player to whitelist.\nUsage: {WhitelistTargetCommandName}",
+				HelpMessage = PluginLocalization.WhitelistTargetPlayerHelpMessage,
 				ShowInHelp = true
 			});
 
@@ -127,7 +129,7 @@ namespace Visibility
 					{
 						await Task.Delay(250);
 						Configuration.Enabled = true;
-						ChatGui.Print("Refresh complete.");
+						ChatGui.Print(PluginLocalization.RefreshComplete);
 					});
 				}
 				
@@ -215,10 +217,10 @@ namespace Visibility
 
 				if (args[0].Equals("help", StringComparison.InvariantCultureIgnoreCase))
 				{
-					ChatGui.Print($"{PluginCommandName} help - This help menu");
-					ChatGui.Print($"{PluginCommandName} refresh - Refreshes hidden actors");
-					ChatGui.Print($"{PluginCommandName} <setting> <on/off/toggle> - Sets a setting to on, off or toggles it");
-					ChatGui.Print("Available values:");
+					ChatGui.Print(PluginLocalization.PluginCommandHelpMenu1);
+					ChatGui.Print(PluginLocalization.PluginCommandHelpMenu2);
+					ChatGui.Print(PluginLocalization.PluginCommandHelpMenu3);
+					ChatGui.Print(PluginLocalization.PluginCommandHelpMenu4);
 
 					foreach (var key in Configuration.settingDictionary.Keys)
 					{
@@ -227,7 +229,8 @@ namespace Visibility
 					
 					return;
 				}
-				else if (args[0].Equals("refresh", StringComparison.InvariantCulture))
+
+				if (args[0].Equals("refresh", StringComparison.InvariantCulture))
 				{
 					RefreshActors();
 					return;
@@ -235,13 +238,13 @@ namespace Visibility
 
 				if (args.Length != 2)
 				{
-					ChatGui.Print("Too few arguments specified.");
+					ChatGui.Print(PluginLocalization.PluginCommandHelpMenuError);
 					return;
 				}
 				
 				if (!Configuration.settingDictionary.Keys.Any(x => x.Equals(args[0], StringComparison.InvariantCultureIgnoreCase)))
 				{
-					ChatGui.Print($"'{args[0]}' is not a valid value.");
+					ChatGui.Print(PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[0]));
 					return;
 				}
 
@@ -265,7 +268,7 @@ namespace Visibility
 						value = 2;
 						break;
 					default:
-						ChatGui.Print($"'{args[1]}' is not a valid value.");
+						ChatGui.Print(PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[1]));
 						return;
 				}
 
@@ -278,7 +281,7 @@ namespace Visibility
 		{
 			if (string.IsNullOrEmpty(arguments))
 			{
-				ChatGui.Print("VoidList: No arguments specified.");
+				ChatGui.Print(PluginLocalization.NoArgumentsError(PluginLocalization.VoidListName));
 				return;
 			}
 
@@ -286,7 +289,7 @@ namespace Visibility
 
 			if (args.Length < 3)
 			{
-				ChatGui.Print("VoidList: Too few arguments specified.");
+				ChatGui.Print(PluginLocalization.NotEnoughArgumentsError(PluginLocalization.VoidListName));
 				return;
 			}
 
@@ -296,7 +299,7 @@ namespace Visibility
 
 			if (world == default(World))
 			{
-				ChatGui.Print($"VoidList: '{args[2]}' is not a valid world name.");
+				ChatGui.Print(PluginLocalization.InvalidWorldNameError(PluginLocalization.VoidListName, args[2]));
 				return;
 			}
 
@@ -309,18 +312,19 @@ namespace Visibility
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual")
 				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual"));
 
-			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode());
+			var playerString = Encoding.UTF8.GetString(new SeString(new TextPayload(playerName),
+				new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(world.Name)).Encode());
 
 			if (!Configuration.VoidList.Any(x =>
 				x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId))
 			{
 				Configuration.VoidList.Add(voidItem);
 				Configuration.Save();
-				ChatGui.Print($"VoidList: {playerName}{icon}{world.Name} has been added.");
+				ChatGui.Print(PluginLocalization.EntryAdded(PluginLocalization.VoidListName, playerString));
 			}
 			else
 			{
-				ChatGui.Print($"VoidList: {playerName}{icon}{world.Name} entry already exists.");
+				ChatGui.Print(PluginLocalization.EntryExistsError(PluginLocalization.VoidListName, playerString));
 			}
 		}
 
@@ -332,23 +336,25 @@ namespace Visibility
 			                                     && x.ObjectId == ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter actor)
 			{
 				var voidItem = new VoidItem(actor, arguments, false);
-				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
+
+				var playerString = Encoding.UTF8.GetString(new SeString(new TextPayload(actor.Name.TextValue),
+					new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(actor.HomeWorld.GameData.Name)).Encode());
 				
 				if (!Configuration.VoidList.Any(x =>
 					x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId))
 				{
 					Configuration.VoidList.Add(voidItem);
 					Configuration.Save();
-					ChatGui.Print($"VoidList: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
+					ChatGui.Print(PluginLocalization.EntryAdded(PluginLocalization.VoidListName, playerString));
 				}
 				else
 				{
-					ChatGui.Print($"VoidList: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} entry already exists.");
+					ChatGui.Print(PluginLocalization.EntryExistsError(PluginLocalization.VoidListName, playerString));
 				}
 			}
 			else
 			{
-				ChatGui.Print("VoidList: Invalid target.");
+				ChatGui.Print(PluginLocalization.InvalidTargetError(PluginLocalization.VoidListName));
 			}
 		}
 		
@@ -356,7 +362,7 @@ namespace Visibility
 		{
 			if (string.IsNullOrEmpty(arguments))
 			{
-				ChatGui.Print("Whitelist: No arguments specified.");
+				ChatGui.Print(PluginLocalization.NoArgumentsError(PluginLocalization.WhitelistName));
 				return;
 			}
 
@@ -364,7 +370,7 @@ namespace Visibility
 
 			if (args.Length < 3)
 			{
-				ChatGui.Print("Whitelist: Too few arguments specified.");
+				ChatGui.Print(PluginLocalization.NotEnoughArgumentsError(PluginLocalization.WhitelistName));
 				return;
 			}
 
@@ -374,7 +380,7 @@ namespace Visibility
 
 			if (world == default(World))
 			{
-				ChatGui.Print($"Whitelist: '{args[2]}' is not a valid world name.");
+				ChatGui.Print(PluginLocalization.InvalidWorldNameError(PluginLocalization.WhitelistName, args[2]));
 				return;
 			}
 
@@ -388,7 +394,8 @@ namespace Visibility
 				? new VoidItem(playerName, world.Name, world.RowId, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual")
 				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual");
 
-			var icon = Encoding.UTF8.GetString(new IconPayload(BitmapFontIcon.CrossWorld).Encode()); 
+			var playerString = Encoding.UTF8.GetString(new SeString(new TextPayload(playerName),
+				new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(world.Name)).Encode()); 
 
 			if (!Configuration.Whitelist.Any(x =>
 				x.Name == item.Name && x.HomeworldId == item.HomeworldId))
@@ -401,11 +408,11 @@ namespace Visibility
 					ShowPlayer(actor.ObjectId);
 				}
 
-				ChatGui.Print($"Whitelist: {playerName}{icon}{world.Name} has been added.");
+				ChatGui.Print(PluginLocalization.EntryAdded(PluginLocalization.WhitelistName, playerString));
 			}
 			else
 			{
-				ChatGui.Print($"Whitelist: {playerName}{icon}{world.Name} entry already exists.");
+				ChatGui.Print(PluginLocalization.EntryExistsError(PluginLocalization.WhitelistName, playerString));
 			}
 		}
 
@@ -417,7 +424,9 @@ namespace Visibility
 			                                     && x.ObjectId == ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter actor)
 			{
 				var item = new VoidItem(actor, arguments, false);
-				var icon = Encoding.UTF8.GetString(new byte[] {2, 18, 2, 89, 3});
+
+				var playerString = Encoding.UTF8.GetString(new SeString(new TextPayload(actor.Name.TextValue),
+					new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(actor.HomeWorld.GameData.Name)).Encode());
 				
 				if (!Configuration.Whitelist.Any(x =>
 					x.Name == item.Name && x.HomeworldId == item.HomeworldId))
@@ -425,16 +434,16 @@ namespace Visibility
 					Configuration.Whitelist.Add(item);
 					Configuration.Save();
 					ShowPlayer(actor.ObjectId);
-					ChatGui.Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} has been added.");
+					ChatGui.Print(PluginLocalization.EntryAdded(PluginLocalization.WhitelistName, playerString));
 				}
 				else
 				{
-					ChatGui.Print($"Whitelist: {actor.Name}{icon}{actor.HomeWorld.GameData.Name} entry already exists.");
+					ChatGui.Print(PluginLocalization.EntryExistsError(PluginLocalization.WhitelistName, playerString));
 				}
 			}
 			else
 			{
-				ChatGui.Print("Whitelist: Invalid target.");
+				ChatGui.Print(PluginLocalization.InvalidTargetError(PluginLocalization.WhitelistName));
 			}
 		}
 
