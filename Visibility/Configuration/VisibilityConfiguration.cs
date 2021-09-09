@@ -154,15 +154,20 @@ namespace Visibility.Configuration
 			settingDictionary["hidepet"] = x => ChangeSetting(nameof(HidePet), x);
 			settingDictionary["hidestar"] = x => ChangeSetting(nameof(HideStar), x);
 			settingDictionary["hideplayer"] = x => ChangeSetting(nameof(HidePlayer), x);
+			settingDictionary["hidechocobo"] = x => ChangeSetting(nameof(HideChocobo), x);
+			settingDictionary["hideminion"] = x => ChangeSetting(nameof(HideMinion), x);
 			settingDictionary["showcompanypet"] = x => ChangeSetting(nameof(ShowCompanyPet), x);
 			settingDictionary["showcompanyplayer"] = x => ChangeSetting(nameof(ShowCompanyPlayer), x);
 			settingDictionary["showcompanychocobo"] = x => ChangeSetting(nameof(ShowCompanyChocobo), x);
+			settingDictionary["showcompanyminion"] = x => ChangeSetting(nameof(ShowCompanyMinion), x);
 			settingDictionary["showpartypet"] = x => ChangeSetting(nameof(ShowPartyPet), x);
 			settingDictionary["showpartyplayer"] = x => ChangeSetting(nameof(ShowPartyPlayer), x);
 			settingDictionary["showpartychocobo"] = x => ChangeSetting(nameof(ShowPartyChocobo), x);
+			settingDictionary["showpartyminion"] = x => ChangeSetting(nameof(ShowPartyMinion), x);
 			settingDictionary["showfriendpet"] = x => ChangeSetting(nameof(ShowFriendPet), x);
 			settingDictionary["showfriendplayer"] = x => ChangeSetting(nameof(ShowFriendPlayer), x);
 			settingDictionary["showfriendchocobo"] = x => ChangeSetting(nameof(ShowFriendChocobo), x);
+			settingDictionary["showfriendminion"] = x => ChangeSetting(nameof(ShowFriendMinion), x);
 			settingDictionary["showdeadplayer"] = x => ChangeSetting(nameof(ShowDeadPlayer), x);
 		}
 
