@@ -62,7 +62,7 @@ namespace Visibility
 			}
 
 			AvailableLanguages.Add(language);
-			_strings[language] = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString);
+			_strings[language] = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)!;
 		}
 
 		public string GetString(string key, Language language) => _strings[language].ContainsKey(key) ? _strings[language][key] : key;

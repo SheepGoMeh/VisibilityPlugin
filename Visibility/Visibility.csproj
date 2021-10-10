@@ -5,6 +5,7 @@
     <LangVersion>default</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />

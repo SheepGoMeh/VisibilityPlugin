@@ -43,7 +43,7 @@ namespace Visibility.Api
 		{
 			CheckInitialised();
 
-			var world = _plugin.DataManager.GetExcelSheet<World>().SingleOrDefault(x => x.RowId == worldId);
+			var world = _plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
 
 			if (world == null)
 			{

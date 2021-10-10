@@ -86,13 +86,13 @@ namespace Visibility.Utils
 		// void dtor_Client::Game::Character::Character(Client::Game::Character::Character* thisPtr);
 		private unsafe delegate void CharacterDtorPrototype(Character* thisPtr);
 
-		private Hook<CharacterEnableDrawPrototype> hookCharacterEnableDraw;
-		private Hook<CharacterDisableDrawPrototype> hookCharacterDisableDraw;
-		private Hook<CompanionEnableDrawPrototype> hookCompanionEnableDraw;
-		private Hook<CharacterDtorPrototype> hookCharacterDtor;
+		private Hook<CharacterEnableDrawPrototype>? hookCharacterEnableDraw;
+		private Hook<CharacterDisableDrawPrototype>? hookCharacterDisableDraw;
+		private Hook<CompanionEnableDrawPrototype>? hookCompanionEnableDraw;
+		private Hook<CharacterDtorPrototype>? hookCharacterDtor;
 
 		private readonly AddressResolver _address = new();
-		private VisibilityPlugin _plugin;
+		private VisibilityPlugin? _plugin;
 
 		public unsafe void Init(VisibilityPlugin plugin)
 		{
@@ -136,7 +136,7 @@ namespace Visibility.Utils
 
 		public unsafe void ShowAll()
 		{
-			foreach (var actor in _plugin.ObjectTable)
+			foreach (var actor in _plugin!.ObjectTable)
 			{
 				var thisPtr = (Character*) actor.Address;
 
@@ -196,7 +196,7 @@ namespace Visibility.Utils
 
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
 		{
-			var localPlayerAddress = _plugin.ClientState?.LocalPlayer?.Address;
+			var localPlayerAddress = _plugin!.ClientState.LocalPlayer?.Address;
 			
 			if (localPlayerAddress.HasValue && LocalPlayer != (BattleChara*)localPlayerAddress.Value)
 			{
@@ -368,7 +368,7 @@ namespace Visibility.Utils
 				}
 			}
 
-			hookCharacterEnableDraw.Original(thisPtr);
+			hookCharacterEnableDraw!.Original(thisPtr);
 		}
 
 		private unsafe void CharacterDisableDrawDetour(Character* thisPtr)
@@ -381,7 +381,7 @@ namespace Visibility.Utils
 				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
 
-			if (_plugin.Configuration.HidePlayer
+			if (_plugin!.Configuration.HidePlayer
 			    && _plugin.Configuration.ShowDeadPlayer
 			    && thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
 			    && thisPtr->Health == 0
@@ -401,12 +401,12 @@ namespace Visibility.Utils
 				MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 			}
 
-			hookCharacterDisableDraw.Original(thisPtr);
+			hookCharacterDisableDraw!.Original(thisPtr);
 		}
 
 		private unsafe void CompanionEnableDrawDetour(Companion* thisPtr)
 		{
-			if (_plugin.Configuration.Enabled
+			if (_plugin!.Configuration.Enabled
 			    && _plugin.Configuration.HideMinion
 			    && thisPtr->Character.CompanionOwnerID != LocalPlayer->Character.GameObject.ObjectID)
 			{
@@ -439,7 +439,7 @@ namespace Visibility.Utils
 				}
 			}
 
-			hookCompanionEnableDraw.Original(thisPtr);
+			hookCompanionEnableDraw!.Original(thisPtr);
 		}
 
 		private unsafe void CharacterDtorDetour(Character* thisPtr)
@@ -462,7 +462,7 @@ namespace Visibility.Utils
 				}
 			}
 
-			hookCharacterDtor.Original(thisPtr);
+			hookCharacterDtor!.Original(thisPtr);
 		}
 
 		protected virtual void Dispose(bool disposing)

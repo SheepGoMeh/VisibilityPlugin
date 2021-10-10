@@ -18,7 +18,7 @@ namespace Visibility.Configuration
 		private static readonly Vector4 VersionColor = new Vector4(.5f, .5f, .5f, 1f);
 
 		private static readonly string VersionString =
-			System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 
 		private readonly IEnumerable<VoidItem>[] _sortedContainer = new IEnumerable<VoidItem>[2];
 
@@ -27,7 +27,7 @@ namespace Visibility.Configuration
 
 		private void CenteredCheckbox(string propertyName)
 		{
-			var state = (bool) GetBackingField(propertyName).GetValue(this);
+			var state = (bool) GetBackingField(propertyName).GetValue(this)!;
 			ImGui.SetCursorPosX(ImGui.GetCursorPosX() +
 			                    (ImGui.GetColumnWidth() + 2 * ImGui.GetStyle().FramePadding.X) / 2 -
 			                    2 * ImGui.GetStyle().ItemSpacing.X - 2 * ImGui.GetStyle().CellPadding.X);
@@ -38,7 +38,7 @@ namespace Visibility.Configuration
 
 		private void Checkbox(string propertyName)
 		{
-			var state = (bool) GetBackingField(propertyName).GetValue(this);
+			var state = (bool) GetBackingField(propertyName).GetValue(this)!;
 			if (!ImGui.Checkbox($"###{propertyName}", ref state)) return;
 			ChangeSetting(propertyName, state ? 1 : 0);
 			Save();
@@ -57,7 +57,7 @@ namespace Visibility.Configuration
 
 			ImGui.SetNextWindowSize(new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
 
-			if (ImGui.Begin($"{_plugin.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
+			if (ImGui.Begin($"{_plugin!.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
 			{
 				Checkbox(nameof(Enabled));
 
@@ -223,7 +223,7 @@ namespace Visibility.Configuration
 		private void DrawVoidList()
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
-			if (!ImGui.Begin($"{_plugin.Name}: {_plugin.PluginLocalization.VoidListName}", ref _showListWindow[0]))
+			if (!ImGui.Begin($"{_plugin!.Name}: {_plugin.PluginLocalization.VoidListName}", ref _showListWindow[0]))
 			{
 				ImGui.End();
 				return;
@@ -241,12 +241,9 @@ namespace Visibility.Configuration
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
-				VoidItem itemToRemove = null;
+				VoidItem? itemToRemove = null;
 
-				if (_sortedContainer[0] == null)
-				{
-					_sortedContainer[0] = VoidList;
-				}
+				_sortedContainer[0] ??= VoidList;
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
@@ -323,7 +320,7 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_plugin.ClientState.LocalPlayer.TargetObjectId > 0
+				if (_plugin.ClientState.LocalPlayer?.TargetObjectId > 0
 				    && _plugin.ObjectTable
 						    .SingleOrDefault(x => x is PlayerCharacter
 						                          && x.ObjectKind != ObjectKind.Companion
@@ -377,7 +374,7 @@ namespace Visibility.Configuration
 		private void DrawWhitelist()
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
-			if (!ImGui.Begin($"{_plugin.Name}: {_plugin.PluginLocalization.WhitelistName}", ref _showListWindow[1]))
+			if (!ImGui.Begin($"{_plugin!.Name}: {_plugin.PluginLocalization.WhitelistName}", ref _showListWindow[1]))
 			{
 				ImGui.End();
 				return;
@@ -395,12 +392,9 @@ namespace Visibility.Configuration
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
-				VoidItem itemToRemove = null;
+				VoidItem? itemToRemove = null;
 
-				if (_sortedContainer[1] == null)
-				{
-					_sortedContainer[1] = Whitelist;
-				}
+				_sortedContainer[1] ??= Whitelist;
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
@@ -467,7 +461,7 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (_plugin.ClientState.LocalPlayer.TargetObjectId > 0
+				if (_plugin.ClientState.LocalPlayer?.TargetObjectId > 0
 				    && _plugin.ObjectTable
 						    .SingleOrDefault(x => x is PlayerCharacter
 						                          && x.ObjectKind != ObjectKind.Companion

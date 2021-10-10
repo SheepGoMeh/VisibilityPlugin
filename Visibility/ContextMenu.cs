@@ -69,7 +69,7 @@ namespace Visibility
 
 		private void AddToVoidList(ContextMenuItemSelectedArgs args)
 		{
-			var world = Plugin.DataManager.GetExcelSheet<World>()
+			var world = Plugin.DataManager.GetExcelSheet<World>()?
 				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
 
 			if (world == null)
@@ -105,7 +105,7 @@ namespace Visibility
 		
 		private void AddToWhitelist(ContextMenuItemSelectedArgs args)
 		{
-			var world = Plugin.DataManager.GetExcelSheet<World>()
+			var world = Plugin.DataManager.GetExcelSheet<World>()?
 				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
 
 			if (world == null)

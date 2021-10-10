@@ -301,8 +301,8 @@ namespace Visibility
 				return;
 			}
 
-			var world = DataManager.GetExcelSheet<World>().SingleOrDefault(x =>
-				x.DataCenter.Value.Region != 0 &&
+			var world = DataManager.GetExcelSheet<World>()?.SingleOrDefault(x =>
+				x.DataCenter.Value?.Region != 0 &&
 				x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 			if (world == default(World))
@@ -382,8 +382,8 @@ namespace Visibility
 				return;
 			}
 
-			var world = DataManager.GetExcelSheet<World>().SingleOrDefault(x =>
-				x.DataCenter.Value.Region != 0 &&
+			var world = DataManager.GetExcelSheet<World>()?.SingleOrDefault(x =>
+				x.DataCenter.Value?.Region != 0 &&
 				x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 			if (world == default(World))
