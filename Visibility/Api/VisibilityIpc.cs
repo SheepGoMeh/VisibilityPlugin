@@ -70,7 +70,7 @@ namespace Visibility.Api
 
 		public void Dispose()
 		{
-			ProviderApiVersion?.UnregisterAction();
+			ProviderApiVersion?.UnregisterFunc();
 			ProviderGetVoidListEntries?.UnregisterFunc();
 			ProviderAddToVoidList?.UnregisterAction();
 			ProviderRemoveFromVoidList?.UnregisterAction();
