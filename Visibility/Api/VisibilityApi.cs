@@ -76,6 +76,46 @@ namespace Visibility.Api
 			_plugin.Configuration.VoidList.Remove(item);
 			_plugin.Configuration.Save();
 		}
+		
+		public IEnumerable<string> GetWhitelistEntries()
+		{
+			CheckInitialised();
+
+			return _plugin
+				.Configuration
+				.Whitelist
+				.Select(x => $"{x.Name} {x.HomeworldId} {x.Reason}")
+				.ToList();
+		}
+
+		public void AddToWhitelist(string name, uint worldId, string reason)
+		{
+			CheckInitialised();
+
+			var world = _plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+
+			if (world == null)
+			{
+				throw new Exception($"Invalid worldId ({worldId}).");
+			}
+
+			_plugin.WhitelistPlayer("", $"{name} {world.Name} {reason}");
+		}
+
+		public void RemoveFromWhitelist(string name, uint worldId)
+		{
+			CheckInitialised();
+
+			var item = _plugin.Configuration.Whitelist.SingleOrDefault(x => x.Name == name && x.HomeworldId == worldId);
+
+			if (item == null)
+			{
+				return;
+			}
+
+			_plugin.Configuration.Whitelist.Remove(item);
+			_plugin.Configuration.Save();
+		}
 
 		public void Dispose()
 		{

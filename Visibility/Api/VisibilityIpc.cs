@@ -12,11 +12,17 @@ namespace Visibility.Api
 		public const string LabelProviderGetVoidListEntries = "Visibility.GetVoidListEntries";
 		public const string LabelProviderAddToVoidList = "Visibility.AddToVoidList";
 		public const string LabelProviderRemoveFromVoidList = "Visibility.RemoveFromVoidList";
+		public const string LabelProviderGetWhitelistEntries = "Visibility.GetWhitelistEntries";
+		public const string LabelProviderAddToWhitelist = "Visibility.AddToWhitelist";
+		public const string LabelProviderRemoveFromWhitelist = "Visibility.RemoveFromWhitelist";
 
 		internal ICallGateProvider<int>? ProviderApiVersion;
 		internal ICallGateProvider<IEnumerable<string>>? ProviderGetVoidListEntries;
 		internal ICallGateProvider<string, uint, string, object>? ProviderAddToVoidList;
 		internal ICallGateProvider<string, uint, object>? ProviderRemoveFromVoidList;
+		internal ICallGateProvider<IEnumerable<string>>? ProviderGetWhitelistEntries;
+		internal ICallGateProvider<string, uint, string, object>? ProviderAddToWhitelist;
+		internal ICallGateProvider<string, uint, object>? ProviderRemoveFromWhitelist;
 
 		internal readonly IVisibilityApi Api;
 
@@ -66,6 +72,39 @@ namespace Visibility.Api
 			{
 				PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromVoidList}:\n{e}");
 			}
+			
+			try
+			{
+				ProviderGetWhitelistEntries =
+					pluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
+				ProviderGetWhitelistEntries.RegisterFunc(api.GetWhitelistEntries);
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error($"Error registering IPC provider for {LabelProviderGetWhitelistEntries}:\n{e}");
+			}
+
+			try
+			{
+				ProviderAddToWhitelist =
+					pluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
+				ProviderAddToWhitelist.RegisterAction(api.AddToWhitelist);
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToWhitelist}:\n{e}");
+			}
+
+			try
+			{
+				ProviderRemoveFromWhitelist =
+					pluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
+				ProviderRemoveFromWhitelist.RegisterAction(api.RemoveFromWhitelist);
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromWhitelist}:\n{e}");
+			}
 		}
 
 		public void Dispose()
@@ -74,6 +113,9 @@ namespace Visibility.Api
 			ProviderGetVoidListEntries?.UnregisterFunc();
 			ProviderAddToVoidList?.UnregisterAction();
 			ProviderRemoveFromVoidList?.UnregisterAction();
+			ProviderGetWhitelistEntries?.UnregisterFunc();
+			ProviderAddToWhitelist?.UnregisterAction();
+			ProviderRemoveFromWhitelist?.UnregisterAction();
 		}
 	}
 }
