@@ -12,6 +12,8 @@ namespace Visibility.Configuration
 	{
 		public int Version { get; set; }
 
+		public Localization.Language Language { get; set; }
+
 		public bool Enabled { get; set; }
 		public bool HidePet	{ get; set; }
 		public bool HidePlayer { get; set; }
@@ -37,10 +39,7 @@ namespace Visibility.Configuration
 		public List<VoidItem> Whitelist { get; } = new List<VoidItem>();
 
 		[NonSerialized]
-		private VisibilityPlugin _plugin;
-
-		[NonSerialized]
-		private DalamudPluginInterface _pluginInterface;
+		private VisibilityPlugin? _plugin;
 
 		[NonSerialized]
 		private bool[] _showListWindow = {false, false};
@@ -75,99 +74,106 @@ namespace Visibility.Configuration
 			switch (propertyName)
 			{
 				case nameof(Enabled):
-					_plugin.Disable = !Enabled;
+					if (!_plugin!.Disable) // Make sure the disable event is finished before enabling again
+					{
+						_plugin.Disable = !Enabled;
+					}
 					break;
 				case nameof(HidePet):
-					_plugin.UnhidePets(ContainerType.All);
+					_plugin!.ShowPets(ContainerType.All);
 					break;
 				case nameof(HidePlayer):
-					_plugin.UnhidePlayers(ContainerType.All);
+					_plugin!.ShowPlayers(ContainerType.All);
 					break;
 				case nameof(HideMinion):
-					_plugin.UnhideMinions(ContainerType.All);
+					_plugin!.ShowMinions(ContainerType.All);
 					break;
 				case nameof(HideChocobo):
-					_plugin.UnhideChocobos(ContainerType.All);
+					_plugin!.ShowChocobos(ContainerType.All);
 					break;
 				case nameof(EnableContextMenu):
-					_plugin.PluginContextMenu.Toggle();
+					_plugin!.PluginContextMenu.Toggle();
 					break;
 				case nameof(ShowCompanyPet):
-					_plugin.UnhidePets(ContainerType.Company);
+					_plugin!.ShowPets(ContainerType.Company);
 					break;
 				case nameof(ShowCompanyPlayer):
-					_plugin.UnhidePlayers(ContainerType.Company);
+					_plugin!.ShowPlayers(ContainerType.Company);
 					break;
 				case nameof(ShowCompanyMinion):
-					_plugin.UnhideMinions(ContainerType.Company);
+					_plugin!.ShowMinions(ContainerType.Company);
 					break;
 				case nameof(ShowCompanyChocobo):
-					_plugin.UnhideChocobos(ContainerType.Company);
+					_plugin!.ShowChocobos(ContainerType.Company);
 					break;
 				case nameof(ShowPartyPet):
-					_plugin.UnhidePets(ContainerType.Party);
+					_plugin!.ShowPets(ContainerType.Party);
 					break;
 				case nameof(ShowPartyPlayer):
-					_plugin.UnhidePlayers(ContainerType.Party);
+					_plugin!.ShowPlayers(ContainerType.Party);
 					break;
 				case nameof(ShowPartyMinion):
-					_plugin.UnhideMinions(ContainerType.Party);
+					_plugin!.ShowMinions(ContainerType.Party);
 					break;
 				case nameof(ShowPartyChocobo):
-					_plugin.UnhideChocobos(ContainerType.Party);
+					_plugin!.ShowChocobos(ContainerType.Party);
 					break;
 				case nameof(ShowFriendPet):
-					_plugin.UnhidePets(ContainerType.Friend);
+					_plugin!.ShowPets(ContainerType.Friend);
 					break;
 				case nameof(ShowFriendPlayer):
-					_plugin.UnhidePlayers(ContainerType.Friend);
+					_plugin!.ShowPlayers(ContainerType.Friend);
 					break;
 				case nameof(ShowFriendMinion):
-					_plugin.UnhideMinions(ContainerType.Friend);
+					_plugin!.ShowMinions(ContainerType.Friend);
 					break;
 				case nameof(ShowFriendChocobo):
-					_plugin.UnhideChocobos(ContainerType.Friend);
+					_plugin!.ShowChocobos(ContainerType.Friend);
 					break;
 			}
 		}
 		
 		private FieldInfo GetBackingField(string propertyName)
 		{
-			return GetType().GetField($"<{propertyName}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+			return GetType().GetField($"<{propertyName}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!;
 		}
 
 		private void ChangeSetting(string propertyName, int val)
 		{
 			var field = GetBackingField(propertyName);
-			var state = (bool) field.GetValue(this);
+			var state = (bool) field.GetValue(this)!;
 			field.SetValue(this, val > 1 ? !state : val > 0);
 			ChangeSetting(propertyName);
 		}
 
-		public void Init(VisibilityPlugin plugin, DalamudPluginInterface pluginInterface)
+		public void Init(VisibilityPlugin plugin)
 		{
 			_plugin = plugin;
-			_pluginInterface = pluginInterface;
 
 			settingDictionary["enabled"] = x => ChangeSetting(nameof(Enabled), x);
 			settingDictionary["hidepet"] = x => ChangeSetting(nameof(HidePet), x);
 			settingDictionary["hidestar"] = x => ChangeSetting(nameof(HideStar), x);
 			settingDictionary["hideplayer"] = x => ChangeSetting(nameof(HidePlayer), x);
+			settingDictionary["hidechocobo"] = x => ChangeSetting(nameof(HideChocobo), x);
+			settingDictionary["hideminion"] = x => ChangeSetting(nameof(HideMinion), x);
 			settingDictionary["showcompanypet"] = x => ChangeSetting(nameof(ShowCompanyPet), x);
 			settingDictionary["showcompanyplayer"] = x => ChangeSetting(nameof(ShowCompanyPlayer), x);
 			settingDictionary["showcompanychocobo"] = x => ChangeSetting(nameof(ShowCompanyChocobo), x);
+			settingDictionary["showcompanyminion"] = x => ChangeSetting(nameof(ShowCompanyMinion), x);
 			settingDictionary["showpartypet"] = x => ChangeSetting(nameof(ShowPartyPet), x);
 			settingDictionary["showpartyplayer"] = x => ChangeSetting(nameof(ShowPartyPlayer), x);
 			settingDictionary["showpartychocobo"] = x => ChangeSetting(nameof(ShowPartyChocobo), x);
+			settingDictionary["showpartyminion"] = x => ChangeSetting(nameof(ShowPartyMinion), x);
 			settingDictionary["showfriendpet"] = x => ChangeSetting(nameof(ShowFriendPet), x);
 			settingDictionary["showfriendplayer"] = x => ChangeSetting(nameof(ShowFriendPlayer), x);
 			settingDictionary["showfriendchocobo"] = x => ChangeSetting(nameof(ShowFriendChocobo), x);
+			settingDictionary["showfriendminion"] = x => ChangeSetting(nameof(ShowFriendMinion), x);
 			settingDictionary["showdeadplayer"] = x => ChangeSetting(nameof(ShowDeadPlayer), x);
 		}
 
 		public void Save()
 		{
-			_pluginInterface.SavePluginConfig(this);
+			_plugin!.PluginInterface.SavePluginConfig(this);
 		}
 	}
 }

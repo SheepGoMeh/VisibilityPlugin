@@ -2,27 +2,30 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Dalamud.Game.ClientState.Actors;
-using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Plugin;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Logging;
 
 namespace Visibility
 {
 	public static class Extensions
 	{
-		public static bool IsStatus(this Actor actor, StatusFlags flag)
+		public static string Format(this string format, params object[] args) => string.Format(format, args);
+
+		public static bool IsStatus(this GameObject actor, StatusFlags flag)
 		{
 			return (Marshal.ReadByte(actor.Address + 0x1906) & (byte) flag) > 0;
 		}
 
-		public static string GetFirstname(this Actor actor)
+		public static string GetFirstname(this GameObject actor)
 		{
-			return actor.Name.Split(' ')[0];
+			return actor.Name.TextValue.Split(' ')[0];
 		}
 
-		public static string GetLastname(this Actor actor)
+		public static string GetLastname(this GameObject actor)
 		{
-			return actor.Name.Split(' ')[1];
+			return actor.Name.TextValue.Split(' ')[1];
 		}
 
 		public static string ByteToString(this byte[] arr)
@@ -42,7 +45,7 @@ namespace Visibility
 			return new string(arr);
 		}
 
-		public static async void Rerender(this Actor a)
+		public static async void Rerender(this GameObject a)
 		{
 			await Task.Run(async () =>
 			{
@@ -82,7 +85,7 @@ namespace Visibility
 			});
 		}
 
-		public static async void Render(this Actor a)
+		public static async void Render(this GameObject a)
 		{
 			await Task.Run(() =>
 			{
@@ -109,7 +112,7 @@ namespace Visibility
 			});
 		}
 
-		public static async void Hide(this Actor a)
+		public static async void Hide(this GameObject a)
 		{
 			await Task.Run(() =>
 			{

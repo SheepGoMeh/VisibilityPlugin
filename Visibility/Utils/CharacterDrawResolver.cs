@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Text;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Actors;
-using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Game.ClientState.Actors.Types.NonPlayer;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Hooking;
-using Dalamud.Plugin;
-using Visibility.Configuration;
-using Visibility.Structs.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Visibility.Utils
 {
@@ -33,59 +26,51 @@ namespace Visibility.Utils
 
 	internal class CharacterDrawResolver
 	{
-		private HashSet<uint> HiddenObjectIds = new HashSet<uint>();
-		private HashSet<uint> ObjectIdsToUnhide = new HashSet<uint>();
+		private HashSet<uint> HiddenObjectIds = new();
+		private HashSet<uint> ObjectIdsToShow = new();
 
-		#region Players
-
-		private Dictionary<ContainerType, HashSet<uint>> _players = new Dictionary<ContainerType, HashSet<uint>>
+		private readonly Dictionary<UnitType, Dictionary<ContainerType, HashSet<uint>>> _containers = new()
 		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
-		};
-
-		#endregion
-
-		#region Pets
-
-		private Dictionary<ContainerType, HashSet<uint>> _pets = new Dictionary<ContainerType, HashSet<uint>>
-		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
-		};
-
-		#endregion
-
-		#region Chocobos
-
-		private Dictionary<ContainerType, HashSet<uint>> _chocobos = new Dictionary<ContainerType, HashSet<uint>>
-		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
-		};
-
-		#endregion
-
-		#region Minions
-
-		private Dictionary<ContainerType, HashSet<uint>> _minions = new Dictionary<ContainerType, HashSet<uint>>
-		{
-			{ContainerType.All, new HashSet<uint>()},
-			{ContainerType.Friend, new HashSet<uint>()},
-			{ContainerType.Party, new HashSet<uint>()},
-			{ContainerType.Company, new HashSet<uint>()},
+			{
+				UnitType.Players, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
+			{
+				UnitType.Pets, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
+			{
+				UnitType.Chocobos, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
+			{
+				UnitType.Minions, new Dictionary<ContainerType, HashSet<uint>>
+				{
+					{ContainerType.All, new HashSet<uint>()},
+					{ContainerType.Friend, new HashSet<uint>()},
+					{ContainerType.Party, new HashSet<uint>()},
+					{ContainerType.Company, new HashSet<uint>()},
+				}
+			},
 		};
 
 		private HashSet<uint> HiddenMinionObjectIds = new HashSet<uint>();
-		private HashSet<uint> MinionObjectIdsToUnhide = new HashSet<uint>();
-
-		#endregion
+		private HashSet<uint> MinionObjectIdsToShow = new HashSet<uint>();
 
 		private unsafe BattleChara* LocalPlayer;
 
@@ -101,20 +86,18 @@ namespace Visibility.Utils
 		// void dtor_Client::Game::Character::Character(Client::Game::Character::Character* thisPtr);
 		private unsafe delegate void CharacterDtorPrototype(Character* thisPtr);
 
-		private Hook<CharacterEnableDrawPrototype> hookCharacterEnableDraw;
-		private Hook<CharacterDisableDrawPrototype> hookCharacterDisableDraw;
-		private Hook<CompanionEnableDrawPrototype> hookCompanionEnableDraw;
-		private Hook<CharacterDtorPrototype> hookCharacterDtor;
+		private Hook<CharacterEnableDrawPrototype>? hookCharacterEnableDraw;
+		private Hook<CharacterDisableDrawPrototype>? hookCharacterDisableDraw;
+		private Hook<CompanionEnableDrawPrototype>? hookCompanionEnableDraw;
+		private Hook<CharacterDtorPrototype>? hookCharacterDtor;
 
-		private readonly AddressResolver _address = new AddressResolver();
-		private VisibilityConfiguration _config;
-		private DalamudPluginInterface _pluginInterface;
+		private readonly AddressResolver _address = new();
+		private VisibilityPlugin? _plugin;
 
-		public unsafe void Init(DalamudPluginInterface pluginInterface, VisibilityConfiguration pluginConfig)
+		public unsafe void Init(VisibilityPlugin plugin)
 		{
-			_pluginInterface = pluginInterface;
-			_address.Setup(pluginInterface.TargetModuleScanner);
-			_config = pluginConfig;
+			_plugin = plugin;
+			_address.Setup(_plugin.SigScanner);
 
 			LocalPlayer = *(BattleChara**)_address.LocalPlayerAddress.ToPointer();
 
@@ -129,59 +112,31 @@ namespace Visibility.Utils
 			hookCharacterDtor.Enable();
 		}
 
-		public void Unhide(UnitType unitType, ContainerType containerType)
+		public void Show(UnitType unitType, ContainerType containerType)
 		{
-			HashSet<uint> container;
-
-			switch (unitType)
+			if (unitType == UnitType.Minions)
 			{
-				case UnitType.Players:
-					container = _players[containerType];
-					break;
-				case UnitType.Pets:
-					container = _pets[containerType];
-					break;
-				case UnitType.Chocobos:
-					container = _chocobos[containerType];
-					break;
-				case UnitType.Minions:
-					container = _minions[containerType];
-					break;
-				default:
-					return;
+				MinionObjectIdsToShow.UnionWith(_containers[unitType][containerType]);
+				HiddenMinionObjectIds.ExceptWith(_containers[unitType][containerType]);
 			}
-
-			ObjectIdsToUnhide.UnionWith(container);
-			HiddenObjectIds.ExceptWith(container);
+			else
+			{
+				ObjectIdsToShow.UnionWith(_containers[unitType][containerType]);
+				HiddenObjectIds.ExceptWith(_containers[unitType][containerType]);
+			}
 		}
 
-		public void UnhidePlayers(ContainerType type)
-		{
-			ObjectIdsToUnhide.UnionWith(_players[type]);
-			HiddenObjectIds.ExceptWith(_players[type]);
-		}
+		public void ShowPlayers(ContainerType type) => Show(UnitType.Players, type);
 
-		public void UnhidePets(ContainerType type)
-		{
-			ObjectIdsToUnhide.UnionWith(_pets[type]);
-			HiddenObjectIds.ExceptWith(_pets[type]);
-		}
+		public void ShowPets(ContainerType type) => Show(UnitType.Pets, type);
 
-		public void UnhideChocobos(ContainerType type)
-		{
-			ObjectIdsToUnhide.UnionWith(_chocobos[type]);
-			HiddenObjectIds.ExceptWith(_chocobos[type]);
-		}
+		public void ShowChocobos(ContainerType type) => Show(UnitType.Chocobos, type);
 
-		public void UnhideMinions(ContainerType type)
-		{
-			MinionObjectIdsToUnhide.UnionWith(_minions[type]);
-			HiddenMinionObjectIds.ExceptWith(_minions[type]);
-		}
+		public void ShowMinions(ContainerType type) => Show(UnitType.Minions, type);
 
-		public unsafe void UnhideAll()
+		public unsafe void ShowAll()
 		{
-			foreach (var actor in _pluginInterface.ClientState.Actors)
+			foreach (var actor in _plugin!.ObjectTable)
 			{
 				var thisPtr = (Character*) actor.Address;
 
@@ -193,7 +148,7 @@ namespace Visibility.Utils
 					}
 					
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					MinionObjectIdsToUnhide.Remove(thisPtr->CompanionOwnerID);
+					MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 				}
 				else
 				{
@@ -208,14 +163,14 @@ namespace Visibility.Utils
 			}
 		}
 
-		public void UnhidePlayer(uint id)
+		public void ShowPlayer(uint id)
 		{
 			if (!HiddenObjectIds.Contains(id))
 			{
 				return;
 			}
 
-			ObjectIdsToUnhide.Add(id);
+			ObjectIdsToShow.Add(id);
 			HiddenObjectIds.Remove(id);
 		}
 
@@ -226,40 +181,29 @@ namespace Visibility.Utils
 
 		private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len)
 		{
-			while (len-- != 0)
-			{
-				if (*arr1++ != *arr2++)
-				{
-					return false;
-				}
-			}
-
-			return true;
+			var a1 = new ReadOnlySpan<byte>(arr1, len);
+			var a2 = new ReadOnlySpan<byte>(arr2, len);
+			return a1.SequenceEqual(a2);
 		}
 
-		private static unsafe bool UnsafeArrayEqual(IReadOnlyList<byte> arr1, byte* arr2, int len)
+		private static unsafe bool UnsafeArrayEqual(byte[] arr1, byte* arr2, int len)
 		{
-			for (var i = 0; i != len; ++i)
+			fixed (byte* a1 = arr1)
 			{
-				if (arr1[i] != *arr2++)
-				{
-					return false;
-				}
+				return UnsafeArrayEqual(a1, arr2, len);
 			}
-
-			return true;
 		}
 
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
 		{
-			var localPlayerAddress = _pluginInterface?.ClientState?.LocalPlayer?.Address;
+			var localPlayerAddress = _plugin!.ClientState.LocalPlayer?.Address;
 			
 			if (localPlayerAddress.HasValue && LocalPlayer != (BattleChara*)localPlayerAddress.Value)
 			{
 				LocalPlayer = (BattleChara*)localPlayerAddress.Value;
 			}
 			
-			if (_config.Enabled && localPlayerAddress.HasValue && thisPtr != (Character*)LocalPlayer)
+			if (_plugin.Configuration.Enabled && localPlayerAddress.HasValue && thisPtr != (Character*)LocalPlayer)
 			{
 				switch (thisPtr->GameObject.ObjectKind)
 				{
@@ -269,64 +213,64 @@ namespace Visibility.Utils
 							break;
 						}
 
-						_players[ContainerType.All].Add(thisPtr->GameObject.ObjectID);
+						_containers[UnitType.Players][ContainerType.All].Add(thisPtr->GameObject.ObjectID);
 
 						if ((thisPtr->StatusFlags & (byte)StatusFlags.Friend) > 0)
 						{
-							_players[ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
 						}
 						else
 						{
-							_players[ContainerType.Friend].Remove(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Friend].Remove(thisPtr->GameObject.ObjectID);
 						}
 
 						if ((thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
 						{
-							_players[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
 						else
 						{
-							_players[ContainerType.Party].Remove(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Party].Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((_pluginInterface.ClientState.Condition[ConditionFlag.BoundByDuty]
-							|| _pluginInterface.ClientState.Condition[ConditionFlag.BetweenAreas]
-							|| _pluginInterface.ClientState.Condition[ConditionFlag.WatchingCutscene])
-							&& !_config.TerritoryTypeWhitelist.Contains(_pluginInterface.ClientState.TerritoryType))
+						if ((_plugin.Condition[ConditionFlag.BoundByDuty]
+							|| _plugin.Condition[ConditionFlag.BetweenAreas]
+							|| _plugin.Condition[ConditionFlag.WatchingCutscene])
+							&& !_plugin.Configuration.TerritoryTypeWhitelist.Contains(_plugin.ClientState.TerritoryType))
 						{
 							break;
 						}
 
-						if (*LocalPlayer->Character.CompanyTag != 0
+						if (*LocalPlayer->Character.FreeCompanyTag != 0
 							&& LocalPlayer->Character.CurrentWorld == LocalPlayer->Character.HomeWorld
-							&& UnsafeArrayEqual(thisPtr->CompanyTag, LocalPlayer->Character.CompanyTag, 7))
+							&& UnsafeArrayEqual(thisPtr->FreeCompanyTag, LocalPlayer->Character.FreeCompanyTag, 7))
 						{
-							_players[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 						else
 						{
-							_players[ContainerType.Company].Remove(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Players][ContainerType.Company].Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_config.VoidList.Any(x => UnsafeArrayEqual(x.NameBytes,
-							                              thisPtr->GameObject.Name,
-							                              x.NameBytes.Length) &&
-						                              x.HomeworldId == thisPtr->HomeWorld))
+						if (_plugin.Configuration.VoidList.Any(x => UnsafeArrayEqual(x.NameBytes,
+							                                            thisPtr->GameObject.Name,
+							                                            x.NameBytes.Length) &&
+						                                            x.HomeworldId == thisPtr->HomeWorld))
 						{
 							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
 							HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 							break;
 						}
 
-						if (!_config.HidePlayer ||
-							(_config.ShowDeadPlayer && thisPtr->CurrentHp == 0) ||
-							(_config.ShowFriendPlayer && _players[ContainerType.Friend].Contains(thisPtr->GameObject.ObjectID)) ||
-							(_config.ShowCompanyPlayer && _players[ContainerType.Company].Contains(thisPtr->GameObject.ObjectID)) ||
-							(_config.ShowPartyPlayer && _players[ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)) ||
-							(_config.Whitelist.Any(x => UnsafeArrayEqual(x.NameBytes,
-								                            thisPtr->GameObject.Name,
-								                            x.NameBytes.Length) &&
-							                            x.HomeworldId == thisPtr->HomeWorld)))
+						if (!_plugin.Configuration.HidePlayer ||
+							(_plugin.Configuration.ShowDeadPlayer && thisPtr->Health == 0) ||
+							(_plugin.Configuration.ShowFriendPlayer && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.ObjectID)) ||
+							(_plugin.Configuration.ShowCompanyPlayer && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.ObjectID)) ||
+							(_plugin.Configuration.ShowPartyPlayer && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.ObjectID)) ||
+							(_plugin.Configuration.Whitelist.Any(x => UnsafeArrayEqual(x.NameBytes,
+								                                          thisPtr->GameObject.Name,
+								                                          x.NameBytes.Length) &&
+							                                          x.HomeworldId == thisPtr->HomeWorld)))
 						{
 							break;
 						}
@@ -337,32 +281,32 @@ namespace Visibility.Utils
 							break;
 						}
 					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && thisPtr->NameID != 6565:
-						if (!_config.HidePet
+						if (!_plugin.Configuration.HidePet
 							|| thisPtr->GameObject.OwnerID == LocalPlayer->Character.GameObject.ObjectID)
 						{
 							break;
 						}
 
-						_pets[ContainerType.All].Add(thisPtr->GameObject.ObjectID);
+						_containers[UnitType.Pets][ContainerType.All].Add(thisPtr->GameObject.ObjectID);
 
-						if (_players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_pets[ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Pets][ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_pets[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Pets][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_pets[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Pets][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((_config.ShowFriendPet && _players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowCompanyPet && _players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowPartyPet && _players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
+						if ((_plugin.Configuration.ShowFriendPet && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+							|| (_plugin.Configuration.ShowCompanyPet && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+							|| (_plugin.Configuration.ShowPartyPet && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
 						{
 							break;
 						}
@@ -375,43 +319,43 @@ namespace Visibility.Utils
 					case (byte) ObjectKind.BattleNpc
 						when thisPtr->GameObject.SubKind == (byte) BattleNpcSubKind.Pet && thisPtr->NameID == 6565
 						: // Earthly Star
-						if (_config.HideStar
-						    && _pluginInterface.ClientState.Condition[ConditionFlag.InCombat]
+						if (_plugin.Configuration.HideStar
+						    && _plugin.Condition[ConditionFlag.InCombat]
 						    && thisPtr->GameObject.OwnerID != LocalPlayer->Character.GameObject.ObjectID
-						    && !_players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
+						    && !_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
 						{
 							thisPtr->GameObject.RenderFlags |= (int) VisibilityFlags.Invisible;
 							HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 						}
 
 						break;
-					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == 3:
-						if (!_config.HideChocobo
+					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Chocobo:
+						if (!_plugin.Configuration.HideChocobo
 							|| thisPtr->GameObject.OwnerID == LocalPlayer->Character.GameObject.ObjectID)
 						{
 							break;
 						}
 
-						_chocobos[ContainerType.All].Add(thisPtr->GameObject.ObjectID);
+						_containers[UnitType.Chocobos][ContainerType.All].Add(thisPtr->GameObject.ObjectID);
 
-						if (_players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_chocobos[ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Chocobos][ContainerType.Friend].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_chocobos[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Chocobos][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if (_players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+						if (_containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
 						{
-							_chocobos[ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
+							_containers[UnitType.Chocobos][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((_config.ShowFriendChocobo && _players[ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowCompanyChocobo && _players[ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
-							|| (_config.ShowPartyChocobo && _players[ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
+						if ((_plugin.Configuration.ShowFriendChocobo && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->GameObject.OwnerID))
+							|| (_plugin.Configuration.ShowCompanyChocobo && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->GameObject.OwnerID))
+							|| (_plugin.Configuration.ShowPartyChocobo && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->GameObject.OwnerID)))
 						{
 							break;
 						}
@@ -424,7 +368,7 @@ namespace Visibility.Utils
 				}
 			}
 
-			hookCharacterEnableDraw.Original(thisPtr);
+			hookCharacterEnableDraw!.Original(thisPtr);
 		}
 
 		private unsafe void CharacterDisableDrawDetour(Character* thisPtr)
@@ -432,60 +376,60 @@ namespace Visibility.Utils
 			if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
 				&& (thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
 			{
-				_players[ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+				_containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
 
-			if (_config.HidePlayer
-				&& _config.ShowDeadPlayer
-				&& thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
-				&& thisPtr->CurrentHp == 0
-				&& HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+			if (_plugin!.Configuration.HidePlayer
+			    && _plugin.Configuration.ShowDeadPlayer
+			    && thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
+			    && thisPtr->Health == 0
+			    && HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
 			{
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
-			else if (ObjectIdsToUnhide.Contains(thisPtr->GameObject.ObjectID))
+			else if (ObjectIdsToShow.Contains(thisPtr->GameObject.ObjectID))
 			{
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				ObjectIdsToUnhide.Remove(thisPtr->GameObject.ObjectID);
+				ObjectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
 			}
-			else if (MinionObjectIdsToUnhide.Contains(thisPtr->CompanionOwnerID))
+			else if (MinionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID))
 			{
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				MinionObjectIdsToUnhide.Remove(thisPtr->CompanionOwnerID);
+				MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 			}
 
-			hookCharacterDisableDraw.Original(thisPtr);
+			hookCharacterDisableDraw!.Original(thisPtr);
 		}
 
 		private unsafe void CompanionEnableDrawDetour(Companion* thisPtr)
 		{
-			if (_config.Enabled
-				&& _config.HideMinion
-				&& thisPtr->Character.CompanionOwnerID != LocalPlayer->Character.GameObject.ObjectID)
+			if (_plugin!.Configuration.Enabled
+			    && _plugin.Configuration.HideMinion
+			    && thisPtr->Character.CompanionOwnerID != LocalPlayer->Character.GameObject.ObjectID)
 			{
-				_minions[ContainerType.All].Add(thisPtr->Character.CompanionOwnerID);
+				_containers[UnitType.Minions][ContainerType.All].Add(thisPtr->Character.CompanionOwnerID);
 
-				if (_players[ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
+				if (_containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
 				{
-					_minions[ContainerType.Friend].Add(thisPtr->Character.CompanionOwnerID);
+					_containers[UnitType.Minions][ContainerType.Friend].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if (_players[ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID))
+				if (_containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID))
 				{
-					_minions[ContainerType.Party].Add(thisPtr->Character.CompanionOwnerID);
+					_containers[UnitType.Minions][ContainerType.Party].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if (_players[ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
+				if (_containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
 				{
-					_minions[ContainerType.Company].Add(thisPtr->Character.CompanionOwnerID);
+					_containers[UnitType.Minions][ContainerType.Company].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if ((_config.ShowFriendMinion && _players[ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
-					|| (_config.ShowCompanyMinion && _players[ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
-					|| (_config.ShowPartyMinion && _players[ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID)))
+				if ((_plugin.Configuration.ShowFriendMinion && _containers[UnitType.Players][ContainerType.Friend].Contains(thisPtr->Character.CompanionOwnerID))
+					|| (_plugin.Configuration.ShowCompanyMinion && _containers[UnitType.Players][ContainerType.Company].Contains(thisPtr->Character.CompanionOwnerID))
+					|| (_plugin.Configuration.ShowPartyMinion && _containers[UnitType.Players][ContainerType.Party].Contains(thisPtr->Character.CompanionOwnerID)))
 				{
 				}
 				else
@@ -495,7 +439,7 @@ namespace Visibility.Utils
 				}
 			}
 
-			hookCompanionEnableDraw.Original(thisPtr);
+			hookCompanionEnableDraw!.Original(thisPtr);
 		}
 
 		private unsafe void CharacterDtorDetour(Character* thisPtr)
@@ -509,16 +453,16 @@ namespace Visibility.Utils
 				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				HiddenMinionObjectIds.Remove(thisPtr->GameObject.ObjectID);
 
-				foreach (ContainerType type in Enum.GetValues(typeof(ContainerType)))
+				foreach (var container in _containers)
 				{
-					_players[type].Remove(thisPtr->GameObject.ObjectID);
-					_pets[type].Remove(thisPtr->GameObject.ObjectID);
-					_chocobos[type].Remove(thisPtr->GameObject.ObjectID);
-					_minions[type].Remove(thisPtr->GameObject.ObjectID);
+					foreach (var set in container.Value)
+					{
+						set.Value.Remove(thisPtr->GameObject.ObjectID);
+					}
 				}
 			}
 
-			hookCharacterDtor.Original(thisPtr);
+			hookCharacterDtor!.Original(thisPtr);
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -526,15 +470,10 @@ namespace Visibility.Utils
 			if (!disposing)
 				return;
 
-			hookCharacterEnableDraw.Disable();
-			hookCharacterDisableDraw.Disable();
-			hookCompanionEnableDraw.Disable();
-			hookCharacterDtor.Dispose();
-
-			hookCharacterEnableDraw.Dispose();
-			hookCharacterDisableDraw.Dispose();
-			hookCompanionEnableDraw.Dispose();
-			hookCharacterDtor.Dispose();
+			hookCharacterEnableDraw?.Dispose();
+			hookCharacterDisableDraw?.Dispose();
+			hookCompanionEnableDraw?.Dispose();
+			hookCharacterDtor?.Dispose();
 		}
 
 		public void Dispose()

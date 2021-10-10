@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Dalamud.Game.ClientState.Actors.Types;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Newtonsoft.Json;
 
 namespace Visibility.Void
@@ -19,7 +19,7 @@ namespace Visibility.Void
 				Lastname = name[1].ToUppercase();
 
 				var nameBytes = Encoding.UTF8.GetBytes(Name + '\0');
-				NameBytes = nameBytes.Length < 30 ? nameBytes : nameBytes.Take(30).ToArray();
+				NameBytes = nameBytes.Length < 64 ? nameBytes : nameBytes.Take(64).ToArray();
 			}
 		}
 
@@ -29,27 +29,33 @@ namespace Visibility.Void
 		public string Lastname { get; set; }
 		public string HomeworldName { get; set; }
 		public DateTime Time { get; set; }
-		public int ActorId { get; set; }
 		public uint HomeworldId { get; set; }
 		public string Reason { get; set; }
 		public bool Manual { get; set; }
-
-		public VoidItem(PlayerCharacter actor, string reason, bool manual)
+		
+		public VoidItem()
 		{
-			Name = actor.Name;
+			NameBytes = Array.Empty<byte>();
+			Firstname = string.Empty;
+			Lastname = string.Empty;
+			HomeworldName = string.Empty;
+			Reason = string.Empty;
+		}
+
+		public VoidItem(PlayerCharacter actor, string reason, bool manual) : this()
+		{
+			Name = actor.Name.TextValue;
 			Time = DateTime.Now;
-			ActorId = actor.ActorId;
 			HomeworldId = actor.HomeWorld.Id;
 			HomeworldName = actor.HomeWorld.GameData.Name;
 			Reason = reason;
 			Manual = manual;
 		}
 
-		public VoidItem(string name, string homeworldName, uint homeworldId, string reason, bool manual)
+		public VoidItem(string name, string homeworldName, uint homeworldId, string reason, bool manual) : this()
 		{
 			Name = name;
 			Time = DateTime.Now;
-			ActorId = 0;
 			HomeworldId = homeworldId;
 			HomeworldName = homeworldName;
 			Reason = reason;
@@ -57,14 +63,13 @@ namespace Visibility.Void
 		}
 
 		[JsonConstructor]
-		public VoidItem(string firstname, string lastname, string homeworldName, uint homeworldId, DateTime time,
-			int actorId, string reason, bool manual)
+		public VoidItem(string firstname, string lastname, string homeworldName, DateTime time, uint homeworldId,
+			string reason, bool manual) : this()
 		{
 			Name = $"{firstname} {lastname}";
-			Time = time;
-			ActorId = actorId;
-			HomeworldId = homeworldId;
 			HomeworldName = homeworldName;
+			Time = time;
+			HomeworldId = homeworldId;
 			Reason = reason;
 			Manual = manual;
 		}

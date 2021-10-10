@@ -44,27 +44,33 @@ namespace Visibility
 				return;
 			}
 
-			if (args.ActorWorld is ushort.MaxValue or 0 || args.Text?.Payloads.Count != 1 ||
+			if (args.ObjectWorld is ushort.MaxValue or 0 || args.Text?.Payloads.Count != 1 ||
 			    args.Text?.Payloads[0] is not TextPayload textPayload)
 			{
 				return;
 			}
 
-			args.Items.Add(Plugin.PluginConfiguration.VoidList.SingleOrDefault(x =>
-				x.Name == textPayload.Text && x.HomeworldId == args.ActorWorld) == null
-				? new NormalContextMenuItem("Add to VoidList", AddToVoidList)
-				: new NormalContextMenuItem("Remove from VoidList", RemoveFromVoidList));
+			args.Items.Add(Plugin.Configuration.VoidList.SingleOrDefault(x =>
+				x.Name == textPayload.Text && x.HomeworldId == args.ObjectWorld) == null
+				? new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.VoidListName), AddToVoidList)
+				: new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.VoidListName),
+					RemoveFromVoidList));
 
-			args.Items.Add(Plugin.PluginConfiguration.Whitelist.SingleOrDefault(x =>
-				x.Name == textPayload.Text && x.HomeworldId == args.ActorWorld) == null
-				? new NormalContextMenuItem("Add to Whitelist", AddToWhitelist)
-				: new NormalContextMenuItem("Remove from Whitelist", RemoveFromWhitelist));
+			args.Items.Add(Plugin.Configuration.Whitelist.SingleOrDefault(x =>
+				x.Name == textPayload.Text && x.HomeworldId == args.ObjectWorld) == null
+				? new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.WhitelistName), AddToWhitelist)
+				: new NormalContextMenuItem(
+					Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.WhitelistName),
+					RemoveFromWhitelist));
 		}
 
 		private void AddToVoidList(ContextMenuItemSelectedArgs args)
 		{
-			var world = Plugin.PluginInterface.Data.GetExcelSheet<World>()
-				.SingleOrDefault(x => x.RowId == args.ActorWorld);
+			var world = Plugin.DataManager.GetExcelSheet<World>()?
+				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
 
 			if (world == null)
 			{
@@ -76,8 +82,8 @@ namespace Visibility
 		
 		private void RemoveFromVoidList(ContextMenuItemSelectedArgs args)
 		{
-			var entry = Plugin.PluginConfiguration.VoidList.SingleOrDefault(x =>
-				x.Name == args.Text?.TextValue && x.HomeworldId == args.ActorWorld);
+			var entry = Plugin.Configuration.VoidList.SingleOrDefault(x =>
+				x.Name == args.Text?.TextValue && x.HomeworldId == args.ObjectWorld);
 
 			if (entry == null)
 			{
@@ -91,16 +97,16 @@ namespace Visibility
 				new TextPayload(entry.HomeworldName + " has been removed."),
 			}).Encode());
 
-			Plugin.PluginConfiguration.VoidList.Remove(entry);
-			Plugin.PluginConfiguration.Save();
-			Plugin.UnhidePlayer(args.ActorId);
-			Plugin.Print(message);
+			Plugin.Configuration.VoidList.Remove(entry);
+			Plugin.Configuration.Save();
+			Plugin.ShowPlayer(args.ObjectId);
+			Plugin.ChatGui.Print(message);
 		}
 		
 		private void AddToWhitelist(ContextMenuItemSelectedArgs args)
 		{
-			var world = Plugin.PluginInterface.Data.GetExcelSheet<World>()
-				.SingleOrDefault(x => x.RowId == args.ActorWorld);
+			var world = Plugin.DataManager.GetExcelSheet<World>()?
+				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
 
 			if (world == null)
 			{
@@ -112,8 +118,8 @@ namespace Visibility
 		
 		private void RemoveFromWhitelist(ContextMenuItemSelectedArgs args)
 		{
-			var entry = Plugin.PluginConfiguration.Whitelist.SingleOrDefault(x =>
-				x.Name == args.Text?.TextValue && x.HomeworldId == args.ActorWorld);
+			var entry = Plugin.Configuration.Whitelist.SingleOrDefault(x =>
+				x.Name == args.Text?.TextValue && x.HomeworldId == args.ObjectWorld);
 
 			if (entry == null)
 			{
@@ -127,9 +133,9 @@ namespace Visibility
 				new TextPayload(entry.HomeworldName + " has been removed."),
 			}).Encode());
 
-			Plugin.PluginConfiguration.Whitelist.Remove(entry);
-			Plugin.PluginConfiguration.Save();
-			Plugin.Print(message);
+			Plugin.Configuration.Whitelist.Remove(entry);
+			Plugin.Configuration.Save();
+			Plugin.ChatGui.Print(message);
 		}
 	}
 }
