@@ -1,7 +1,7 @@
 {
   "PluginCommandHelpMessage": "Visibilityプラグインの設定を表示します。\n追加のヘルプを利用できます: '/pvis help'",
-  "VoidPlayerHelpMessage": "プレイヤーを追加して無効にします。\n使用法: /void <firstname> <lastname> <worldname> <reason>",
-  "VoidTargetPlayerHelpMessage": "ターゲットプレイヤーを追加して無効にします。\n使用法: /voidtarget <reason>",
+  "VoidPlayerHelpMessage": "プレイヤーをVoidListに追加します。\n使用法: /void <firstname> <lastname> <worldname> <reason>",
+  "VoidTargetPlayerHelpMessage": "ターゲットプレイヤーをVoidListに追加します。\n使用法: /voidtarget <reason>",
   "WhitelistPlayerHelpMessage": "プレイヤーをホワイトリストに追加します。\n使用法: /whitelist <firstname> <lastname> <worldname>",
   "WhitelistTargetPlayerHelpMessage": "ターゲットプレイヤーをホワイトリストに追加します。\n使用法: /whitelisttarget",
   "RefreshComplete": "更新完了",
@@ -31,7 +31,7 @@
   "OptionPets": "ペット",
   "OptionChocobos": "チョコボ",
   "OptionMinions": "ミニオン",
-  "OptionEarthlyStar": "パーティー以外のスターを隠す",
+  "OptionEarthlyStar": "パーティー以外のアーサリースターを隠す",
   "OptionEarthlyStarTip": "パーティー内のプレイヤーに属していないアーサリースターを隠します(戦闘でのみ有効です)",
   "OptionContextMenu": "コンテキストメニューを有効にする",
   "OptionContextMenuTip": "チャットでプレイヤー名のコンテキストメニュー(右クリックメニュー) を有効にする",
@@ -43,7 +43,7 @@
   "ColumnWorld": "ワールド",
   "ColumnDate": "日付",
   "ColumnReason": "理由",
-  "ColumnAction": "動作",
+  "ColumnAction": "アクション",
   "OptionLanguage": "言語",
   "LanguageName": "日本語"
 }
