@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace Visibility.Utils
 {
@@ -203,7 +204,9 @@ namespace Visibility.Utils
 				LocalPlayer = (BattleChara*)localPlayerAddress.Value;
 			}
 			
-			if (_plugin.Configuration.Enabled && localPlayerAddress.HasValue && thisPtr != (Character*)LocalPlayer)
+			var fadeMiddleWidget = _plugin.GameGui.GetAddonByName("FadeMiddle", 1);
+			
+			if (_plugin.Configuration.Enabled && fadeMiddleWidget != IntPtr.Zero && !((AtkUnitBase*)fadeMiddleWidget)->IsVisible && localPlayerAddress.HasValue && thisPtr != (Character*)LocalPlayer)
 			{
 				switch (thisPtr->GameObject.ObjectKind)
 				{

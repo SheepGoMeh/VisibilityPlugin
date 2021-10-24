@@ -37,6 +37,7 @@ namespace Visibility
 		public CommandManager CommandManager;
 		public Framework Framework;
 		public ChatGui ChatGui;
+		public GameGui GameGui;
 		public SigScanner SigScanner;
 		public ClientState ClientState;
 		public ObjectTable ObjectTable;
@@ -54,7 +55,7 @@ namespace Visibility
 		public VisibilityIpc Ipc { get; }
 
 		public VisibilityPlugin(DalamudPluginInterface dalamudPluginInterface, CommandManager commandManager,
-			Framework framework, ChatGui chatGui, SigScanner sigScanner, ClientState clientState,
+			Framework framework, ChatGui chatGui, GameGui gameGui, SigScanner sigScanner, ClientState clientState,
 			ObjectTable objectTable, DataManager dataManager, Dalamud.Game.ClientState.Conditions.Condition condition)
 		{
 			Condition = condition;
@@ -63,6 +64,7 @@ namespace Visibility
 			ClientState = clientState;
 			SigScanner = sigScanner;
 			ChatGui = chatGui;
+			GameGui = gameGui;
 			Framework = framework;
 			CommandManager = commandManager;
 			PluginInterface = dalamudPluginInterface;
