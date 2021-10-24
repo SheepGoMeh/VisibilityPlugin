@@ -16,6 +16,7 @@ using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
 using Visibility.Api;
 using Visibility.Configuration;
+using Visibility.Ipc;
 using Visibility.Utils;
 using Visibility.Void;
 using XivCommon;
@@ -52,7 +53,7 @@ namespace Visibility
 		
 		private CharacterDrawResolver _characterDrawResolver;
 		public VisibilityApi Api { get; }
-		public VisibilityIpc Ipc { get; }
+		public VisibilityProvider IpcProvider { get; }
 
 		public VisibilityPlugin(DalamudPluginInterface dalamudPluginInterface, CommandManager commandManager,
 			Framework framework, ChatGui chatGui, GameGui gameGui, SigScanner sigScanner, ClientState clientState,
@@ -119,7 +120,7 @@ namespace Visibility
 			}
 
 			Api = new VisibilityApi(this);
-			Ipc = new VisibilityIpc(dalamudPluginInterface, Api);
+			IpcProvider = new VisibilityProvider(dalamudPluginInterface, Api);
 		}
 
 		private void FrameworkOnOnUpdateEvent(Framework framework)
@@ -156,7 +157,7 @@ namespace Visibility
 				return;
 			}
 
-			Ipc.Dispose();
+			IpcProvider.Dispose();
 			Api.Dispose();
 
 			PluginContextMenu.Dispose();

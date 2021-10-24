@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
+using Visibility.Api;
 
-namespace Visibility.Api
+namespace Visibility.Ipc
 {
-	public class VisibilityIpc : IDisposable
+	public class VisibilityProvider : IDisposable
 	{
 		public const string LabelProviderApiVersion = "Visibility.ApiVersion";
 		public const string LabelProviderGetVoidListEntries = "Visibility.GetVoidListEntries";
@@ -28,7 +29,7 @@ namespace Visibility.Api
 
 		internal readonly IVisibilityApi Api;
 
-		public VisibilityIpc(DalamudPluginInterface pluginInterface, IVisibilityApi api)
+		public VisibilityProvider(DalamudPluginInterface pluginInterface, IVisibilityApi api)
 		{
 			Api = api;
 
