@@ -47,5 +47,11 @@ namespace Visibility.Api
 		/// <param name="name">Full player name</param>
 		/// <param name="worldId">World ID</param>
 		public void RemoveFromWhitelist(string name, uint worldId);
+		
+		/// <summary>
+		/// Enables or disables Visibility
+		/// </summary>
+		/// <param name="state">Enabled = true</param>
+		public void Enable(bool state);
 	}
 }

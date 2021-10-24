@@ -15,6 +15,7 @@ namespace Visibility.Api
 		public const string LabelProviderGetWhitelistEntries = "Visibility.GetWhitelistEntries";
 		public const string LabelProviderAddToWhitelist = "Visibility.AddToWhitelist";
 		public const string LabelProviderRemoveFromWhitelist = "Visibility.RemoveFromWhitelist";
+		public const string LabelProviderEnable = "Visibility.Enable";
 
 		internal ICallGateProvider<int>? ProviderApiVersion;
 		internal ICallGateProvider<IEnumerable<string>>? ProviderGetVoidListEntries;
@@ -23,6 +24,7 @@ namespace Visibility.Api
 		internal ICallGateProvider<IEnumerable<string>>? ProviderGetWhitelistEntries;
 		internal ICallGateProvider<string, uint, string, object>? ProviderAddToWhitelist;
 		internal ICallGateProvider<string, uint, object>? ProviderRemoveFromWhitelist;
+		internal ICallGateProvider<bool, object>? ProviderEnable;
 
 		internal readonly IVisibilityApi Api;
 
@@ -105,6 +107,17 @@ namespace Visibility.Api
 			{
 				PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromWhitelist}:\n{e}");
 			}
+			
+			try
+			{
+				ProviderEnable =
+					pluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
+				ProviderEnable.RegisterAction(api.Enable);
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error($"Error registering IPC provider for {LabelProviderEnable}:\n{e}");
+			}
 		}
 
 		public void Dispose()
@@ -116,6 +129,7 @@ namespace Visibility.Api
 			ProviderGetWhitelistEntries?.UnregisterFunc();
 			ProviderAddToWhitelist?.UnregisterAction();
 			ProviderRemoveFromWhitelist?.UnregisterAction();
+			ProviderEnable?.UnregisterAction();
 		}
 	}
 }

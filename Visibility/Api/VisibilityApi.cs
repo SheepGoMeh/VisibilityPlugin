@@ -117,6 +117,11 @@ namespace Visibility.Api
 			_plugin.Configuration.Save();
 		}
 
+		public void Enable(bool state)
+		{
+			_plugin.Configuration.settingDictionary["enabled"].Invoke(state ? 1 : 0);
+		}
+
 		public void Dispose()
 		{
 			_initialised = false;
