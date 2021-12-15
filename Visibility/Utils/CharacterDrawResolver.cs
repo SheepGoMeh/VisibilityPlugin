@@ -73,7 +73,7 @@ namespace Visibility.Utils
 		private HashSet<uint> HiddenMinionObjectIds = new HashSet<uint>();
 		private HashSet<uint> MinionObjectIdsToShow = new HashSet<uint>();
 
-		private unsafe BattleChara* LocalPlayer;
+		private unsafe BattleChara* LocalPlayer = null;
 
 		// void Client::Game::Character::Character::EnableDraw(Client::Game::Character::Character* thisPtr);
 		private unsafe delegate void CharacterEnableDrawPrototype(Character* thisPtr);
@@ -100,7 +100,12 @@ namespace Visibility.Utils
 			_plugin = plugin;
 			_address.Setup(_plugin.SigScanner);
 
-			LocalPlayer = *(BattleChara**)_address.LocalPlayerAddress.ToPointer();
+			var localPlayerAddress = _plugin!.ClientState.LocalPlayer?.Address;
+			
+			if (localPlayerAddress.HasValue && LocalPlayer != (BattleChara*)localPlayerAddress.Value)
+			{
+				LocalPlayer = (BattleChara*)localPlayerAddress.Value;
+			}
 
 			hookCharacterEnableDraw = new Hook<CharacterEnableDrawPrototype>(_address.CharacterEnableDrawAddress, CharacterEnableDrawDetour);
 			hookCharacterDisableDraw = new Hook<CharacterDisableDrawPrototype>(_address.CharacterDisableDrawAddress, CharacterDisableDrawDetour);
@@ -173,11 +178,6 @@ namespace Visibility.Utils
 
 			ObjectIdsToShow.Add(id);
 			HiddenObjectIds.Remove(id);
-		}
-
-		public unsafe void UpdateLocalPlayer()
-		{
-			LocalPlayer = *(BattleChara**)_address.LocalPlayerAddress.ToPointer();
 		}
 
 		private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len)
@@ -411,6 +411,7 @@ namespace Visibility.Utils
 		{
 			if (_plugin!.Configuration.Enabled
 			    && _plugin.Configuration.HideMinion
+			    && LocalPlayer != null
 			    && thisPtr->Character.CompanionOwnerID != LocalPlayer->Character.GameObject.ObjectID)
 			{
 				_containers[UnitType.Minions][ContainerType.All].Add(thisPtr->Character.CompanionOwnerID);
