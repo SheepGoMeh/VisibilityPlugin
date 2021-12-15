@@ -127,6 +127,9 @@
   <data name="fr.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\fr\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="de.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\de\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="it.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\it\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
@@ -138,6 +141,9 @@
   </data>
   <data name="zh-CN.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\zh-CN\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="zh-TW.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\zh-TW\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="pt-BR.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\pt-BR\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

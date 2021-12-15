@@ -15,51 +15,33 @@ namespace Visibility
 		{
 			LoadStrings(Language.English, "en");
 			LoadStrings(Language.French, "fr");
+			LoadStrings(Language.German, "de");
 			LoadStrings(Language.Italian, "it");
 			LoadStrings(Language.Portuguese, "pt-BR");
 			LoadStrings(Language.Spanish, "es-ES");
 			LoadStrings(Language.Russian, "ru");
 			LoadStrings(Language.Japanese, "ja");
 			LoadStrings(Language.ChineseSimplified, "zh-CN");
+			LoadStrings(Language.ChineseTraditional, "zh-TW");
 			CurrentLanguage = AvailableLanguages.Contains(language) ? language : Language.English;
 		}
 
 		private void LoadStrings(Language language, string languageName)
 		{
-			var jsonString = string.Empty;
-			switch (language)
+			string jsonString = language switch
 			{
-				case Language.English:
-					jsonString = Properties.Resources.en_strings;
-					break;
-				case Language.French:
-					jsonString = Properties.Resources.fr_strings;
-					break;
-				case Language.German:
-					break;
-				case Language.Italian:
-					jsonString = Properties.Resources.it_strings;
-					break;
-				case Language.Japanese:
-					jsonString = Properties.Resources.ja_strings;
-					break;
-				case Language.Portuguese:
-					jsonString = Properties.Resources.pt_BR_strings;
-					break;
-				case Language.Russian:
-					jsonString = Properties.Resources.ru_strings;
-					break;
-				case Language.Spanish:
-					jsonString = Properties.Resources.es_ES_strings;
-					break;
-				case Language.ChineseSimplified:
-					jsonString = Properties.Resources.zh_CN_strings;
-					break;
-				case Language.ChineseTraditional:
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(language), language, null);
-			}
+				Language.English => Properties.Resources.en_strings,
+				Language.French => Properties.Resources.fr_strings,
+				Language.German => Properties.Resources.de_strings,
+				Language.Italian => Properties.Resources.it_strings,
+				Language.Japanese => Properties.Resources.ja_strings,
+				Language.Portuguese => Properties.Resources.pt_BR_strings,
+				Language.Russian => Properties.Resources.ru_strings,
+				Language.Spanish => Properties.Resources.es_ES_strings,
+				Language.ChineseSimplified => Properties.Resources.zh_CN_strings,
+				Language.ChineseTraditional => Properties.Resources.zh_TW_strings,
+				_ => throw new ArgumentOutOfRangeException(nameof(language), language, null)
+			};
 
 			AvailableLanguages.Add(language);
 			_strings[language] = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)!;

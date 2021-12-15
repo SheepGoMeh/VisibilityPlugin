@@ -62,11 +62,25 @@ namespace Visibility.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to {
-        ///  &quot;PluginCommandHelpMessage&quot;: &quot;Shows the config for the visibility plugin.\\nAdditional help available via &apos;/pvis help&apos;&quot;,
-        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;Adds player to void list.\\nUsage: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt; &lt;reason&gt;&quot;,
-        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;Adds targeted player to void list.\\nUsage: /voidtarget &lt;reason&gt;&quot;,
-        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;Adds player to whitelist.\\nUsage: /whitelist &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt;&quot;,
-        ///  &quot;WhitelistTargetPlayerHelpMessage&quot;: &quot;Adds targeted pla [rest of string was truncated]&quot;;.
+        ///  &quot;PluginCommandHelpMessage&quot;: &quot;Zeigt die Konfiguration für das Visiblity-Plugin an.\nZusätzliche Hilfe übe &apos;/pvis help&apos;&quot;,
+        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;Fügt Spieler zur Void List hinzu.\nBeispiel: /void &lt;vorname&gt; &lt;nachname&gt; &lt;weltenname&gt; &lt;grund&gt;&quot;,
+        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;Fügt anvisierten Spieler zur Void List hinzu.\nBeispiel: /voidtarget &lt;grund&gt;&quot;,
+        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;Fügt Spieler zur Whitelist hinzu.\nBeispiel: /whitelist &lt;vorname&gt; &lt;nachname&gt; &lt;weltenname&gt;&quot;,
+        ///  &quot;WhitelistTargetPlayerHel [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string de_strings {
+            get {
+                return ResourceManager.GetString("de.strings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;PluginCommandHelpMessage&quot;: &quot;Shows the config for the visibility plugin.\nAdditional help available via &apos;/pvis help&apos;&quot;,
+        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;Adds player to void list.\nUsage: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt; &lt;reason&gt;&quot;,
+        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;Adds targeted player to void list.\nUsage: /voidtarget &lt;reason&gt;&quot;,
+        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;Adds player to whitelist.\nUsage: /whitelist &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt;&quot;,
+        ///  &quot;WhitelistTargetPlayerHelpMessage&quot;: &quot;Adds targeted player  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string en_strings {
             get {
@@ -118,13 +132,13 @@ namespace Visibility.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to {
-        ///  &quot;PluginCommandHelpMessage&quot;: &quot;Visibilityプラグインの設定を表示します。\\n追加のヘルプを利用できます: &apos;/pvis help&apos;&quot;,
-        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;プレイヤーを追加して無効にします。\\n使用法: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt; &lt;reason&gt;&quot;,
-        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;ターゲットプレイヤーを追加して無効にします。\\n使用法: /voidtarget &lt;reason&gt;&quot;,
-        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;プレイヤーをホワイトリストに追加します。\\n使用法: /whitelist &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt;&quot;,
-        ///  &quot;WhitelistTargetPlayerHelpMessage&quot;: &quot;ターゲットプレイヤーをホワイトリストに追加します。\\n使用法: /whitelisttarget&quot;,
+        ///  &quot;PluginCommandHelpMessage&quot;: &quot;Visibilityプラグインの設定を表示します。\n追加のヘルプを利用できます: /pvis help&quot;,
+        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;プレイヤーを追加して無効にします。\n使用法: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt; &lt;reason&gt;&quot;,
+        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;ターゲットプレイヤーを追加して無効にします。\n使用法: /voidtarget &lt;reason&gt;&quot;,
+        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;プレイヤーをホワイトリストに追加します。\n使用法: /whitelist &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt;&quot;,
+        ///  &quot;WhitelistTargetPlayerHelpMessage&quot;: &quot;ターゲットプレイヤーをホワイトリストに追加します。\n使用法: /whitelisttarget&quot;,
         ///  &quot;RefreshComplete&quot;: &quot;更新完了&quot;,
-        /// [rest of string was truncated]&quot;;.
+        ///  &quot;Plug [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ja_strings {
             get {
@@ -148,11 +162,11 @@ namespace Visibility.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to {
-        ///  &quot;PluginCommandHelpMessage&quot;: &quot;Shows the config for the visibility plugin.\\nAdditional help available via &apos;/pvis help&apos;&quot;,
-        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;Adds player to void list.\\nUsage: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt; &lt;reason&gt;&quot;,
-        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;Adds targeted player to void list.\\nUsage: /voidtarget &lt;reason&gt;&quot;,
-        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;Adds player to whitelist.\\nUsage: /whitelist &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt;&quot;,
-        ///  &quot;WhitelistTargetPlayerHelpMessage&quot;: &quot;Adds targeted pla [rest of string was truncated]&quot;;.
+        ///  &quot;PluginCommandHelpMessage&quot;: &quot;Shows the config for the visibility plugin.\nAdditional help available via &apos;/pvis help&apos;&quot;,
+        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;Adds player to void list.\nUsage: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt; &lt;reason&gt;&quot;,
+        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;Adds targeted player to void list.\nUsage: /voidtarget &lt;reason&gt;&quot;,
+        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;Adds player to whitelist.\nUsage: /whitelist &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt;&quot;,
+        ///  &quot;WhitelistTargetPlayerHelpMessage&quot;: &quot;Adds targeted player  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ru_strings {
             get {
@@ -174,6 +188,23 @@ namespace Visibility.Properties {
         internal static string zh_CN_strings {
             get {
                 return ResourceManager.GetString("zh-CN.strings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;PluginCommandHelpMessage&quot;: &quot;顯示Visbility插件設置.\\n鍵入&apos;/pvis help&apos;獲得額外幫助&quot;,
+        ///  &quot;VoidPlayerHelpMessage&quot;: &quot;添加角色到黒名單.\\n用法: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt; &lt;reason&gt;&quot;,
+        ///  &quot;VoidTargetPlayerHelpMessage&quot;: &quot;将目标玩家添加到黒名單.\\n用法: /voidtarget &lt;reason&gt;&quot;,
+        ///  &quot;WhitelistPlayerHelpMessage&quot;: &quot;添加角色到白名單.\\n用法: /void &lt;firstname&gt; &lt;lastname&gt; &lt;worldname&gt;&quot;,
+        ///  &quot;WhitelistTargetPlayerHelpMessage&quot;: &quot;添加目标角色到白名單.\\n用法: /whitelisttarget&quot;,
+        ///  &quot;RefreshComplete&quot;: &quot;刷新完成.&quot;,
+        ///  &quot;PluginCommandHelpMenu1&quot;: &quot;/pvis help - 顯示幫助菜單&quot;,
+        ///  &quot;PluginCommand [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string zh_TW_strings {
+            get {
+                return ResourceManager.GetString("zh-TW.strings", resourceCulture);
             }
         }
     }

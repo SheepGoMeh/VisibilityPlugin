@@ -1,5 +1,5 @@
 {
-  "PluginCommandHelpMessage": "Visibilityプラグインの設定を表示します。\n追加のヘルプを利用できます: '/pvis help'",
+  "PluginCommandHelpMessage": "Visibilityプラグインの設定を表示します。\n追加のヘルプを利用できます: /pvis help",
   "VoidPlayerHelpMessage": "プレイヤーを追加して無効にします。\n使用法: /void <firstname> <lastname> <worldname> <reason>",
   "VoidTargetPlayerHelpMessage": "ターゲットプレイヤーを追加して無効にします。\n使用法: /voidtarget <reason>",
   "WhitelistPlayerHelpMessage": "プレイヤーをホワイトリストに追加します。\n使用法: /whitelist <firstname> <lastname> <worldname>",
@@ -31,8 +31,8 @@
   "OptionPets": "ペット",
   "OptionChocobos": "チョコボ",
   "OptionMinions": "ミニオン",
-  "OptionEarthlyStar": "パーティー以外のスターを隠す",
-  "OptionEarthlyStarTip": "パーティー内のプレイヤーに属していないアーサリースターを隠します(戦闘でのみ有効です)",
+  "OptionEarthlyStar": "パーティー以外のアーサリースターを非表示",
+  "OptionEarthlyStarTip": "パーティーではないプレイヤーのアーサリースターを隠します(戦闘でのみ有効です)",
   "OptionContextMenu": "コンテキストメニューを有効にする",
   "OptionContextMenuTip": "チャットでプレイヤー名のコンテキストメニュー(右クリックメニュー) を有効にする",
   "OptionRefresh": "更新",
