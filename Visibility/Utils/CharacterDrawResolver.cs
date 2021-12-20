@@ -204,9 +204,9 @@ namespace Visibility.Utils
 				LocalPlayer = (BattleChara*)localPlayerAddress.Value;
 			}
 			
-			var fadeMiddleWidget = _plugin.GameGui.GetAddonByName("FadeMiddle", 1);
+			var nowLoadingWidget = _plugin.GameGui.GetAddonByName("NowLoading", 1);
 			
-			if (_plugin.Configuration.Enabled && fadeMiddleWidget != IntPtr.Zero && !((AtkUnitBase*)fadeMiddleWidget)->IsVisible && localPlayerAddress.HasValue && thisPtr != (Character*)LocalPlayer)
+			if (_plugin.Configuration.Enabled && nowLoadingWidget != IntPtr.Zero && !((AtkUnitBase*)nowLoadingWidget)->IsVisible && localPlayerAddress.HasValue && thisPtr != (Character*)LocalPlayer)
 			{
 				switch (thisPtr->GameObject.ObjectKind)
 				{
