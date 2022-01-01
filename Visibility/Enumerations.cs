@@ -9,10 +9,9 @@ namespace Visibility
 		Hostile = 1 << 0,
 		InCombat = 1 << 1,
 		WeaponOut = 1 << 2,
-		PartyMember = 1 << 4,
-		AllianceMember = 1 << 5,
-		Friend = 1 << 6,
-		Casting = 1 << 7
+		PartyMember = 1 << 5,
+		AllianceMember = 1 << 6,
+		Friend = 1 << 7,
 	}
 
 	[Flags]
