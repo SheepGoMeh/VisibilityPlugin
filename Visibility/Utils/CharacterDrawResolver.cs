@@ -376,32 +376,37 @@ namespace Visibility.Utils
 
 		private unsafe void CharacterDisableDrawDetour(Character* thisPtr)
 		{
-			if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
-				&& (thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
+			var nowLoadingWidget = _plugin!.GameGui.GetAddonByName("NowLoading", 1);
+			
+			if (nowLoadingWidget != IntPtr.Zero && !((AtkUnitBase*)nowLoadingWidget)->IsVisible && !_plugin.Condition[ConditionFlag.WatchingCutscene])
 			{
-				_containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
-				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
-			}
+				if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
+				    && (thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
+				{
+					_containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
+					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+					HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+				}
 
-			if (_plugin!.Configuration.HidePlayer
-			    && _plugin.Configuration.ShowDeadPlayer
-			    && thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
-			    && thisPtr->Health == 0
-			    && HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
-			{
-				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
-			}
-			else if (ObjectIdsToShow.Contains(thisPtr->GameObject.ObjectID))
-			{
-				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				ObjectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
-			}
-			else if (MinionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID))
-			{
-				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-				MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
+				if (_plugin.Configuration.HidePlayer
+				    && _plugin.Configuration.ShowDeadPlayer
+				    && thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
+				    && thisPtr->Health == 0
+				    && HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+				{
+					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+					HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+				}
+				else if (ObjectIdsToShow.Contains(thisPtr->GameObject.ObjectID))
+				{
+					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+					ObjectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
+				}
+				else if (MinionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID))
+				{
+					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+					MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
+				}
 			}
 
 			hookCharacterDisableDraw!.Original(thisPtr);
