@@ -55,8 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.5" />
-    <PackageReference Include="ILRepack" Version="2.1.0-beta1" />
-    <PackageReference Include="XivCommon" Version="4.0.0-alpha.2" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\Resources.Designer.cs">
@@ -77,15 +75,7 @@
   <ItemGroup>
     <Compile Remove="Utils\PlaceholderResolver.cs" />
   </ItemGroup>
-  <Target Name="ILRepack" AfterTargets="PostBuildEvent">
-    <ItemGroup>
-      <InputAssemblies Include="$(TargetPath)" />
-      <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
-      <InputAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'XivCommon'" />
-    </ItemGroup>
-    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(AppData)\XIVLauncher\addon\Hooks\dev /out:$(TargetPath) @(InputAssemblies, ' ')" />
-  </Target>
-  <Target Name="PackagePlugin" AfterTargets="ILRepack" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="PackagePlugin" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
     <DalamudPackager ProjectDir="$(ProjectDir)" OutputPath="$(OutputPath)" AssemblyName="$(AssemblyName)" MakeZip="true" />
   </Target>
 </Project>
