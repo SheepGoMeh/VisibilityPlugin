@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using Dalamud.Game.Gui.ContextMenus;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
-using XivCommon.Functions.ContextMenu;
 
 namespace Visibility
 {
@@ -23,11 +22,11 @@ namespace Visibility
 		{
 			if (_enabled)
 			{
-				Plugin.Common.Functions.ContextMenu.OpenContextMenu -= OnOpenContextMenu;
+				Plugin.ContextMenu.ContextMenuOpened -= OnOpenContextMenu;
 			}
 			else
 			{
-				Plugin.Common.Functions.ContextMenu.OpenContextMenu += OnOpenContextMenu;
+				Plugin.ContextMenu.ContextMenuOpened += OnOpenContextMenu;
 			}
 
 			_enabled = !_enabled;
@@ -35,55 +34,51 @@ namespace Visibility
 
 		public void Dispose()
 		{
-			Plugin.Common.Functions.ContextMenu.OpenContextMenu -= OnOpenContextMenu;
+			Plugin.ContextMenu.ContextMenuOpened -= OnOpenContextMenu;
 		}
 		
-		private void OnOpenContextMenu(ContextMenuOpenArgs args) {
+		private void OnOpenContextMenu(ContextMenuOpenedArgs args) {
 			if (args.ParentAddonName is not "ChatLog")
 			{
 				return;
 			}
 
-			if (args.ObjectWorld is ushort.MaxValue or 0 || args.Text?.Payloads.Count != 1 ||
-			    args.Text?.Payloads[0] is not TextPayload textPayload)
+			if (args.GameObjectContext?.WorldId is ushort.MaxValue or 0 || args.GameObjectContext?.Name is null)
 			{
 				return;
 			}
+			
+			args.AddCustomSubMenu(Plugin.Name, openedSubMenuArgs =>
+			{
+				openedSubMenuArgs.Items.Add(Plugin.Configuration.VoidList.SingleOrDefault(x =>
+					x.Name == openedSubMenuArgs.GameObjectContext?.Name && x.HomeworldId == openedSubMenuArgs.GameObjectContext?.WorldId) == null
+					? new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.VoidListName), AddToVoidList)
+					: new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.VoidListName), RemoveFromVoidList));
 
-			args.Items.Add(Plugin.Configuration.VoidList.SingleOrDefault(x =>
-				x.Name == textPayload.Text && x.HomeworldId == args.ObjectWorld) == null
-				? new NormalContextMenuItem(
-					Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.VoidListName), AddToVoidList)
-				: new NormalContextMenuItem(
-					Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.VoidListName),
-					RemoveFromVoidList));
-
-			args.Items.Add(Plugin.Configuration.Whitelist.SingleOrDefault(x =>
-				x.Name == textPayload.Text && x.HomeworldId == args.ObjectWorld) == null
-				? new NormalContextMenuItem(
-					Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.WhitelistName), AddToWhitelist)
-				: new NormalContextMenuItem(
-					Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.WhitelistName),
-					RemoveFromWhitelist));
+				openedSubMenuArgs.Items.Add(Plugin.Configuration.Whitelist.SingleOrDefault(x =>
+					x.Name == openedSubMenuArgs.GameObjectContext?.Name && x.HomeworldId == openedSubMenuArgs.GameObjectContext?.WorldId) == null
+					? new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.WhitelistName), AddToWhitelist)
+					: new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.WhitelistName), RemoveFromWhitelist));
+			});
 		}
 
-		private void AddToVoidList(ContextMenuItemSelectedArgs args)
+		private void AddToVoidList(CustomContextMenuItemSelectedArgs args)
 		{
 			var world = Plugin.DataManager.GetExcelSheet<World>()?
-				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
+				.SingleOrDefault(x => x.RowId == args.ContextMenuOpenedArgs.GameObjectContext?.WorldId);
 
 			if (world == null)
 			{
 				return;
 			}
 			
-			Plugin.VoidPlayer("ContextMenu", $"{args.Text} {world.Name}");
+			Plugin.VoidPlayer("ContextMenu", $"{args.ContextMenuOpenedArgs.GameObjectContext?.Name} {world.Name}");
 		}
 		
-		private void RemoveFromVoidList(ContextMenuItemSelectedArgs args)
+		private void RemoveFromVoidList(CustomContextMenuItemSelectedArgs args)
 		{
 			var entry = Plugin.Configuration.VoidList.SingleOrDefault(x =>
-				x.Name == args.Text?.TextValue && x.HomeworldId == args.ObjectWorld);
+				x.Name == args.ContextMenuOpenedArgs.GameObjectContext?.Name && x.HomeworldId == args.ContextMenuOpenedArgs.GameObjectContext?.WorldId);
 
 			if (entry == null)
 			{
@@ -99,27 +94,27 @@ namespace Visibility
 
 			Plugin.Configuration.VoidList.Remove(entry);
 			Plugin.Configuration.Save();
-			Plugin.ShowPlayer(args.ObjectId);
+			Plugin.ShowPlayer(args.ContextMenuOpenedArgs.GameObjectContext!.Id!.Value);
 			Plugin.ChatGui.Print(message);
 		}
 		
-		private void AddToWhitelist(ContextMenuItemSelectedArgs args)
+		private void AddToWhitelist(CustomContextMenuItemSelectedArgs args)
 		{
 			var world = Plugin.DataManager.GetExcelSheet<World>()?
-				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
+				.SingleOrDefault(x => x.RowId == args.ContextMenuOpenedArgs.GameObjectContext?.WorldId);
 
 			if (world == null)
 			{
 				return;
 			}
 			
-			Plugin.WhitelistPlayer("ContextMenu", $"{args.Text} {world.Name}");
+			Plugin.WhitelistPlayer("ContextMenu", $"{args.ContextMenuOpenedArgs.GameObjectContext?.Name} {world.Name}");
 		}
 		
-		private void RemoveFromWhitelist(ContextMenuItemSelectedArgs args)
+		private void RemoveFromWhitelist(CustomContextMenuItemSelectedArgs args)
 		{
 			var entry = Plugin.Configuration.Whitelist.SingleOrDefault(x =>
-				x.Name == args.Text?.TextValue && x.HomeworldId == args.ObjectWorld);
+				x.Name == args.ContextMenuOpenedArgs.GameObjectContext?.Name && x.HomeworldId == args.ContextMenuOpenedArgs.GameObjectContext?.WorldId);
 
 			if (entry == null)
 			{

@@ -19,7 +19,6 @@ using Visibility.Configuration;
 using Visibility.Ipc;
 using Visibility.Utils;
 using Visibility.Void;
-using XivCommon;
 
 namespace Visibility
 {
@@ -39,6 +38,7 @@ namespace Visibility
 		public Framework Framework;
 		public ChatGui ChatGui;
 		public GameGui GameGui;
+		public Dalamud.Game.Gui.ContextMenus.ContextMenu ContextMenu;
 		public SigScanner SigScanner;
 		public ClientState ClientState;
 		public ObjectTable ObjectTable;
@@ -48,7 +48,6 @@ namespace Visibility
 		private bool _drawConfig;
 		private bool _refresh;
 		public bool Disable;
-		public XivCommonBase Common;
 		public ContextMenu PluginContextMenu;
 		
 		private CharacterDrawResolver _characterDrawResolver;
@@ -57,9 +56,10 @@ namespace Visibility
 
 		public VisibilityPlugin(DalamudPluginInterface dalamudPluginInterface, CommandManager commandManager,
 			Framework framework, ChatGui chatGui, GameGui gameGui, SigScanner sigScanner, ClientState clientState,
-			ObjectTable objectTable, DataManager dataManager, Dalamud.Game.ClientState.Conditions.Condition condition)
+			ObjectTable objectTable, DataManager dataManager, Dalamud.Game.ClientState.Conditions.Condition condition, Dalamud.Game.Gui.ContextMenus.ContextMenu contextMenu)
 		{
 			Condition = condition;
+			ContextMenu = contextMenu;
 			DataManager = dataManager;
 			ObjectTable = objectTable;
 			ClientState = clientState;
@@ -111,7 +111,6 @@ namespace Visibility
 			PluginInterface.UiBuilder.Draw += BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 			ChatGui.ChatMessage += OnChatMessage;
-			Common = new XivCommonBase(Hooks.ContextMenu);
 			PluginContextMenu = new ContextMenu(this);
 
 			if (Configuration.EnableContextMenu)
@@ -161,7 +160,6 @@ namespace Visibility
 			Api.Dispose();
 
 			PluginContextMenu.Dispose();
-			Common.Dispose();
 			_characterDrawResolver.Dispose();
 
 			Framework.Update -= FrameworkOnOnUpdateEvent;
