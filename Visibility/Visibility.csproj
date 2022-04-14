@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0-windows7.0</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <OutputType>Library</OutputType>
     <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -54,7 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.5" />
+    <PackageReference Include="DalamudPackager" Version="2.1.6" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\Resources.Designer.cs">
@@ -75,7 +75,4 @@
   <ItemGroup>
     <Compile Remove="Utils\PlaceholderResolver.cs" />
   </ItemGroup>
-  <Target Name="PackagePlugin" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
-    <DalamudPackager ProjectDir="$(ProjectDir)" OutputPath="$(OutputPath)" AssemblyName="$(AssemblyName)" MakeZip="true" />
-  </Target>
 </Project>
