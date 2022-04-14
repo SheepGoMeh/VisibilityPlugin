@@ -48,7 +48,7 @@ namespace Visibility
 		private bool _drawConfig;
 		private bool _refresh;
 		public bool Disable;
-		public ContextMenu PluginContextMenu;
+		// public ContextMenu PluginContextMenu;
 		
 		private CharacterDrawResolver _characterDrawResolver;
 		public VisibilityApi Api { get; }
@@ -111,12 +111,12 @@ namespace Visibility
 			PluginInterface.UiBuilder.Draw += BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 			ChatGui.ChatMessage += OnChatMessage;
-			PluginContextMenu = new ContextMenu(this);
-
-			if (Configuration.EnableContextMenu)
-			{
-				PluginContextMenu.Toggle();
-			}
+			// PluginContextMenu = new ContextMenu(this);
+			//
+			// if (Configuration.EnableContextMenu)
+			// {
+			// 	PluginContextMenu.Toggle();
+			// }
 
 			Api = new VisibilityApi(this);
 			IpcProvider = new VisibilityProvider(dalamudPluginInterface, Api);
@@ -159,7 +159,7 @@ namespace Visibility
 			IpcProvider.Dispose();
 			Api.Dispose();
 
-			PluginContextMenu.Dispose();
+			// PluginContextMenu.Dispose();
 			_characterDrawResolver.Dispose();
 
 			Framework.Update -= FrameworkOnOnUpdateEvent;
