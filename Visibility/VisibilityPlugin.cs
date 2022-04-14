@@ -347,7 +347,7 @@ namespace Visibility
 				var voidItem = new VoidItem(actor, arguments, false);
 
 				var playerString = Encoding.UTF8.GetString(new SeString(new TextPayload(actor.Name.TextValue),
-					new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(actor.HomeWorld.GameData.Name)).Encode());
+					new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(actor.HomeWorld.GameData!.Name)).Encode());
 				
 				if (!Configuration.VoidList.Any(x =>
 					x.Name == voidItem.Name && x.HomeworldId == voidItem.HomeworldId))
@@ -435,7 +435,7 @@ namespace Visibility
 				var item = new VoidItem(actor, arguments, false);
 
 				var playerString = Encoding.UTF8.GetString(new SeString(new TextPayload(actor.Name.TextValue),
-					new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(actor.HomeWorld.GameData.Name)).Encode());
+					new IconPayload(BitmapFontIcon.CrossWorld), new TextPayload(actor.HomeWorld.GameData!.Name)).Encode());
 				
 				if (!Configuration.Whitelist.Any(x =>
 					x.Name == item.Name && x.HomeworldId == item.HomeworldId))

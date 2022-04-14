@@ -47,7 +47,7 @@ namespace Visibility.Void
 			Name = actor.Name.TextValue;
 			Time = DateTime.Now;
 			HomeworldId = actor.HomeWorld.Id;
-			HomeworldName = actor.HomeWorld.GameData.Name;
+			HomeworldName = actor.HomeWorld.GameData!.Name;
 			Reason = reason;
 			Manual = manual;
 		}

@@ -334,7 +334,7 @@ namespace Visibility.Configuration
 
 					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[0], 0);
 					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[1], 0);
-					Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[2], 0);
+					Encoding.Default.GetBytes(actor.HomeWorld.GameData!.Name).CopyTo(_buffer[2], 0);
 
 					manual = false;
 				}
@@ -475,7 +475,7 @@ namespace Visibility.Configuration
 
 					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[4], 0);
 					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[5], 0);
-					Encoding.Default.GetBytes(actor.HomeWorld.GameData.Name).CopyTo(_buffer[6], 0);
+					Encoding.Default.GetBytes(actor.HomeWorld.GameData!.Name).CopyTo(_buffer[6], 0);
 
 					manual = false;
 				}
