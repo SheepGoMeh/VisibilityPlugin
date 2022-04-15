@@ -47,19 +47,30 @@ namespace Visibility
 			{
 				return;
 			}
-			
-			args.AddCustomSubMenu(Plugin.Name, openedSubMenuArgs =>
-			{
-				openedSubMenuArgs.Items.Add(Plugin.Configuration.VoidList.SingleOrDefault(x =>
-					x.Name == openedSubMenuArgs.GameObjectContext?.Name && x.HomeworldId == openedSubMenuArgs.GameObjectContext?.WorldId) == null
-					? new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.VoidListName), AddToVoidList)
-					: new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.VoidListName), RemoveFromVoidList));
 
-				openedSubMenuArgs.Items.Add(Plugin.Configuration.Whitelist.SingleOrDefault(x =>
-					x.Name == openedSubMenuArgs.GameObjectContext?.Name && x.HomeworldId == openedSubMenuArgs.GameObjectContext?.WorldId) == null
-					? new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.WhitelistName), AddToWhitelist)
-					: new CustomContextMenuItem(Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.WhitelistName), RemoveFromWhitelist));
-			});
+			if (Plugin.Configuration.VoidList.SingleOrDefault(x =>
+				    x.Name == args.GameObjectContext?.Name && x.HomeworldId == args.GameObjectContext?.WorldId) == null)
+			{
+				args.AddCustomItem(Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.VoidListName),
+					AddToVoidList);
+			}
+			else
+			{
+				args.AddCustomItem(Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.VoidListName),
+					RemoveFromVoidList);
+			}
+			
+			if (Plugin.Configuration.Whitelist.SingleOrDefault(x =>
+				    x.Name == args.GameObjectContext?.Name && x.HomeworldId == args.GameObjectContext?.WorldId) == null)
+			{
+				args.AddCustomItem(Plugin.PluginLocalization.ContextMenuAdd(Plugin.PluginLocalization.WhitelistName),
+					AddToWhitelist);
+			}
+			else
+			{
+				args.AddCustomItem(Plugin.PluginLocalization.ContextMenuRemove(Plugin.PluginLocalization.WhitelistName),
+					RemoveFromWhitelist);
+			}
 		}
 
 		private void AddToVoidList(CustomContextMenuItemSelectedArgs args)
