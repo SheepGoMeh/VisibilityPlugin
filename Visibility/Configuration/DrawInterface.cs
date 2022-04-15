@@ -160,16 +160,6 @@ namespace Visibility.Configuration
 				}
 
 				ImGui.NextColumn();
-
-				Checkbox(nameof(EnableContextMenu));
-				ImGui.SameLine();
-				ImGui.Text(_plugin.PluginLocalization.OptionContextMenu);
-				if (ImGui.IsItemHovered())
-				{
-					ImGui.SetTooltip(_plugin.PluginLocalization.OptionContextMenuTip);
-				}
-
-				ImGui.NextColumn();
 				ImGui.Separator();
 
 				ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
