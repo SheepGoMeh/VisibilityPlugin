@@ -136,6 +136,9 @@
   <data name="ru.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\ru\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="sv.strings" type="System.Resources.ResXFileRef, System.Windows.Forms"> 
+    <value>..\Languages\sv\strings.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value> 
+  </data> 
   <data name="ja.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\ja\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

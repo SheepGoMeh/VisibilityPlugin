@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -19,6 +19,7 @@ namespace Visibility
 			LoadStrings(Language.Italian, "it");
 			LoadStrings(Language.Portuguese, "pt-BR");
 			LoadStrings(Language.Spanish, "es-ES");
+			LoadStrings(Language.Swedish, "sv");
 			LoadStrings(Language.Russian, "ru");
 			LoadStrings(Language.Japanese, "ja");
 			LoadStrings(Language.ChineseSimplified, "zh-CN");
@@ -36,6 +37,7 @@ namespace Visibility
 				Language.Italian => Properties.Resources.it_strings,
 				Language.Japanese => Properties.Resources.ja_strings,
 				Language.Portuguese => Properties.Resources.pt_BR_strings,
+                Language.Swedish => Properties.Resources.sv_strings,
 				Language.Russian => Properties.Resources.ru_strings,
 				Language.Spanish => Properties.Resources.es_ES_strings,
 				Language.ChineseSimplified => Properties.Resources.zh_CN_strings,
@@ -57,6 +59,7 @@ namespace Visibility
 			Italian,
 			Japanese,
 			Portuguese,
+            Swedish,
 			Russian,
 			Spanish,
 			ChineseSimplified,

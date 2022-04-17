@@ -160,6 +160,22 @@ namespace Visibility.Properties {
             }
         }
         
+        /// <summary> 
+        ///   Looks up a localized string similar to {
+        ///   "PluginCommandHelpMessage": "Visar configen för den Visibility plugin.\nYtterligare hjälp tillgänglig med '/pvis help'",
+        ///   "VoidPlayerHelpMessage": "Läggar spelare till i voidlisten.\nAnvändningen: /void <förnamn> <efternamn> <världnamn> <anledning>",
+        ///   "VoidTargetPlayerHelpMessage": "Läggar markerad spelare till i voidlisten.\nAnvändningen: /voidtarget <anledning>",
+        ///   "WhitelistPlayerHelpMessage": "Läggar spelare till i whitelisten.\nAnvändningen: /whitelist <förnamn> <efternamn> <världnamn>",
+        ///   "WhitelistTargetPlayerHelpMessage": "Läggar markerad spelare till i whitelisten.\nAnvändningen: /whitelisttarget",
+        /// </summary> 
+        internal static string sv_strings
+        {
+            get
+            {
+                return ResourceManager.GetString("sv.strings", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to {
         ///  &quot;PluginCommandHelpMessage&quot;: &quot;Shows the config for the visibility plugin.\nAdditional help available via &apos;/pvis help&apos;&quot;,
