@@ -22,5 +22,8 @@ It provides:
 	* You can manually add players to the voidlist via `/void firstname lastname worldname reason`
 	* You can manually add targeted players to the voidlist via `/voidtarget reason`
 
+## Contribution
+* You can contribute to the translation over at https://crowdin.com/project/visibility
+
 ## Known Issues
 * Own player might disapper. If that happens, use the `Refresh` functionality.
