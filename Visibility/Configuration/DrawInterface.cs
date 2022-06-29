@@ -4,10 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Objects.Types;
 using ImGuiNET;
 using Visibility.Void;
 
@@ -20,34 +18,46 @@ namespace Visibility.Configuration
 		private static readonly string VersionString =
 			System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 
-		private readonly IEnumerable<VoidItem>[] _sortedContainer = new IEnumerable<VoidItem>[2];
+		private readonly IEnumerable<VoidItem>[] sortedContainer = new IEnumerable<VoidItem>[2];
 
-		private readonly bool[] _sortAscending = {true, true};
-		private readonly Func<VoidItem, object>[] _sortKeySelector = new Func<VoidItem, object>[2];
+		private readonly bool[] sortAscending = { true, true };
+		private readonly Func<VoidItem, object>[] sortKeySelector = new Func<VoidItem, object>[2];
 
 		private void CenteredCheckbox(string propertyName)
 		{
-			var state = (bool) GetBackingField(propertyName).GetValue(this)!;
-			ImGui.SetCursorPosX(ImGui.GetCursorPosX() +
-			                    (ImGui.GetColumnWidth() + 2 * ImGui.GetStyle().FramePadding.X) / 2 -
-			                    2 * ImGui.GetStyle().ItemSpacing.X - 2 * ImGui.GetStyle().CellPadding.X);
-			if (!ImGui.Checkbox($"###{propertyName}", ref state)) return;
-			ChangeSetting(propertyName, state ? 1 : 0);
-			Save();
+			var state = (bool)this.GetBackingField(propertyName).GetValue(this)!;
+			ImGui.SetCursorPosX(
+				ImGui.GetCursorPosX() +
+				((ImGui.GetColumnWidth() + (2 * ImGui.GetStyle().FramePadding.X)) / 2) -
+				(2 * ImGui.GetStyle().ItemSpacing.X) - (2 * ImGui.GetStyle().CellPadding.X));
+
+			if (!ImGui.Checkbox($"###{propertyName}", ref state))
+			{
+				return;
+			}
+
+			this.ChangeSetting(propertyName, state ? 1 : 0);
+			this.Save();
 		}
 
 		private void Checkbox(string propertyName)
 		{
-			var state = (bool) GetBackingField(propertyName).GetValue(this)!;
-			if (!ImGui.Checkbox($"###{propertyName}", ref state)) return;
-			ChangeSetting(propertyName, state ? 1 : 0);
-			Save();
+			var state = (bool)this.GetBackingField(propertyName).GetValue(this)!;
+
+			if (!ImGui.Checkbox($"###{propertyName}", ref state))
+			{
+				return;
+			}
+
+			this.ChangeSetting(propertyName, state ? 1 : 0);
+			this.Save();
 		}
 
 		private static void CenteredText(string text)
 		{
-			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetColumnWidth() - ImGui.CalcTextSize(text).X) / 2 -
-			                    2 * ImGui.GetStyle().CellPadding.X);
+			ImGui.SetCursorPosX(
+				ImGui.GetCursorPosX() + ((ImGui.GetColumnWidth() - ImGui.CalcTextSize(text).X) / 2) -
+				(2 * ImGui.GetStyle().CellPadding.X));
 			ImGui.Text(text);
 		}
 
@@ -57,106 +67,127 @@ namespace Visibility.Configuration
 
 			ImGui.SetNextWindowSize(new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
 
-			if (ImGui.Begin($"{_plugin!.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
+			if (ImGui.Begin($"{this.plugin!.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
 			{
-				Checkbox(nameof(Enabled));
+				this.Checkbox(nameof(this.Enabled));
 
 				ImGui.SameLine();
-				ImGui.Text(_plugin.PluginLocalization.OptionEnable);
+				ImGui.Text(this.plugin.PluginLocalization.OptionEnable);
 				var cursorY = ImGui.GetCursorPosY();
-				var comboWidth = ImGui.CalcTextSize(_plugin.PluginLocalization.GetString("LanguageName", Localization.Language.English)).X * 2 + ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale;
-				ImGui.SameLine(ImGui.GetContentRegionMax().X / 2 - ImGui.CalcTextSize(_plugin.PluginLocalization.OptionLanguage).X - comboWidth);
-				ImGui.Text(_plugin.PluginLocalization.OptionLanguage);
+				var comboWidth =
+					(ImGui.CalcTextSize(
+						this.plugin.PluginLocalization.GetString("LanguageName", Localization.Language.English)).X * 2) +
+					(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
+				ImGui.SameLine(
+					(ImGui.GetContentRegionMax().X / 2) -
+					ImGui.CalcTextSize(this.plugin.PluginLocalization.OptionLanguage).X - comboWidth);
+				ImGui.Text(this.plugin.PluginLocalization.OptionLanguage);
 				ImGui.SameLine();
 				ImGui.PushItemWidth(comboWidth);
-				if (ImGui.BeginCombo("###language", _plugin.PluginLocalization.LanguageName))
+				if (ImGui.BeginCombo("###language", this.plugin.PluginLocalization.LanguageName))
 				{
-					foreach (var language in _plugin.PluginLocalization.AvailableLanguages.Where(language =>
-						ImGui.Selectable(_plugin.PluginLocalization.GetString("LanguageName", language))))
+					foreach (var language in this.plugin.PluginLocalization.AvailableLanguages.Where(
+						         language =>
+							         ImGui.Selectable(
+								         this.plugin.PluginLocalization.GetString("LanguageName", language))))
 					{
-						_plugin.Configuration.Language = language;
-						_plugin.PluginLocalization.CurrentLanguage = language;
-						Save();
+						this.plugin.Configuration.Language = language;
+						this.plugin.PluginLocalization.CurrentLanguage = language;
+						this.Save();
 					}
 
 					ImGui.EndCombo();
 				}
+
 				ImGui.PopItemWidth();
-				ImGui.SameLine(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
-				               ImGui.GetScrollX());
+				ImGui.SameLine(
+					ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
+					ImGui.GetScrollX());
 				ImGui.SetCursorPosY(cursorY / 2);
 				ImGui.TextColored(VersionColor, VersionString);
 				ImGui.SetCursorPosY(cursorY);
 
 				if (ImGui.BeginTable("###cols", 6, ImGuiTableFlags.BordersOuterH))
 				{
-					ImGui.TableSetupColumn(string.Empty, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
-					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionHideAll, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
-					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowParty, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
-					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowFriends, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
-					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowFc, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
-					ImGui.TableSetupColumn(_plugin.PluginLocalization.OptionShowDead, ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(
+						string.Empty,
+						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(
+						this.plugin.PluginLocalization.OptionHideAll,
+						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(
+						this.plugin.PluginLocalization.OptionShowParty,
+						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(
+						this.plugin.PluginLocalization.OptionShowFriends,
+						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(
+						this.plugin.PluginLocalization.OptionShowFc,
+						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+					ImGui.TableSetupColumn(
+						this.plugin.PluginLocalization.OptionShowDead,
+						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 					ImGui.TableHeadersRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(_plugin.PluginLocalization.OptionPlayers);
+					ImGui.Text(this.plugin.PluginLocalization.OptionPlayers);
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(HidePlayer));
+					this.CenteredCheckbox(nameof(this.HidePlayer));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowPartyPlayer));
+					this.CenteredCheckbox(nameof(this.ShowPartyPlayer));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowFriendPlayer));
+					this.CenteredCheckbox(nameof(this.ShowFriendPlayer));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowCompanyPlayer));
+					this.CenteredCheckbox(nameof(this.ShowCompanyPlayer));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowDeadPlayer));
+					this.CenteredCheckbox(nameof(this.ShowDeadPlayer));
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(_plugin.PluginLocalization.OptionPets);
+					ImGui.Text(this.plugin.PluginLocalization.OptionPets);
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(HidePet));
+					this.CenteredCheckbox(nameof(this.HidePet));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowPartyPet));
+					this.CenteredCheckbox(nameof(this.ShowPartyPet));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowFriendPet));
+					this.CenteredCheckbox(nameof(this.ShowFriendPet));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowCompanyPet));
+					this.CenteredCheckbox(nameof(this.ShowCompanyPet));
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(_plugin.PluginLocalization.OptionChocobos);
+					ImGui.Text(this.plugin.PluginLocalization.OptionChocobos);
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(HideChocobo));
+					this.CenteredCheckbox(nameof(this.HideChocobo));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowPartyChocobo));
+					this.CenteredCheckbox(nameof(this.ShowPartyChocobo));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowFriendChocobo));
+					this.CenteredCheckbox(nameof(this.ShowFriendChocobo));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowCompanyChocobo));
+					this.CenteredCheckbox(nameof(this.ShowCompanyChocobo));
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(_plugin.PluginLocalization.OptionMinions);
+					ImGui.Text(this.plugin.PluginLocalization.OptionMinions);
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(HideMinion));
+					this.CenteredCheckbox(nameof(this.HideMinion));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowPartyMinion));
+					this.CenteredCheckbox(nameof(this.ShowPartyMinion));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowFriendMinion));
+					this.CenteredCheckbox(nameof(this.ShowFriendMinion));
 					ImGui.TableNextColumn();
-					CenteredCheckbox(nameof(ShowCompanyMinion));
+					this.CenteredCheckbox(nameof(this.ShowCompanyMinion));
 					ImGui.TableNextRow();
-					
+
 					ImGui.EndTable();
 				}
 
-				Checkbox(nameof(HideStar));
+				this.Checkbox(nameof(this.HideStar));
 				ImGui.SameLine();
-				ImGui.Text(_plugin.PluginLocalization.OptionEarthlyStar);
+				ImGui.Text(this.plugin.PluginLocalization.OptionEarthlyStar);
 				if (ImGui.IsItemHovered())
 				{
-					ImGui.SetTooltip(_plugin.PluginLocalization.OptionEarthlyStarTip);
+					ImGui.SetTooltip(this.plugin.PluginLocalization.OptionEarthlyStarTip);
 				}
 
 				ImGui.NextColumn();
@@ -164,111 +195,135 @@ namespace Visibility.Configuration
 
 				ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
 
-				if (ImGui.Button(_plugin.PluginLocalization.OptionRefresh))
+				if (ImGui.Button(this.plugin.PluginLocalization.OptionRefresh))
 				{
-					_plugin.RefreshActors();
+					this.plugin.RefreshActors();
 				}
 
-				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(_plugin.PluginLocalization.WhitelistName).X -
-				               ImGui.CalcTextSize(_plugin.PluginLocalization.VoidListName).X - 4 * ImGui.GetStyle().FramePadding.X -
-				               ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
+				ImGui.SameLine(
+					ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(this.plugin.PluginLocalization.WhitelistName).X -
+					ImGui.CalcTextSize(this.plugin.PluginLocalization.VoidListName).X -
+					(4 * ImGui.GetStyle().FramePadding.X) -
+					(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale));
 
-				if (ImGui.Button(_plugin.PluginLocalization.WhitelistName))
+				if (ImGui.Button(this.plugin.PluginLocalization.WhitelistName))
 				{
-					_showListWindow[1] = !_showListWindow[1];
+					this.showListWindow[1] = !this.showListWindow[1];
 				}
 
-				ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(_plugin.PluginLocalization.VoidListName).X -
-				               2 * ImGui.GetStyle().FramePadding.X);
+				ImGui.SameLine(
+					ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(this.plugin.PluginLocalization.VoidListName).X -
+					(2 * ImGui.GetStyle().FramePadding.X));
 
-				if (ImGui.Button(_plugin.PluginLocalization.VoidListName))
+				if (ImGui.Button(this.plugin.PluginLocalization.VoidListName))
 				{
-					_showListWindow[0] = !_showListWindow[0];
+					this.showListWindow[0] = !this.showListWindow[0];
 				}
 			}
 
 			ImGui.End();
 
-			if (_showListWindow[0])
+			if (this.showListWindow[0])
 			{
-				DrawVoidList();
+				this.DrawVoidList();
 			}
 
-			if (_showListWindow[1])
+			if (this.showListWindow[1])
 			{
-				DrawWhitelist();
+				this.DrawWhitelist();
 			}
 
 			return drawConfig;
 		}
 
-		private static IEnumerable<VoidItem> SortContainer(IEnumerable<VoidItem> container,
-			Func<VoidItem, object> keySelector, bool isAscending, out Func<VoidItem, object> keySelectorOut)
+		private static IEnumerable<VoidItem> SortContainer(
+			IEnumerable<VoidItem> container,
+			Func<VoidItem, object> keySelector,
+			bool isAscending,
+			out Func<VoidItem, object> keySelectorOut)
 		{
 			keySelectorOut = keySelector;
-			return keySelector == null ? container :
-				isAscending ? container.OrderBy(keySelector) : container.OrderByDescending(keySelector);
+			return isAscending ? container.OrderBy(keySelector) : container.OrderByDescending(keySelector);
 		}
 
 		private void DrawVoidList()
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
-			if (!ImGui.Begin($"{_plugin!.Name}: {_plugin.PluginLocalization.VoidListName}", ref _showListWindow[0]))
+			if (!ImGui.Begin(
+				    $"{this.plugin!.Name}: {this.plugin.PluginLocalization.VoidListName}",
+				    ref this.showListWindow[0]))
 			{
 				ImGui.End();
 				return;
 			}
 
-			if (ImGui.BeginTable("VoidListTable", 6,
-				ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
+			if (ImGui.BeginTable(
+				    "VoidListTable",
+				    6,
+				    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
 			{
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnFirstname);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnLastname);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnWorld);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnReason);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnFirstname);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnLastname);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnWorld);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnReason);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
 				VoidItem? itemToRemove = null;
 
-				_sortedContainer[0] ??= VoidList;
+				this.sortedContainer[0] ??= this.VoidList;
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
 				if (sortSpecs.SpecsDirty)
 				{
-					_sortAscending[0] = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending;
+					this.sortAscending[0] = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending;
 
 					switch (sortSpecs.Specs.ColumnIndex)
 					{
 						case 0:
-							_sortedContainer[0] = SortContainer(VoidList, x => x.Firstname,
-								_sortAscending[0], out _sortKeySelector[0]);
+							this.sortedContainer[0] = SortContainer(
+								this.VoidList,
+								x => x.Firstname,
+								this.sortAscending[0],
+								out this.sortKeySelector[0]);
 							break;
 						case 1:
-							_sortedContainer[0] = SortContainer(VoidList, x => x.Lastname,
-								_sortAscending[0], out _sortKeySelector[0]);
+							this.sortedContainer[0] = SortContainer(
+								this.VoidList,
+								x => x.Lastname,
+								this.sortAscending[0],
+								out this.sortKeySelector[0]);
 							break;
 						case 2:
-							_sortedContainer[0] = SortContainer(VoidList, x => x.HomeworldName,
-								_sortAscending[0], out _sortKeySelector[0]);
+							this.sortedContainer[0] = SortContainer(
+								this.VoidList,
+								x => x.HomeworldName,
+								this.sortAscending[0],
+								out this.sortKeySelector[0]);
 							break;
 						case 3:
-							_sortedContainer[0] = SortContainer(VoidList, x => x.Time,
-								_sortAscending[0], out _sortKeySelector[0]);
+							this.sortedContainer[0] = SortContainer(
+								this.VoidList,
+								x => x.Time,
+								this.sortAscending[0],
+								out this.sortKeySelector[0]);
 							break;
 						case 4:
-							_sortedContainer[0] = SortContainer(VoidList, x => x.Reason,
-								_sortAscending[0], out _sortKeySelector[0]);
+							this.sortedContainer[0] = SortContainer(
+								this.VoidList,
+								x => x.Reason,
+								this.sortAscending[0],
+								out this.sortKeySelector[0]);
 							break;
 					}
 
 					sortSpecs.SpecsDirty = false;
 				}
 
-				foreach (var item in _sortedContainer[0])
+				foreach (var item in this.sortedContainer[0])
 				{
 					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Firstname);
@@ -282,7 +337,7 @@ namespace Visibility.Configuration
 					ImGui.TextUnformatted(item.Reason);
 					ImGui.TableNextColumn();
 
-					if (ImGui.Button($"{_plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
+					if (ImGui.Button($"{this.plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
@@ -292,67 +347,89 @@ namespace Visibility.Configuration
 
 				if (itemToRemove != null)
 				{
-					if (_plugin.ObjectTable
-						.SingleOrDefault(x =>
-							x is PlayerCharacter playerCharacter &&
-							playerCharacter.Name.TextValue.Equals(itemToRemove.Name, StringComparison.Ordinal) &&
-							playerCharacter.HomeWorld.Id == itemToRemove.HomeworldId) is PlayerCharacter a)
+					if (this.plugin.ObjectTable
+						    .SingleOrDefault(
+							    x =>
+								    x is PlayerCharacter playerCharacter &&
+								    playerCharacter.Name.TextValue.Equals(
+									    itemToRemove.Name,
+									    StringComparison.Ordinal) &&
+								    playerCharacter.HomeWorld.Id == itemToRemove.HomeworldId) is PlayerCharacter a)
 					{
 						a.Render();
 					}
 
-					VoidList.Remove(itemToRemove);
-					Save();
+					this.VoidList.Remove(itemToRemove);
+					this.Save();
 
-					_sortedContainer[0] = SortContainer(VoidList, _sortKeySelector[0], _sortAscending[0],
-						out _sortKeySelector[0]);
+					this.sortedContainer[0] = SortContainer(
+						this.VoidList,
+						this.sortKeySelector[0],
+						this.sortAscending[0],
+						out this.sortKeySelector[0]);
 				}
 
 				var manual = true;
 
-				if (_plugin.ClientState.LocalPlayer?.TargetObjectId > 0
-				    && _plugin.ObjectTable
-						    .SingleOrDefault(x => x is PlayerCharacter
-						                          && x.ObjectKind != ObjectKind.Companion
-						                          && x.ObjectId == _plugin.ClientState.LocalPlayer
-							                          ?.TargetObjectId) is
+				if (this.plugin.ClientState.LocalPlayer?.TargetObjectId > 0
+				    && this.plugin.ObjectTable
+						    .SingleOrDefault(
+							    x => x is PlayerCharacter
+							         && x.ObjectKind != ObjectKind.Companion
+							         && x.ObjectId == this.plugin.ClientState.LocalPlayer
+								         ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
-					Array.Clear(_buffer[0], 0, _buffer[0].Length);
-					Array.Clear(_buffer[1], 0, _buffer[1].Length);
-					Array.Clear(_buffer[2], 0, _buffer[2].Length);
+					Array.Clear(this.buffer[0], 0, this.buffer[0].Length);
+					Array.Clear(this.buffer[1], 0, this.buffer[1].Length);
+					Array.Clear(this.buffer[2], 0, this.buffer[2].Length);
 
-					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[0], 0);
-					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[1], 0);
-					Encoding.Default.GetBytes(actor.HomeWorld.GameData!.Name).CopyTo(_buffer[2], 0);
+					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(this.buffer[0], 0);
+					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(this.buffer[1], 0);
+					Encoding.Default.GetBytes(actor.HomeWorld.GameData!.Name).CopyTo(this.buffer[2], 0);
 
 					manual = false;
 				}
 
 				ImGui.TableNextColumn();
-				ImGui.InputText("###playerFirstName", _buffer[0], (uint) _buffer[0].Length,
+				ImGui.InputText(
+					"###playerFirstName",
+					this.buffer[0],
+					(uint)this.buffer[0].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
 				ImGui.TableNextColumn();
-				ImGui.InputText("###playerLastName", _buffer[1], (uint) _buffer[1].Length,
+				ImGui.InputText(
+					"###playerLastName",
+					this.buffer[1],
+					(uint)this.buffer[1].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
 				ImGui.TableNextColumn();
-				ImGui.InputText("###homeworldName", _buffer[2], (uint) _buffer[2].Length,
+				ImGui.InputText(
+					"###homeworldName",
+					this.buffer[2],
+					(uint)this.buffer[2].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
 				ImGui.TableNextColumn();
 				ImGui.TableNextColumn();
-				ImGui.InputText("###reason", _buffer[3], (uint) _buffer[3].Length);
+				ImGui.InputText("###reason", this.buffer[3], (uint)this.buffer[3].Length);
 				ImGui.TableNextColumn();
 
-				if (ImGui.Button(_plugin.PluginLocalization.OptionAddPlayer))
+				if (ImGui.Button(this.plugin.PluginLocalization.OptionAddPlayer))
 				{
-					_plugin.VoidPlayer(manual ? "VoidUIManual" : string.Empty,
-						$"{_buffer[0].ByteToString()} {_buffer[1].ByteToString()} {_buffer[2].ByteToString()} {_buffer[3].ByteToString()}");
+					this.plugin.VoidPlayer(
+						manual ? "VoidUIManual" : string.Empty,
+						$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
 
-					foreach (var item in _buffer)
+					foreach (var item in this.buffer)
+					{
 						Array.Clear(item, 0, item.Length);
+					}
 
-					_sortedContainer[0] = SortContainer(VoidList, _sortKeySelector[0], _sortAscending[0],
-						out _sortKeySelector[0]);
+					this.sortedContainer[0] = SortContainer(
+						this.VoidList,
+						this.sortKeySelector[0],
+						this.sortAscending[0],
+						out this.sortKeySelector[0]);
 				}
 
 				ImGui.EndTable();
@@ -364,62 +441,81 @@ namespace Visibility.Configuration
 		private void DrawWhitelist()
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
-			if (!ImGui.Begin($"{_plugin!.Name}: {_plugin.PluginLocalization.WhitelistName}", ref _showListWindow[1]))
+			if (!ImGui.Begin(
+				    $"{this.plugin!.Name}: {this.plugin.PluginLocalization.WhitelistName}",
+				    ref this.showListWindow[1]))
 			{
 				ImGui.End();
 				return;
 			}
 
-			if (ImGui.BeginTable("WhitelistTable", 6,
-				ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
+			if (ImGui.BeginTable(
+				    "WhitelistTable",
+				    6,
+				    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
 			{
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnFirstname);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnLastname);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnWorld);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnReason);
-				ImGui.TableSetupColumn(_plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnFirstname);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnLastname);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnWorld);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnReason);
+				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
 				VoidItem? itemToRemove = null;
 
-				_sortedContainer[1] ??= Whitelist;
+				this.sortedContainer[1] ??= this.Whitelist;
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
 				if (sortSpecs.SpecsDirty)
 				{
-					_sortAscending[1] = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending;
+					this.sortAscending[1] = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending;
 
 					switch (sortSpecs.Specs.ColumnIndex)
 					{
 						case 0:
-							_sortedContainer[1] = SortContainer(Whitelist, x => x.Firstname,
-								_sortAscending[1], out _sortKeySelector[1]);
+							this.sortedContainer[1] = SortContainer(
+								this.Whitelist,
+								x => x.Firstname,
+								this.sortAscending[1],
+								out this.sortKeySelector[1]);
 							break;
 						case 1:
-							_sortedContainer[1] = SortContainer(Whitelist, x => x.Lastname,
-								_sortAscending[1], out _sortKeySelector[1]);
+							this.sortedContainer[1] = SortContainer(
+								this.Whitelist,
+								x => x.Lastname,
+								this.sortAscending[1],
+								out this.sortKeySelector[1]);
 							break;
 						case 2:
-							_sortedContainer[1] = SortContainer(Whitelist, x => x.HomeworldName,
-								_sortAscending[1], out _sortKeySelector[1]);
+							this.sortedContainer[1] = SortContainer(
+								this.Whitelist,
+								x => x.HomeworldName,
+								this.sortAscending[1],
+								out this.sortKeySelector[1]);
 							break;
 						case 3:
-							_sortedContainer[1] = SortContainer(Whitelist, x => x.Time,
-								_sortAscending[1], out _sortKeySelector[1]);
+							this.sortedContainer[1] = SortContainer(
+								this.Whitelist,
+								x => x.Time,
+								this.sortAscending[1],
+								out this.sortKeySelector[1]);
 							break;
 						case 4:
-							_sortedContainer[1] = SortContainer(Whitelist, x => x.Reason,
-								_sortAscending[1], out _sortKeySelector[1]);
+							this.sortedContainer[1] = SortContainer(
+								this.Whitelist,
+								x => x.Reason,
+								this.sortAscending[1],
+								out this.sortKeySelector[1]);
 							break;
 					}
 
 					sortSpecs.SpecsDirty = false;
 				}
 
-				foreach (var item in _sortedContainer[1])
+				foreach (var item in this.sortedContainer[1])
 				{
 					ImGui.TableNextColumn();
 					ImGui.TextUnformatted(item.Firstname);
@@ -433,7 +529,7 @@ namespace Visibility.Configuration
 					ImGui.TextUnformatted(item.Reason);
 					ImGui.TableNextColumn();
 
-					if (ImGui.Button($"{_plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
+					if (ImGui.Button($"{this.plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
@@ -443,57 +539,76 @@ namespace Visibility.Configuration
 
 				if (itemToRemove != null)
 				{
-					Whitelist.Remove(itemToRemove);
-					Save();
-					_sortedContainer[1] = SortContainer(Whitelist, _sortKeySelector[1], _sortAscending[1],
-						out _sortKeySelector[1]);
+					this.Whitelist.Remove(itemToRemove);
+					this.Save();
+					this.sortedContainer[1] = SortContainer(
+						this.Whitelist,
+						this.sortKeySelector[1],
+						this.sortAscending[1],
+						out this.sortKeySelector[1]);
 				}
 
 				var manual = true;
 
-				if (_plugin.ClientState.LocalPlayer?.TargetObjectId > 0
-				    && _plugin.ObjectTable
-						    .SingleOrDefault(x => x is PlayerCharacter
-						                          && x.ObjectKind != ObjectKind.Companion
-						                          && x.ObjectId == _plugin.ClientState.LocalPlayer
-							                          ?.TargetObjectId) is
+				if (this.plugin.ClientState.LocalPlayer?.TargetObjectId > 0
+				    && this.plugin.ObjectTable
+						    .SingleOrDefault(
+							    x => x is PlayerCharacter
+							         && x.ObjectKind != ObjectKind.Companion
+							         && x.ObjectId == this.plugin.ClientState.LocalPlayer
+								         ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
-					Array.Clear(_buffer[4], 0, _buffer[4].Length);
-					Array.Clear(_buffer[5], 0, _buffer[5].Length);
-					Array.Clear(_buffer[6], 0, _buffer[6].Length);
+					Array.Clear(this.buffer[4], 0, this.buffer[4].Length);
+					Array.Clear(this.buffer[5], 0, this.buffer[5].Length);
+					Array.Clear(this.buffer[6], 0, this.buffer[6].Length);
 
-					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(_buffer[4], 0);
-					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(_buffer[5], 0);
-					Encoding.Default.GetBytes(actor.HomeWorld.GameData!.Name).CopyTo(_buffer[6], 0);
+					Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(this.buffer[4], 0);
+					Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(this.buffer[5], 0);
+					Encoding.Default.GetBytes(actor.HomeWorld.GameData!.Name).CopyTo(this.buffer[6], 0);
 
 					manual = false;
 				}
 
 				ImGui.TableNextColumn();
-				ImGui.InputText("###playerFirstName", _buffer[4], (uint) _buffer[4].Length,
+				ImGui.InputText(
+					"###playerFirstName",
+					this.buffer[4],
+					(uint)this.buffer[4].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
 				ImGui.TableNextColumn();
-				ImGui.InputText("###playerLastName", _buffer[5], (uint) _buffer[5].Length,
+				ImGui.InputText(
+					"###playerLastName",
+					this.buffer[5],
+					(uint)this.buffer[5].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
 				ImGui.TableNextColumn();
-				ImGui.InputText("###homeworldName", _buffer[6], (uint) _buffer[6].Length,
+				ImGui.InputText(
+					"###homeworldName",
+					this.buffer[6],
+					(uint)this.buffer[6].Length,
 					ImGuiInputTextFlags.CharsNoBlank);
 				ImGui.TableNextColumn();
 				ImGui.TableNextColumn();
-				ImGui.InputText("###reason", _buffer[7], (uint) _buffer[7].Length);
+				ImGui.InputText("###reason", this.buffer[7], (uint)this.buffer[7].Length);
 				ImGui.TableNextColumn();
 
-				if (ImGui.Button(_plugin.PluginLocalization.OptionAddPlayer))
+				if (ImGui.Button(this.plugin.PluginLocalization.OptionAddPlayer))
 				{
-					_plugin.WhitelistPlayer(manual ? "WhitelistUIManual" : string.Empty,
-						$"{_buffer[4].ByteToString()} {_buffer[5].ByteToString()} {_buffer[6].ByteToString()} {_buffer[7].ByteToString()}");
+					this.plugin.WhitelistPlayer(
+						manual ? "WhitelistUIManual" : string.Empty,
+						$"{this.buffer[4].ByteToString()} {this.buffer[5].ByteToString()} {this.buffer[6].ByteToString()} {this.buffer[7].ByteToString()}");
 
-					foreach (var item in _buffer)
+					foreach (var item in this.buffer)
+					{
 						Array.Clear(item, 0, item.Length);
+					}
 
-					_sortedContainer[1] = SortContainer(Whitelist, _sortKeySelector[1], _sortAscending[1],
-						out _sortKeySelector[1]);
+					this.sortedContainer[1] = SortContainer(
+						this.Whitelist,
+						this.sortKeySelector[1],
+						this.sortAscending[1],
+						out this.sortKeySelector[1]);
 				}
 
 				ImGui.EndTable();

@@ -31,12 +31,12 @@ namespace Visibility.Ipc
 
 		public VisibilityProvider(DalamudPluginInterface pluginInterface, IVisibilityApi api)
 		{
-			Api = api;
+			this.Api = api;
 
 			try
 			{
-				ProviderApiVersion = pluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
-				ProviderApiVersion.RegisterFunc(() => api.ApiVersion);
+				this.ProviderApiVersion = pluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
+				this.ProviderApiVersion.RegisterFunc(() => api.ApiVersion);
 			}
 			catch (Exception e)
 			{
@@ -45,9 +45,9 @@ namespace Visibility.Ipc
 
 			try
 			{
-				ProviderGetVoidListEntries =
+				this.ProviderGetVoidListEntries =
 					pluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetVoidListEntries);
-				ProviderGetVoidListEntries.RegisterFunc(api.GetVoidListEntries);
+				this.ProviderGetVoidListEntries.RegisterFunc(api.GetVoidListEntries);
 			}
 			catch (Exception e)
 			{
@@ -56,9 +56,9 @@ namespace Visibility.Ipc
 
 			try
 			{
-				ProviderAddToVoidList =
+				this.ProviderAddToVoidList =
 					pluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToVoidList);
-				ProviderAddToVoidList.RegisterAction(api.AddToVoidList);
+				this.ProviderAddToVoidList.RegisterAction(api.AddToVoidList);
 			}
 			catch (Exception e)
 			{
@@ -67,9 +67,9 @@ namespace Visibility.Ipc
 
 			try
 			{
-				ProviderRemoveFromVoidList =
+				this.ProviderRemoveFromVoidList =
 					pluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromVoidList);
-				ProviderRemoveFromVoidList.RegisterAction(api.RemoveFromVoidList);
+				this.ProviderRemoveFromVoidList.RegisterAction(api.RemoveFromVoidList);
 			}
 			catch (Exception e)
 			{
@@ -78,9 +78,9 @@ namespace Visibility.Ipc
 			
 			try
 			{
-				ProviderGetWhitelistEntries =
+				this.ProviderGetWhitelistEntries =
 					pluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
-				ProviderGetWhitelistEntries.RegisterFunc(api.GetWhitelistEntries);
+				this.ProviderGetWhitelistEntries.RegisterFunc(api.GetWhitelistEntries);
 			}
 			catch (Exception e)
 			{
@@ -89,9 +89,9 @@ namespace Visibility.Ipc
 
 			try
 			{
-				ProviderAddToWhitelist =
+				this.ProviderAddToWhitelist =
 					pluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
-				ProviderAddToWhitelist.RegisterAction(api.AddToWhitelist);
+				this.ProviderAddToWhitelist.RegisterAction(api.AddToWhitelist);
 			}
 			catch (Exception e)
 			{
@@ -100,9 +100,9 @@ namespace Visibility.Ipc
 
 			try
 			{
-				ProviderRemoveFromWhitelist =
+				this.ProviderRemoveFromWhitelist =
 					pluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
-				ProviderRemoveFromWhitelist.RegisterAction(api.RemoveFromWhitelist);
+				this.ProviderRemoveFromWhitelist.RegisterAction(api.RemoveFromWhitelist);
 			}
 			catch (Exception e)
 			{
@@ -111,9 +111,9 @@ namespace Visibility.Ipc
 			
 			try
 			{
-				ProviderEnable =
+				this.ProviderEnable =
 					pluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
-				ProviderEnable.RegisterAction(api.Enable);
+				this.ProviderEnable.RegisterAction(api.Enable);
 			}
 			catch (Exception e)
 			{
@@ -123,14 +123,14 @@ namespace Visibility.Ipc
 
 		public void Dispose()
 		{
-			ProviderApiVersion?.UnregisterFunc();
-			ProviderGetVoidListEntries?.UnregisterFunc();
-			ProviderAddToVoidList?.UnregisterAction();
-			ProviderRemoveFromVoidList?.UnregisterAction();
-			ProviderGetWhitelistEntries?.UnregisterFunc();
-			ProviderAddToWhitelist?.UnregisterAction();
-			ProviderRemoveFromWhitelist?.UnregisterAction();
-			ProviderEnable?.UnregisterAction();
+			this.ProviderApiVersion?.UnregisterFunc();
+			this.ProviderGetVoidListEntries?.UnregisterFunc();
+			this.ProviderAddToVoidList?.UnregisterAction();
+			this.ProviderRemoveFromVoidList?.UnregisterAction();
+			this.ProviderGetWhitelistEntries?.UnregisterFunc();
+			this.ProviderAddToWhitelist?.UnregisterAction();
+			this.ProviderRemoveFromWhitelist?.UnregisterAction();
+			this.ProviderEnable?.UnregisterAction();
 		}
 	}
 }

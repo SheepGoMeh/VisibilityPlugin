@@ -11,15 +11,15 @@ namespace Visibility.Void
 		[JsonIgnore]
 		public string Name
 		{
-			get => $"{Firstname} {Lastname}";
+			get => $"{this.Firstname} {this.Lastname}";
 			set
 			{
 				var name = value.Split(' ');
-				Firstname = name[0].ToUppercase();
-				Lastname = name[1].ToUppercase();
+				this.Firstname = name[0].ToUppercase();
+				this.Lastname = name[1].ToUppercase();
 
-				var nameBytes = Encoding.UTF8.GetBytes(Name + '\0');
-				NameBytes = nameBytes.Length < 64 ? nameBytes : nameBytes.Take(64).ToArray();
+				var nameBytes = Encoding.UTF8.GetBytes(this.Name + '\0');
+				this.NameBytes = nameBytes.Length < 64 ? nameBytes : nameBytes.Take(64).ToArray();
 			}
 		}
 
@@ -35,43 +35,43 @@ namespace Visibility.Void
 		
 		public VoidItem()
 		{
-			NameBytes = Array.Empty<byte>();
-			Firstname = string.Empty;
-			Lastname = string.Empty;
-			HomeworldName = string.Empty;
-			Reason = string.Empty;
+			this.NameBytes = Array.Empty<byte>();
+			this.Firstname = string.Empty;
+			this.Lastname = string.Empty;
+			this.HomeworldName = string.Empty;
+			this.Reason = string.Empty;
 		}
 
 		public VoidItem(PlayerCharacter actor, string reason, bool manual) : this()
 		{
-			Name = actor.Name.TextValue;
-			Time = DateTime.Now;
-			HomeworldId = actor.HomeWorld.Id;
-			HomeworldName = actor.HomeWorld.GameData!.Name;
-			Reason = reason;
-			Manual = manual;
+			this.Name = actor.Name.TextValue;
+			this.Time = DateTime.Now;
+			this.HomeworldId = actor.HomeWorld.Id;
+			this.HomeworldName = actor.HomeWorld.GameData!.Name;
+			this.Reason = reason;
+			this.Manual = manual;
 		}
 
 		public VoidItem(string name, string homeworldName, uint homeworldId, string reason, bool manual) : this()
 		{
-			Name = name;
-			Time = DateTime.Now;
-			HomeworldId = homeworldId;
-			HomeworldName = homeworldName;
-			Reason = reason;
-			Manual = manual;
+			this.Name = name;
+			this.Time = DateTime.Now;
+			this.HomeworldId = homeworldId;
+			this.HomeworldName = homeworldName;
+			this.Reason = reason;
+			this.Manual = manual;
 		}
 
 		[JsonConstructor]
 		public VoidItem(string firstname, string lastname, string homeworldName, DateTime time, uint homeworldId,
 			string reason, bool manual) : this()
 		{
-			Name = $"{firstname} {lastname}";
-			HomeworldName = homeworldName;
-			Time = time;
-			HomeworldId = homeworldId;
-			Reason = reason;
-			Manual = manual;
+			this.Name = $"{firstname} {lastname}";
+			this.HomeworldName = homeworldName;
+			this.Time = time;
+			this.HomeworldId = homeworldId;
+			this.Reason = reason;
+			this.Manual = manual;
 		}
 	}
 }

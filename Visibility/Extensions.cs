@@ -47,7 +47,8 @@ namespace Visibility
 
 		public static async void Rerender(this GameObject a)
 		{
-			await Task.Run(async () =>
+			await Task.Run(
+				async () =>
 			{
 				try
 				{
@@ -87,7 +88,8 @@ namespace Visibility
 
 		public static async void Render(this GameObject a)
 		{
-			await Task.Run(() =>
+			await Task.Run(
+				() =>
 			{
 				try
 				{
@@ -95,7 +97,11 @@ namespace Visibility
 					var renderToggle = Marshal.ReadInt32(addrRenderToggle);
 					if ((renderToggle & (int) VisibilityFlags.Invisible) != (int) VisibilityFlags.Invisible &&
 					    (a.ObjectKind != ObjectKind.MountType ||
-					     (renderToggle & (int) VisibilityFlags.Unknown15) != (int) VisibilityFlags.Unknown15)) return;
+					     (renderToggle & (int) VisibilityFlags.Unknown15) != (int) VisibilityFlags.Unknown15))
+					{
+						return;
+					}
+
 					renderToggle &= ~(int)VisibilityFlags.Invisible;
 					Marshal.WriteInt32(addrRenderToggle, renderToggle);
 				}
@@ -114,7 +120,8 @@ namespace Visibility
 
 		public static async void Hide(this GameObject a)
 		{
-			await Task.Run(() =>
+			await Task.Run(
+				() =>
 			{
 				try
 				{

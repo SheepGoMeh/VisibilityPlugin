@@ -10,19 +10,18 @@ namespace Visibility.Api
 	{
 		public int ApiVersion => 1;
 
-		private bool _initialised;
-		private readonly VisibilityPlugin _plugin;
-
+		private bool initialised;
+		private readonly VisibilityPlugin plugin;
 
 		public VisibilityApi(VisibilityPlugin plugin)
 		{
-			_plugin = plugin;
-			_initialised = true;
+			this.plugin = plugin;
+			this.initialised = true;
 		}
 
 		private void CheckInitialised()
 		{
-			if (!_initialised)
+			if (!this.initialised)
 			{
 				throw new Exception("PluginShare is not initialised.");
 			}
@@ -30,9 +29,9 @@ namespace Visibility.Api
 
 		public IEnumerable<string> GetVoidListEntries()
 		{
-			CheckInitialised();
+			this.CheckInitialised();
 
-			return _plugin
+			return this.plugin
 				.Configuration
 				.VoidList
 				.Select(x => $"{x.Name} {x.HomeworldId} {x.Reason}")
@@ -41,47 +40,49 @@ namespace Visibility.Api
 
 		public void AddToVoidList(string name, uint worldId, string reason)
 		{
-			CheckInitialised();
+			this.CheckInitialised();
 
-			var world = _plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+			var world = this.plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
 
 			if (world == null)
 			{
 				throw new Exception($"Invalid worldId ({worldId}).");
 			}
 
-			_plugin.VoidPlayer("", $"{name} {world.Name} {reason}");
+			this.plugin.VoidPlayer("", $"{name} {world.Name} {reason}");
 		}
 
 		public void RemoveFromVoidList(string name, uint worldId)
 		{
-			CheckInitialised();
+			this.CheckInitialised();
 
-			var item = _plugin.Configuration.VoidList.SingleOrDefault(x => x.Name == name && x.HomeworldId == worldId);
+			var item = this.plugin.Configuration.VoidList.SingleOrDefault(
+				x => x.Name == name && x.HomeworldId == worldId);
 
 			if (item == null)
 			{
 				return;
 			}
 
-			if (_plugin.ObjectTable
-				.SingleOrDefault(x =>
-					x is PlayerCharacter playerCharacter &&
-					playerCharacter.Name.TextValue.Equals(item.Name, StringComparison.Ordinal) &&
-					playerCharacter.HomeWorld.Id == item.HomeworldId) is PlayerCharacter a)
+			if (this.plugin.ObjectTable
+				    .SingleOrDefault(
+					    x =>
+						    x is PlayerCharacter playerCharacter &&
+						    playerCharacter.Name.TextValue.Equals(item.Name, StringComparison.Ordinal) &&
+						    playerCharacter.HomeWorld.Id == item.HomeworldId) is PlayerCharacter a)
 			{
 				a.Render();
 			}
 
-			_plugin.Configuration.VoidList.Remove(item);
-			_plugin.Configuration.Save();
+			this.plugin.Configuration.VoidList.Remove(item);
+			this.plugin.Configuration.Save();
 		}
-		
+
 		public IEnumerable<string> GetWhitelistEntries()
 		{
-			CheckInitialised();
+			this.CheckInitialised();
 
-			return _plugin
+			return this.plugin
 				.Configuration
 				.Whitelist
 				.Select(x => $"{x.Name} {x.HomeworldId} {x.Reason}")
@@ -90,41 +91,42 @@ namespace Visibility.Api
 
 		public void AddToWhitelist(string name, uint worldId, string reason)
 		{
-			CheckInitialised();
+			this.CheckInitialised();
 
-			var world = _plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+			var world = this.plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
 
 			if (world == null)
 			{
 				throw new Exception($"Invalid worldId ({worldId}).");
 			}
 
-			_plugin.WhitelistPlayer("", $"{name} {world.Name} {reason}");
+			this.plugin.WhitelistPlayer("", $"{name} {world.Name} {reason}");
 		}
 
 		public void RemoveFromWhitelist(string name, uint worldId)
 		{
-			CheckInitialised();
+			this.CheckInitialised();
 
-			var item = _plugin.Configuration.Whitelist.SingleOrDefault(x => x.Name == name && x.HomeworldId == worldId);
+			var item = this.plugin.Configuration.Whitelist.SingleOrDefault(
+				x => x.Name == name && x.HomeworldId == worldId);
 
 			if (item == null)
 			{
 				return;
 			}
 
-			_plugin.Configuration.Whitelist.Remove(item);
-			_plugin.Configuration.Save();
+			this.plugin.Configuration.Whitelist.Remove(item);
+			this.plugin.Configuration.Save();
 		}
 
 		public void Enable(bool state)
 		{
-			_plugin.Configuration.settingDictionary["enabled"].Invoke(state ? 1 : 0);
+			this.plugin.Configuration.SettingDictionary["enabled"].Invoke(state ? 1 : 0);
 		}
 
 		public void Dispose()
 		{
-			_initialised = false;
+			this.initialised = false;
 		}
 	}
 }
