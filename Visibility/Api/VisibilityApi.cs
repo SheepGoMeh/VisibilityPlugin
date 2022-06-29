@@ -11,11 +11,9 @@ namespace Visibility.Api
 		public int ApiVersion => 1;
 
 		private bool initialised;
-		private readonly VisibilityPlugin plugin;
 
-		public VisibilityApi(VisibilityPlugin plugin)
+		public VisibilityApi()
 		{
-			this.plugin = plugin;
 			this.initialised = true;
 		}
 
@@ -31,7 +29,8 @@ namespace Visibility.Api
 		{
 			this.CheckInitialised();
 
-			return this.plugin
+			return VisibilityPlugin
+				.Instance
 				.Configuration
 				.VoidList
 				.Select(x => $"{x.Name} {x.HomeworldId} {x.Reason}")
@@ -42,21 +41,21 @@ namespace Visibility.Api
 		{
 			this.CheckInitialised();
 
-			var world = this.plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+			var world = VisibilityPlugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
 
 			if (world == null)
 			{
 				throw new Exception($"Invalid worldId ({worldId}).");
 			}
 
-			this.plugin.VoidPlayer("", $"{name} {world.Name} {reason}");
+			VisibilityPlugin.Instance.VoidPlayer("", $"{name} {world.Name} {reason}");
 		}
 
 		public void RemoveFromVoidList(string name, uint worldId)
 		{
 			this.CheckInitialised();
 
-			var item = this.plugin.Configuration.VoidList.SingleOrDefault(
+			var item = VisibilityPlugin.Instance.Configuration.VoidList.SingleOrDefault(
 				x => x.Name == name && x.HomeworldId == worldId);
 
 			if (item == null)
@@ -64,7 +63,7 @@ namespace Visibility.Api
 				return;
 			}
 
-			if (this.plugin.ObjectTable
+			if (VisibilityPlugin.ObjectTable
 				    .SingleOrDefault(
 					    x =>
 						    x is PlayerCharacter playerCharacter &&
@@ -74,15 +73,16 @@ namespace Visibility.Api
 				a.Render();
 			}
 
-			this.plugin.Configuration.VoidList.Remove(item);
-			this.plugin.Configuration.Save();
+			VisibilityPlugin.Instance.Configuration.VoidList.Remove(item);
+			VisibilityPlugin.Instance.Configuration.Save();
 		}
 
 		public IEnumerable<string> GetWhitelistEntries()
 		{
 			this.CheckInitialised();
 
-			return this.plugin
+			return VisibilityPlugin
+				.Instance
 				.Configuration
 				.Whitelist
 				.Select(x => $"{x.Name} {x.HomeworldId} {x.Reason}")
@@ -93,21 +93,21 @@ namespace Visibility.Api
 		{
 			this.CheckInitialised();
 
-			var world = this.plugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+			var world = VisibilityPlugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
 
 			if (world == null)
 			{
 				throw new Exception($"Invalid worldId ({worldId}).");
 			}
 
-			this.plugin.WhitelistPlayer("", $"{name} {world.Name} {reason}");
+			VisibilityPlugin.Instance.WhitelistPlayer("", $"{name} {world.Name} {reason}");
 		}
 
 		public void RemoveFromWhitelist(string name, uint worldId)
 		{
 			this.CheckInitialised();
 
-			var item = this.plugin.Configuration.Whitelist.SingleOrDefault(
+			var item = VisibilityPlugin.Instance.Configuration.Whitelist.SingleOrDefault(
 				x => x.Name == name && x.HomeworldId == worldId);
 
 			if (item == null)
@@ -115,13 +115,13 @@ namespace Visibility.Api
 				return;
 			}
 
-			this.plugin.Configuration.Whitelist.Remove(item);
-			this.plugin.Configuration.Save();
+			VisibilityPlugin.Instance.Configuration.Whitelist.Remove(item);
+			VisibilityPlugin.Instance.Configuration.Save();
 		}
 
 		public void Enable(bool state)
 		{
-			this.plugin.Configuration.SettingDictionary["enabled"].Invoke(state ? 1 : 0);
+			VisibilityPlugin.Instance.Configuration.SettingDictionary["enabled"].Invoke(state ? 1 : 0);
 		}
 
 		public void Dispose()

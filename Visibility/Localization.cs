@@ -6,29 +6,29 @@ namespace Visibility
 {
 	public class Localization
 	{
-		private readonly Dictionary<Language, Dictionary<string, string>> _strings = new();
+		private readonly Dictionary<Language, Dictionary<string, string>> strings = new();
 		public List<Language> AvailableLanguages { get; } = new();
 
 		public Language CurrentLanguage;
 
 		public Localization(Language language = Language.English)
 		{
-			this.LoadStrings(Language.English, "en");
-			this.LoadStrings(Language.French, "fr");
-			this.LoadStrings(Language.German, "de");
-			this.LoadStrings(Language.Italian, "it");
-			this.LoadStrings(Language.Portuguese, "pt-BR");
-			this.LoadStrings(Language.Spanish, "es-ES");
-			this.LoadStrings(Language.Russian, "ru");
-			this.LoadStrings(Language.Japanese, "ja");
-			this.LoadStrings(Language.ChineseSimplified, "zh-CN");
-			this.LoadStrings(Language.ChineseTraditional, "zh-TW");
+			this.LoadStrings(Language.English);
+			this.LoadStrings(Language.French);
+			this.LoadStrings(Language.German);
+			this.LoadStrings(Language.Italian);
+			this.LoadStrings(Language.Portuguese);
+			this.LoadStrings(Language.Spanish);
+			this.LoadStrings(Language.Russian);
+			this.LoadStrings(Language.Japanese);
+			this.LoadStrings(Language.ChineseSimplified);
+			this.LoadStrings(Language.ChineseTraditional);
 			this.CurrentLanguage = this.AvailableLanguages.Contains(language) ? language : Language.English;
 		}
 
-		private void LoadStrings(Language language, string languageName)
+		private void LoadStrings(Language language)
 		{
-			string jsonString = language switch
+			var jsonString = language switch
 			{
 				Language.English => Properties.Resources.en_strings,
 				Language.French => Properties.Resources.fr_strings,
@@ -44,10 +44,10 @@ namespace Visibility
 			};
 
 			this.AvailableLanguages.Add(language);
-			this._strings[language] = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)!;
+			this.strings[language] = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)!;
 		}
 
-		public string GetString(string key, Language language) => this._strings[language].ContainsKey(key) ? this._strings[language][key] : key;
+		public string GetString(string key, Language language) => this.strings[language].ContainsKey(key) ? this.strings[language][key] : key;
 
 		public enum Language
 		{

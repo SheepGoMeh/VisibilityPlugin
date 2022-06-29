@@ -27,8 +27,8 @@ namespace Visibility.Utils
 
 	internal class CharacterDrawResolver
 	{
-		private HashSet<uint> HiddenObjectIds = new();
-		private HashSet<uint> ObjectIdsToShow = new();
+		private readonly HashSet<uint> hiddenObjectIds = new();
+		private readonly HashSet<uint> objectIdsToShow = new();
 
 		private readonly Dictionary<UnitType, Dictionary<ContainerType, HashSet<uint>>> containers = new()
 		{
@@ -70,8 +70,8 @@ namespace Visibility.Utils
 			},
 		};
 
-		private HashSet<uint> HiddenMinionObjectIds = new HashSet<uint>();
-		private HashSet<uint> MinionObjectIdsToShow = new HashSet<uint>();
+		private readonly HashSet<uint> hiddenMinionObjectIds = new HashSet<uint>();
+		private readonly HashSet<uint> minionObjectIdsToShow = new HashSet<uint>();
 
 		private unsafe BattleChara* localPlayer = null;
 
@@ -93,14 +93,12 @@ namespace Visibility.Utils
 		private Hook<CharacterDtorPrototype>? hookCharacterDtor;
 
 		private readonly AddressResolver address = new();
-		private VisibilityPlugin? plugin;
 
-		public unsafe void Init(VisibilityPlugin visibilityPlugin)
+		public unsafe void Init()
 		{
-			this.plugin = visibilityPlugin;
-			this.address.Setup(this.plugin.SigScanner);
+			this.address.Setup(VisibilityPlugin.SigScanner);
 
-			var localPlayerAddress = this.plugin!.ClientState.LocalPlayer?.Address;
+			var localPlayerAddress = VisibilityPlugin.ClientState.LocalPlayer?.Address;
 
 			if (localPlayerAddress.HasValue && this.localPlayer != (BattleChara*)localPlayerAddress.Value)
 			{
@@ -130,13 +128,13 @@ namespace Visibility.Utils
 		{
 			if (unitType == UnitType.Minions)
 			{
-				this.MinionObjectIdsToShow.UnionWith(this.containers[unitType][containerType]);
-				this.HiddenMinionObjectIds.ExceptWith(this.containers[unitType][containerType]);
+				this.minionObjectIdsToShow.UnionWith(this.containers[unitType][containerType]);
+				this.hiddenMinionObjectIds.ExceptWith(this.containers[unitType][containerType]);
 			}
 			else
 			{
-				this.ObjectIdsToShow.UnionWith(this.containers[unitType][containerType]);
-				this.HiddenObjectIds.ExceptWith(this.containers[unitType][containerType]);
+				this.objectIdsToShow.UnionWith(this.containers[unitType][containerType]);
+				this.hiddenObjectIds.ExceptWith(this.containers[unitType][containerType]);
 			}
 		}
 
@@ -150,42 +148,42 @@ namespace Visibility.Utils
 
 		public unsafe void ShowAll()
 		{
-			foreach (var actor in this.plugin!.ObjectTable)
+			foreach (var actor in VisibilityPlugin.ObjectTable)
 			{
 				var thisPtr = (Character*)actor.Address;
 
 				if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Companion)
 				{
-					if (!this.HiddenMinionObjectIds.Contains(thisPtr->CompanionOwnerID))
+					if (!this.hiddenMinionObjectIds.Contains(thisPtr->CompanionOwnerID))
 					{
 						continue;
 					}
 
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					this.MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
+					this.minionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 				}
 				else
 				{
-					if (!this.HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+					if (!this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
 					{
 						continue;
 					}
 
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					this.HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+					this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				}
 			}
 		}
 
 		public void ShowPlayer(uint id)
 		{
-			if (!this.HiddenObjectIds.Contains(id))
+			if (!this.hiddenObjectIds.Contains(id))
 			{
 				return;
 			}
 
-			this.ObjectIdsToShow.Add(id);
-			this.HiddenObjectIds.Remove(id);
+			this.objectIdsToShow.Add(id);
+			this.hiddenObjectIds.Remove(id);
 		}
 
 		private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len)
@@ -205,16 +203,16 @@ namespace Visibility.Utils
 
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
 		{
-			var localPlayerAddress = this.plugin!.ClientState.LocalPlayer?.Address;
+			var localPlayerAddress = VisibilityPlugin.ClientState.LocalPlayer?.Address;
 
 			if (localPlayerAddress.HasValue && this.localPlayer != (BattleChara*)localPlayerAddress.Value)
 			{
 				this.localPlayer = (BattleChara*)localPlayerAddress.Value;
 			}
 
-			var nowLoadingWidget = this.plugin.GameGui.GetAddonByName("NowLoading", 1);
+			var nowLoadingWidget = VisibilityPlugin.GameGui.GetAddonByName("NowLoading", 1);
 
-			if (this.plugin.Configuration.Enabled && nowLoadingWidget != IntPtr.Zero &&
+			if (VisibilityPlugin.Instance.Configuration.Enabled && nowLoadingWidget != IntPtr.Zero &&
 			    !((AtkUnitBase*)nowLoadingWidget)->IsVisible && localPlayerAddress.HasValue &&
 			    thisPtr != (Character*)this.localPlayer)
 			{
@@ -247,11 +245,11 @@ namespace Visibility.Utils
 							this.containers[UnitType.Players][ContainerType.Party].Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((this.plugin.Condition[ConditionFlag.BoundByDuty]
-						     || this.plugin.Condition[ConditionFlag.BetweenAreas]
-						     || this.plugin.Condition[ConditionFlag.WatchingCutscene])
-						    && !this.plugin.Configuration.TerritoryTypeWhitelist.Contains(
-							    this.plugin.ClientState.TerritoryType))
+						if ((VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
+						     || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
+						     || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene])
+						    && !VisibilityPlugin.Instance.Configuration.TerritoryTypeWhitelist.Contains(
+							    VisibilityPlugin.ClientState.TerritoryType))
 						{
 							break;
 						}
@@ -268,7 +266,7 @@ namespace Visibility.Utils
 								.Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						if (this.plugin.Configuration.VoidList.Any(
+						if (VisibilityPlugin.Instance.Configuration.VoidList.Any(
 							    x => UnsafeArrayEqual(
 								         x.NameBytes,
 								         thisPtr->GameObject.Name,
@@ -276,22 +274,22 @@ namespace Visibility.Utils
 							         x.HomeworldId == thisPtr->HomeWorld))
 						{
 							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 							break;
 						}
 
-						if (!this.plugin.Configuration.HidePlayer ||
-						    (this.plugin.Configuration.ShowDeadPlayer && thisPtr->Health == 0) ||
-						    (this.plugin.Configuration.ShowFriendPlayer &&
+						if (!VisibilityPlugin.Instance.Configuration.HidePlayer ||
+						    (VisibilityPlugin.Instance.Configuration.ShowDeadPlayer && thisPtr->Health == 0) ||
+						    (VisibilityPlugin.Instance.Configuration.ShowFriendPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
-						    (this.plugin.Configuration.ShowCompanyPlayer &&
+						    (VisibilityPlugin.Instance.Configuration.ShowCompanyPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Company]
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
-						    (this.plugin.Configuration.ShowPartyPlayer &&
+						    (VisibilityPlugin.Instance.Configuration.ShowPartyPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Party]
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
-						    this.plugin.Configuration.Whitelist.Any(
+						    VisibilityPlugin.Instance.Configuration.Whitelist.Any(
 							    x => UnsafeArrayEqual(
 								         x.NameBytes,
 								         thisPtr->GameObject.Name,
@@ -303,12 +301,12 @@ namespace Visibility.Utils
 						else
 						{
 							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 							break;
 						}
 					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet &&
 					                                     thisPtr->NameID != 6565:
-						if (!this.plugin.Configuration.HidePet
+						if (!VisibilityPlugin.Instance.Configuration.HidePet
 						    || thisPtr->GameObject.OwnerID == this.localPlayer->Character.GameObject.ObjectID)
 						{
 							break;
@@ -334,13 +332,13 @@ namespace Visibility.Utils
 							this.containers[UnitType.Pets][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((this.plugin.Configuration.ShowFriendPet &&
+						if ((VisibilityPlugin.Instance.Configuration.ShowFriendPet &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.OwnerID))
-						    || (this.plugin.Configuration.ShowCompanyPet &&
+						    || (VisibilityPlugin.Instance.Configuration.ShowCompanyPet &&
 						        this.containers[UnitType.Players][ContainerType.Company]
 							        .Contains(thisPtr->GameObject.OwnerID))
-						    || (this.plugin.Configuration.ShowPartyPet &&
+						    || (VisibilityPlugin.Instance.Configuration.ShowPartyPet &&
 						        this.containers[UnitType.Players][ContainerType.Party]
 							        .Contains(thisPtr->GameObject.OwnerID)))
 						{
@@ -349,25 +347,25 @@ namespace Visibility.Utils
 						else
 						{
 							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 							break;
 						}
 					case (byte)ObjectKind.BattleNpc
 						when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && thisPtr->NameID == 6565
 						: // Earthly Star
-						if (this.plugin.Configuration.HideStar
-						    && this.plugin.Condition[ConditionFlag.InCombat]
+						if (VisibilityPlugin.Instance.Configuration.HideStar
+						    && VisibilityPlugin.Condition[ConditionFlag.InCombat]
 						    && thisPtr->GameObject.OwnerID != this.localPlayer->Character.GameObject.ObjectID
 						    && !this.containers[UnitType.Players][ContainerType.Party]
 							    .Contains(thisPtr->GameObject.OwnerID))
 						{
 							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 						}
 
 						break;
 					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Chocobo:
-						if (!this.plugin.Configuration.HideChocobo
+						if (!VisibilityPlugin.Instance.Configuration.HideChocobo
 						    || thisPtr->GameObject.OwnerID == this.localPlayer->Character.GameObject.ObjectID)
 						{
 							break;
@@ -393,13 +391,13 @@ namespace Visibility.Utils
 							this.containers[UnitType.Chocobos][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((this.plugin.Configuration.ShowFriendChocobo &&
+						if ((VisibilityPlugin.Instance.Configuration.ShowFriendChocobo &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.OwnerID))
-						    || (this.plugin.Configuration.ShowCompanyChocobo &&
+						    || (VisibilityPlugin.Instance.Configuration.ShowCompanyChocobo &&
 						        this.containers[UnitType.Players][ContainerType.Company]
 							        .Contains(thisPtr->GameObject.OwnerID))
-						    || (this.plugin.Configuration.ShowPartyChocobo &&
+						    || (VisibilityPlugin.Instance.Configuration.ShowPartyChocobo &&
 						        this.containers[UnitType.Players][ContainerType.Party]
 							        .Contains(thisPtr->GameObject.OwnerID)))
 						{
@@ -408,7 +406,7 @@ namespace Visibility.Utils
 						else
 						{
 							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.HiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 							break;
 						}
 				}
@@ -419,37 +417,37 @@ namespace Visibility.Utils
 
 		private unsafe void CharacterDisableDrawDetour(Character* thisPtr)
 		{
-			var nowLoadingWidget = this.plugin!.GameGui.GetAddonByName("NowLoading", 1);
+			var nowLoadingWidget = VisibilityPlugin.GameGui.GetAddonByName("NowLoading", 1);
 
 			if (nowLoadingWidget != IntPtr.Zero && !((AtkUnitBase*)nowLoadingWidget)->IsVisible &&
-			    !this.plugin.Condition[ConditionFlag.WatchingCutscene])
+			    !VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene])
 			{
 				if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
 				    && (thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
 				{
 					this.containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					this.HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+					this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				}
 
-				if (this.plugin.Configuration.HidePlayer
-				    && this.plugin.Configuration.ShowDeadPlayer
+				if (VisibilityPlugin.Instance.Configuration.HidePlayer
+				    && VisibilityPlugin.Instance.Configuration.ShowDeadPlayer
 				    && thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
 				    && thisPtr->Health == 0
-				    && this.HiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+				    && this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
 				{
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					this.HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+					this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				}
-				else if (this.ObjectIdsToShow.Contains(thisPtr->GameObject.ObjectID))
+				else if (this.objectIdsToShow.Contains(thisPtr->GameObject.ObjectID))
 				{
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					this.ObjectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
+					this.objectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
 				}
-				else if (this.MinionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID))
+				else if (this.minionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID))
 				{
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					this.MinionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
+					this.minionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 				}
 			}
 
@@ -458,8 +456,8 @@ namespace Visibility.Utils
 
 		private unsafe void CompanionEnableDrawDetour(Companion* thisPtr)
 		{
-			if (this.plugin!.Configuration.Enabled
-			    && this.plugin.Configuration.HideMinion
+			if (VisibilityPlugin.Instance.Configuration.Enabled
+			    && VisibilityPlugin.Instance.Configuration.HideMinion
 			    && this.localPlayer != null
 			    && thisPtr->Character.CompanionOwnerID != this.localPlayer->Character.GameObject.ObjectID)
 			{
@@ -483,13 +481,13 @@ namespace Visibility.Utils
 					this.containers[UnitType.Minions][ContainerType.Company].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if ((this.plugin.Configuration.ShowFriendMinion &&
+				if ((VisibilityPlugin.Instance.Configuration.ShowFriendMinion &&
 				     this.containers[UnitType.Players][ContainerType.Friend]
 					     .Contains(thisPtr->Character.CompanionOwnerID))
-				    || (this.plugin.Configuration.ShowCompanyMinion &&
+				    || (VisibilityPlugin.Instance.Configuration.ShowCompanyMinion &&
 				        this.containers[UnitType.Players][ContainerType.Company]
 					        .Contains(thisPtr->Character.CompanionOwnerID))
-				    || (this.plugin.Configuration.ShowPartyMinion &&
+				    || (VisibilityPlugin.Instance.Configuration.ShowPartyMinion &&
 				        this.containers[UnitType.Players][ContainerType.Party]
 					        .Contains(thisPtr->Character.CompanionOwnerID)))
 				{
@@ -497,7 +495,7 @@ namespace Visibility.Utils
 				else
 				{
 					thisPtr->Character.GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-					this.HiddenMinionObjectIds.Add(thisPtr->Character.CompanionOwnerID);
+					this.hiddenMinionObjectIds.Add(thisPtr->Character.CompanionOwnerID);
 				}
 			}
 
@@ -512,8 +510,8 @@ namespace Visibility.Utils
 			        && (thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet ||
 			            thisPtr->GameObject.SubKind == 3)))
 			{
-				this.HiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
-				this.HiddenMinionObjectIds.Remove(thisPtr->GameObject.ObjectID);
+				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+				this.hiddenMinionObjectIds.Remove(thisPtr->GameObject.ObjectID);
 
 				foreach (var container in this.containers)
 				{

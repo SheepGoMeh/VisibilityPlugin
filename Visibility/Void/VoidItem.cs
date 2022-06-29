@@ -63,8 +63,14 @@ namespace Visibility.Void
 		}
 
 		[JsonConstructor]
-		public VoidItem(string firstname, string lastname, string homeworldName, DateTime time, uint homeworldId,
-			string reason, bool manual) : this()
+		public VoidItem(
+			string firstname,
+			string lastname,
+			string homeworldName,
+			DateTime time,
+			uint homeworldId,
+			string reason,
+			bool manual) : this()
 		{
 			this.Name = $"{firstname} {lastname}";
 			this.HomeworldName = homeworldName;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Dalamud.Logging;
-using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Visibility.Api;
 
@@ -29,13 +28,13 @@ namespace Visibility.Ipc
 
 		internal readonly IVisibilityApi Api;
 
-		public VisibilityProvider(DalamudPluginInterface pluginInterface, IVisibilityApi api)
+		public VisibilityProvider(IVisibilityApi api)
 		{
 			this.Api = api;
 
 			try
 			{
-				this.ProviderApiVersion = pluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
+				this.ProviderApiVersion = VisibilityPlugin.PluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
 				this.ProviderApiVersion.RegisterFunc(() => api.ApiVersion);
 			}
 			catch (Exception e)
@@ -46,7 +45,7 @@ namespace Visibility.Ipc
 			try
 			{
 				this.ProviderGetVoidListEntries =
-					pluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetVoidListEntries);
+					VisibilityPlugin.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetVoidListEntries);
 				this.ProviderGetVoidListEntries.RegisterFunc(api.GetVoidListEntries);
 			}
 			catch (Exception e)
@@ -57,7 +56,7 @@ namespace Visibility.Ipc
 			try
 			{
 				this.ProviderAddToVoidList =
-					pluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToVoidList);
+					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToVoidList);
 				this.ProviderAddToVoidList.RegisterAction(api.AddToVoidList);
 			}
 			catch (Exception e)
@@ -68,7 +67,7 @@ namespace Visibility.Ipc
 			try
 			{
 				this.ProviderRemoveFromVoidList =
-					pluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromVoidList);
+					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromVoidList);
 				this.ProviderRemoveFromVoidList.RegisterAction(api.RemoveFromVoidList);
 			}
 			catch (Exception e)
@@ -79,7 +78,7 @@ namespace Visibility.Ipc
 			try
 			{
 				this.ProviderGetWhitelistEntries =
-					pluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
+					VisibilityPlugin.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
 				this.ProviderGetWhitelistEntries.RegisterFunc(api.GetWhitelistEntries);
 			}
 			catch (Exception e)
@@ -90,7 +89,7 @@ namespace Visibility.Ipc
 			try
 			{
 				this.ProviderAddToWhitelist =
-					pluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
+					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
 				this.ProviderAddToWhitelist.RegisterAction(api.AddToWhitelist);
 			}
 			catch (Exception e)
@@ -101,7 +100,7 @@ namespace Visibility.Ipc
 			try
 			{
 				this.ProviderRemoveFromWhitelist =
-					pluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
+					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
 				this.ProviderRemoveFromWhitelist.RegisterAction(api.RemoveFromWhitelist);
 			}
 			catch (Exception e)
@@ -112,7 +111,7 @@ namespace Visibility.Ipc
 			try
 			{
 				this.ProviderEnable =
-					pluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
+					VisibilityPlugin.PluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
 				this.ProviderEnable.RegisterAction(api.Enable);
 			}
 			catch (Exception e)

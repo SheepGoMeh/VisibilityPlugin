@@ -53,46 +53,38 @@ namespace Visibility.Configuration
 			this.Save();
 		}
 
-		private static void CenteredText(string text)
-		{
-			ImGui.SetCursorPosX(
-				ImGui.GetCursorPosX() + ((ImGui.GetColumnWidth() - ImGui.CalcTextSize(text).X) / 2) -
-				(2 * ImGui.GetStyle().CellPadding.X));
-			ImGui.Text(text);
-		}
-
 		public bool DrawConfigUi()
 		{
 			var drawConfig = true;
 
 			ImGui.SetNextWindowSize(new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0), ImGuiCond.Always);
 
-			if (ImGui.Begin($"{this.plugin!.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
+			if (ImGui.Begin($"{VisibilityPlugin.Instance.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
 			{
 				this.Checkbox(nameof(this.Enabled));
 
 				ImGui.SameLine();
-				ImGui.Text(this.plugin.PluginLocalization.OptionEnable);
+				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEnable);
 				var cursorY = ImGui.GetCursorPosY();
 				var comboWidth =
 					(ImGui.CalcTextSize(
-						this.plugin.PluginLocalization.GetString("LanguageName", Localization.Language.English)).X * 2) +
+						VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", Localization.Language.English)).X * 2) +
 					(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
 				ImGui.SameLine(
 					(ImGui.GetContentRegionMax().X / 2) -
-					ImGui.CalcTextSize(this.plugin.PluginLocalization.OptionLanguage).X - comboWidth);
-				ImGui.Text(this.plugin.PluginLocalization.OptionLanguage);
+					ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage).X - comboWidth);
+				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage);
 				ImGui.SameLine();
 				ImGui.PushItemWidth(comboWidth);
-				if (ImGui.BeginCombo("###language", this.plugin.PluginLocalization.LanguageName))
+				if (ImGui.BeginCombo("###language", VisibilityPlugin.Instance.PluginLocalization.LanguageName))
 				{
-					foreach (var language in this.plugin.PluginLocalization.AvailableLanguages.Where(
+					foreach (var language in VisibilityPlugin.Instance.PluginLocalization.AvailableLanguages.Where(
 						         language =>
 							         ImGui.Selectable(
-								         this.plugin.PluginLocalization.GetString("LanguageName", language))))
+								         VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", language))))
 					{
-						this.plugin.Configuration.Language = language;
-						this.plugin.PluginLocalization.CurrentLanguage = language;
+						VisibilityPlugin.Instance.Configuration.Language = language;
+						VisibilityPlugin.Instance.PluginLocalization.CurrentLanguage = language;
 						this.Save();
 					}
 
@@ -113,24 +105,24 @@ namespace Visibility.Configuration
 						string.Empty,
 						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 					ImGui.TableSetupColumn(
-						this.plugin.PluginLocalization.OptionHideAll,
+						VisibilityPlugin.Instance.PluginLocalization.OptionHideAll,
 						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 					ImGui.TableSetupColumn(
-						this.plugin.PluginLocalization.OptionShowParty,
+						VisibilityPlugin.Instance.PluginLocalization.OptionShowParty,
 						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 					ImGui.TableSetupColumn(
-						this.plugin.PluginLocalization.OptionShowFriends,
+						VisibilityPlugin.Instance.PluginLocalization.OptionShowFriends,
 						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 					ImGui.TableSetupColumn(
-						this.plugin.PluginLocalization.OptionShowFc,
+						VisibilityPlugin.Instance.PluginLocalization.OptionShowFc,
 						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 					ImGui.TableSetupColumn(
-						this.plugin.PluginLocalization.OptionShowDead,
+						VisibilityPlugin.Instance.PluginLocalization.OptionShowDead,
 						ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 					ImGui.TableHeadersRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(this.plugin.PluginLocalization.OptionPlayers);
+					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPlayers);
 					ImGui.TableNextColumn();
 					this.CenteredCheckbox(nameof(this.HidePlayer));
 					ImGui.TableNextColumn();
@@ -144,7 +136,7 @@ namespace Visibility.Configuration
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(this.plugin.PluginLocalization.OptionPets);
+					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPets);
 					ImGui.TableNextColumn();
 					this.CenteredCheckbox(nameof(this.HidePet));
 					ImGui.TableNextColumn();
@@ -156,7 +148,7 @@ namespace Visibility.Configuration
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(this.plugin.PluginLocalization.OptionChocobos);
+					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionChocobos);
 					ImGui.TableNextColumn();
 					this.CenteredCheckbox(nameof(this.HideChocobo));
 					ImGui.TableNextColumn();
@@ -168,7 +160,7 @@ namespace Visibility.Configuration
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
-					ImGui.Text(this.plugin.PluginLocalization.OptionMinions);
+					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionMinions);
 					ImGui.TableNextColumn();
 					this.CenteredCheckbox(nameof(this.HideMinion));
 					ImGui.TableNextColumn();
@@ -184,10 +176,10 @@ namespace Visibility.Configuration
 
 				this.Checkbox(nameof(this.HideStar));
 				ImGui.SameLine();
-				ImGui.Text(this.plugin.PluginLocalization.OptionEarthlyStar);
+				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEarthlyStar);
 				if (ImGui.IsItemHovered())
 				{
-					ImGui.SetTooltip(this.plugin.PluginLocalization.OptionEarthlyStarTip);
+					ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionEarthlyStarTip);
 				}
 
 				ImGui.NextColumn();
@@ -195,27 +187,27 @@ namespace Visibility.Configuration
 
 				ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
 
-				if (ImGui.Button(this.plugin.PluginLocalization.OptionRefresh))
+				if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.OptionRefresh))
 				{
-					this.plugin.RefreshActors();
+					VisibilityPlugin.Instance.RefreshActors();
 				}
 
 				ImGui.SameLine(
-					ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(this.plugin.PluginLocalization.WhitelistName).X -
-					ImGui.CalcTextSize(this.plugin.PluginLocalization.VoidListName).X -
+					ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.WhitelistName).X -
+					ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
 					(4 * ImGui.GetStyle().FramePadding.X) -
 					(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale));
 
-				if (ImGui.Button(this.plugin.PluginLocalization.WhitelistName))
+				if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.WhitelistName))
 				{
 					this.showListWindow[1] = !this.showListWindow[1];
 				}
 
 				ImGui.SameLine(
-					ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(this.plugin.PluginLocalization.VoidListName).X -
+					ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
 					(2 * ImGui.GetStyle().FramePadding.X));
 
-				if (ImGui.Button(this.plugin.PluginLocalization.VoidListName))
+				if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.VoidListName))
 				{
 					this.showListWindow[0] = !this.showListWindow[0];
 				}
@@ -250,7 +242,7 @@ namespace Visibility.Configuration
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
 			if (!ImGui.Begin(
-				    $"{this.plugin!.Name}: {this.plugin.PluginLocalization.VoidListName}",
+				    $"{VisibilityPlugin.Instance.Name}: {VisibilityPlugin.Instance.PluginLocalization.VoidListName}",
 				    ref this.showListWindow[0]))
 			{
 				ImGui.End();
@@ -262,18 +254,21 @@ namespace Visibility.Configuration
 				    6,
 				    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
 			{
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnFirstname);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnLastname);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnWorld);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnReason);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnFirstname);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnLastname);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnWorld);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnReason);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
 				VoidItem? itemToRemove = null;
 
-				this.sortedContainer[0] ??= this.VoidList;
+				if (this.sortedContainer[0].Count() != this.VoidList.Count)
+				{
+					this.sortedContainer[0] = this.VoidList;
+				}
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
@@ -337,7 +332,7 @@ namespace Visibility.Configuration
 					ImGui.TextUnformatted(item.Reason);
 					ImGui.TableNextColumn();
 
-					if (ImGui.Button($"{this.plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
+					if (ImGui.Button($"{VisibilityPlugin.Instance.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
@@ -347,7 +342,7 @@ namespace Visibility.Configuration
 
 				if (itemToRemove != null)
 				{
-					if (this.plugin.ObjectTable
+					if (VisibilityPlugin.ObjectTable
 						    .SingleOrDefault(
 							    x =>
 								    x is PlayerCharacter playerCharacter &&
@@ -371,12 +366,12 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (this.plugin.ClientState.LocalPlayer?.TargetObjectId > 0
-				    && this.plugin.ObjectTable
+				if (VisibilityPlugin.ClientState.LocalPlayer?.TargetObjectId > 0
+				    && VisibilityPlugin.ObjectTable
 						    .SingleOrDefault(
 							    x => x is PlayerCharacter
 							         && x.ObjectKind != ObjectKind.Companion
-							         && x.ObjectId == this.plugin.ClientState.LocalPlayer
+							         && x.ObjectId == VisibilityPlugin.ClientState.LocalPlayer
 								         ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
@@ -414,9 +409,9 @@ namespace Visibility.Configuration
 				ImGui.InputText("###reason", this.buffer[3], (uint)this.buffer[3].Length);
 				ImGui.TableNextColumn();
 
-				if (ImGui.Button(this.plugin.PluginLocalization.OptionAddPlayer))
+				if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.OptionAddPlayer))
 				{
-					this.plugin.VoidPlayer(
+					VisibilityPlugin.Instance.VoidPlayer(
 						manual ? "VoidUIManual" : string.Empty,
 						$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
 
@@ -442,7 +437,7 @@ namespace Visibility.Configuration
 		{
 			ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
 			if (!ImGui.Begin(
-				    $"{this.plugin!.Name}: {this.plugin.PluginLocalization.WhitelistName}",
+				    $"{VisibilityPlugin.Instance.Name}: {VisibilityPlugin.Instance.PluginLocalization.WhitelistName}",
 				    ref this.showListWindow[1]))
 			{
 				ImGui.End();
@@ -454,18 +449,21 @@ namespace Visibility.Configuration
 				    6,
 				    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
 			{
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnFirstname);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnLastname);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnWorld);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnReason);
-				ImGui.TableSetupColumn(this.plugin.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnFirstname);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnLastname);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnWorld);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnDate, ImGuiTableColumnFlags.DefaultSort);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnReason);
+				ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 				ImGui.TableSetupScrollFreeze(0, 1);
 				ImGui.TableHeadersRow();
 
 				VoidItem? itemToRemove = null;
 
-				this.sortedContainer[1] ??= this.Whitelist;
+				if (this.sortedContainer[1].Count() != this.Whitelist.Count)
+				{
+					this.sortedContainer[1] = this.Whitelist;
+				}
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
@@ -529,7 +527,7 @@ namespace Visibility.Configuration
 					ImGui.TextUnformatted(item.Reason);
 					ImGui.TableNextColumn();
 
-					if (ImGui.Button($"{this.plugin.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
+					if (ImGui.Button($"{VisibilityPlugin.Instance.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
 					{
 						itemToRemove = item;
 					}
@@ -550,12 +548,12 @@ namespace Visibility.Configuration
 
 				var manual = true;
 
-				if (this.plugin.ClientState.LocalPlayer?.TargetObjectId > 0
-				    && this.plugin.ObjectTable
+				if (VisibilityPlugin.ClientState.LocalPlayer?.TargetObjectId > 0
+				    && VisibilityPlugin.ObjectTable
 						    .SingleOrDefault(
 							    x => x is PlayerCharacter
 							         && x.ObjectKind != ObjectKind.Companion
-							         && x.ObjectId == this.plugin.ClientState.LocalPlayer
+							         && x.ObjectId == VisibilityPlugin.ClientState.LocalPlayer
 								         ?.TargetObjectId) is
 					    PlayerCharacter actor)
 				{
@@ -593,9 +591,9 @@ namespace Visibility.Configuration
 				ImGui.InputText("###reason", this.buffer[7], (uint)this.buffer[7].Length);
 				ImGui.TableNextColumn();
 
-				if (ImGui.Button(this.plugin.PluginLocalization.OptionAddPlayer))
+				if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.OptionAddPlayer))
 				{
-					this.plugin.WhitelistPlayer(
+					VisibilityPlugin.Instance.WhitelistPlayer(
 						manual ? "WhitelistUIManual" : string.Empty,
 						$"{this.buffer[4].ByteToString()} {this.buffer[5].ByteToString()} {this.buffer[6].ByteToString()} {this.buffer[7].ByteToString()}");
 

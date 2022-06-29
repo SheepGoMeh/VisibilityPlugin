@@ -11,7 +11,7 @@ namespace Visibility.Configuration
 	{
 		public int Version { get; set; }
 
-		public Localization.Language Language { get; set; }
+		public Localization.Language Language { get; private set; }
 
 		public bool Enabled { get; set; }
 		public bool HidePet { get; set; }
@@ -37,10 +37,7 @@ namespace Visibility.Configuration
 		public List<VoidItem> Whitelist { get; } = new List<VoidItem>();
 
 		[NonSerialized]
-		private VisibilityPlugin? plugin;
-
-		[NonSerialized]
-		private bool[] showListWindow = { false, false };
+		private readonly bool[] showListWindow = { false, false };
 
 		[NonSerialized]
 		private readonly byte[][] buffer =
@@ -72,58 +69,58 @@ namespace Visibility.Configuration
 			switch (propertyName)
 			{
 				case nameof(this.Enabled):
-					if (!this.plugin!.Disable) // Make sure the disable event is finished before enabling again
+					if (!VisibilityPlugin.Instance.Disable) // Make sure the disable event is finished before enabling again
 					{
-						this.plugin.Disable = !this.Enabled;
+						VisibilityPlugin.Instance.Disable = !this.Enabled;
 					}
 					break;
 				case nameof(this.HidePet):
-					this.plugin!.ShowPets(ContainerType.All);
+					VisibilityPlugin.Instance.ShowPets(ContainerType.All);
 					break;
 				case nameof(this.HidePlayer):
-					this.plugin!.ShowPlayers(ContainerType.All);
+					VisibilityPlugin.Instance.ShowPlayers(ContainerType.All);
 					break;
 				case nameof(this.HideMinion):
-					this.plugin!.ShowMinions(ContainerType.All);
+					VisibilityPlugin.Instance.ShowMinions(ContainerType.All);
 					break;
 				case nameof(this.HideChocobo):
-					this.plugin!.ShowChocobos(ContainerType.All);
+					VisibilityPlugin.Instance.ShowChocobos(ContainerType.All);
 					break;
 				case nameof(this.ShowCompanyPet):
-					this.plugin!.ShowPets(ContainerType.Company);
+					VisibilityPlugin.Instance.ShowPets(ContainerType.Company);
 					break;
 				case nameof(this.ShowCompanyPlayer):
-					this.plugin!.ShowPlayers(ContainerType.Company);
+					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Company);
 					break;
 				case nameof(this.ShowCompanyMinion):
-					this.plugin!.ShowMinions(ContainerType.Company);
+					VisibilityPlugin.Instance.ShowMinions(ContainerType.Company);
 					break;
 				case nameof(this.ShowCompanyChocobo):
-					this.plugin!.ShowChocobos(ContainerType.Company);
+					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Company);
 					break;
 				case nameof(this.ShowPartyPet):
-					this.plugin!.ShowPets(ContainerType.Party);
+					VisibilityPlugin.Instance.ShowPets(ContainerType.Party);
 					break;
 				case nameof(this.ShowPartyPlayer):
-					this.plugin!.ShowPlayers(ContainerType.Party);
+					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Party);
 					break;
 				case nameof(this.ShowPartyMinion):
-					this.plugin!.ShowMinions(ContainerType.Party);
+					VisibilityPlugin.Instance.ShowMinions(ContainerType.Party);
 					break;
 				case nameof(this.ShowPartyChocobo):
-					this.plugin!.ShowChocobos(ContainerType.Party);
+					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Party);
 					break;
 				case nameof(this.ShowFriendPet):
-					this.plugin!.ShowPets(ContainerType.Friend);
+					VisibilityPlugin.Instance.ShowPets(ContainerType.Friend);
 					break;
 				case nameof(this.ShowFriendPlayer):
-					this.plugin!.ShowPlayers(ContainerType.Friend);
+					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Friend);
 					break;
 				case nameof(this.ShowFriendMinion):
-					this.plugin!.ShowMinions(ContainerType.Friend);
+					VisibilityPlugin.Instance.ShowMinions(ContainerType.Friend);
 					break;
 				case nameof(this.ShowFriendChocobo):
-					this.plugin!.ShowChocobos(ContainerType.Friend);
+					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Friend);
 					break;
 			}
 		}
@@ -141,10 +138,8 @@ namespace Visibility.Configuration
 			this.ChangeSetting(propertyName);
 		}
 
-		public void Init(VisibilityPlugin visibilityPlugin)
+		public void Init()
 		{
-			this.plugin = visibilityPlugin;
-
 			this.SettingDictionary["enabled"] = x => this.ChangeSetting(nameof(this.Enabled), x);
 			this.SettingDictionary["hidepet"] = x => this.ChangeSetting(nameof(this.HidePet), x);
 			this.SettingDictionary["hidestar"] = x => this.ChangeSetting(nameof(this.HideStar), x);
@@ -168,7 +163,7 @@ namespace Visibility.Configuration
 
 		public void Save()
 		{
-			this.plugin!.PluginInterface.SavePluginConfig(this);
+			VisibilityPlugin.PluginInterface.SavePluginConfig(this);
 		}
 	}
 }
