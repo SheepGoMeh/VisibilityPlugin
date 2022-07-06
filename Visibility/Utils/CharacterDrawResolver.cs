@@ -5,6 +5,8 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Group;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace Visibility.Utils
@@ -242,16 +244,13 @@ namespace Visibility.Utils
 								.Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						var groupManager =
-							FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance();
-						var infoProxyCrossRealm =
-							FFXIVClientStructs.FFXIV.Client.UI.Info.InfoProxyCrossRealm.Instance();
+						var groupManager = GroupManager.Instance();
+						var infoProxyCrossRealm = InfoProxyCrossRealm.Instance();
 
 						if ((groupManager->MemberCount > 0 &&
 						     groupManager->IsObjectIDInParty(thisPtr->GameObject.ObjectID)) ||
 						    (infoProxyCrossRealm->GroupCount > 0 &&
-						     FFXIVClientStructs.FFXIV.Client.UI.Info.InfoProxyCrossRealm.GetMemberByObjectId(
-							     thisPtr->GameObject.ObjectID) != null))
+						     InfoProxyCrossRealm.GetMemberByObjectId(thisPtr->GameObject.ObjectID) != null))
 						{
 							this.containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
