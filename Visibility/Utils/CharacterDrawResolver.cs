@@ -242,7 +242,16 @@ namespace Visibility.Utils
 								.Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
+						var groupManager =
+							FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance();
+						var infoProxyCrossRealm =
+							FFXIVClientStructs.FFXIV.Client.UI.Info.InfoProxyCrossRealm.Instance();
+
+						if ((groupManager->MemberCount > 0 &&
+						     groupManager->IsObjectIDInParty(thisPtr->GameObject.ObjectID)) ||
+						    (infoProxyCrossRealm->GroupCount > 0 &&
+						     FFXIVClientStructs.FFXIV.Client.UI.Info.InfoProxyCrossRealm.GetMemberByObjectId(
+							     thisPtr->GameObject.ObjectID) != null))
 						{
 							this.containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
