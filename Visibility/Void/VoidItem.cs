@@ -25,6 +25,9 @@ namespace Visibility.Void
 
 		[JsonIgnore] public byte[] NameBytes { get; set; }
 
+		[JsonIgnore]
+		public uint ObjectId { get; set; } // Do not serialize because object id can be inconsistent between server restarts
+
 		public string Firstname { get; set; }
 		public string Lastname { get; set; }
 		public string HomeworldName { get; set; }
@@ -40,6 +43,7 @@ namespace Visibility.Void
 			this.Lastname = string.Empty;
 			this.HomeworldName = string.Empty;
 			this.Reason = string.Empty;
+			this.ObjectId = 0;
 		}
 
 		public VoidItem(PlayerCharacter actor, string reason, bool manual) : this()

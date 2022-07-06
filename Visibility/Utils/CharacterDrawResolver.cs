@@ -201,6 +201,12 @@ namespace Visibility.Utils
 			}
 		}
 
+		private unsafe void HideGameObject(Character* thisPtr)
+		{
+			thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
+			this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+		}
+
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
 		{
 			var localPlayerAddress = VisibilityPlugin.ClientState.LocalPlayer?.Address;
@@ -266,15 +272,18 @@ namespace Visibility.Utils
 								.Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						if (VisibilityPlugin.Instance.Configuration.VoidList.Any(
-							    x => UnsafeArrayEqual(
-								         x.NameBytes,
-								         thisPtr->GameObject.Name,
-								         x.NameBytes.Length) &&
-							         x.HomeworldId == thisPtr->HomeWorld))
+						var voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.FirstOrDefault(
+							x => UnsafeArrayEqual(x.NameBytes, thisPtr->GameObject.Name, x.NameBytes.Length) &&
+							     x.HomeworldId == thisPtr->HomeWorld);
+
+						if (voidedPlayer != null)
 						{
-							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							if (voidedPlayer.ObjectId != thisPtr->GameObject.ObjectID)
+							{
+								voidedPlayer.ObjectId = thisPtr->GameObject.ObjectID;
+							}
+
+							this.HideGameObject(thisPtr);
 							break;
 						}
 
@@ -288,26 +297,31 @@ namespace Visibility.Utils
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
 						    (VisibilityPlugin.Instance.Configuration.ShowPartyPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Party]
-							     .Contains(thisPtr->GameObject.ObjectID)) ||
-						    VisibilityPlugin.Instance.Configuration.Whitelist.Any(
-							    x => UnsafeArrayEqual(
-								         x.NameBytes,
-								         thisPtr->GameObject.Name,
-								         x.NameBytes.Length) &&
-							         x.HomeworldId == thisPtr->HomeWorld))
+							     .Contains(thisPtr->GameObject.ObjectID)))
 						{
 							break;
 						}
-						else
+
+						var whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.FirstOrDefault(
+							x => UnsafeArrayEqual(x.NameBytes, thisPtr->GameObject.Name, x.NameBytes.Length) &&
+							     x.HomeworldId == thisPtr->HomeWorld);
+
+						if (whitelistedPlayer != null)
 						{
-							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							if (whitelistedPlayer.ObjectId != thisPtr->GameObject.ObjectID)
+							{
+								whitelistedPlayer.ObjectId = thisPtr->GameObject.ObjectID;
+							}
+
 							break;
 						}
+
+						this.HideGameObject(thisPtr);
+						break;
 					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet &&
 					                                     thisPtr->NameID != 6565:
-						if (!VisibilityPlugin.Instance.Configuration.HidePet
-						    || thisPtr->GameObject.OwnerID == this.localPlayer->Character.GameObject.ObjectID)
+						// Ignore own pet
+						if (thisPtr->GameObject.OwnerID == this.localPlayer->Character.GameObject.ObjectID)
 						{
 							break;
 						}
@@ -332,24 +346,40 @@ namespace Visibility.Utils
 							this.containers[UnitType.Pets][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((VisibilityPlugin.Instance.Configuration.ShowFriendPet &&
+						// Do not hide pets in duties
+						if (VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
+						    || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
+						    || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene])
+						{
+							break;
+						}
+
+						// Hide pet if it belongs to a voided player
+						if (VisibilityPlugin.Instance.Configuration.VoidList.Any(
+							    x => x.ObjectId == thisPtr->GameObject.OwnerID))
+						{
+							this.HideGameObject(thisPtr);
+							break;
+						}
+
+						if (!VisibilityPlugin.Instance.Configuration.HidePet ||
+						    (VisibilityPlugin.Instance.Configuration.ShowFriendPet &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
-							     .Contains(thisPtr->GameObject.OwnerID))
-						    || (VisibilityPlugin.Instance.Configuration.ShowCompanyPet &&
-						        this.containers[UnitType.Players][ContainerType.Company]
-							        .Contains(thisPtr->GameObject.OwnerID))
-						    || (VisibilityPlugin.Instance.Configuration.ShowPartyPet &&
-						        this.containers[UnitType.Players][ContainerType.Party]
-							        .Contains(thisPtr->GameObject.OwnerID)))
+							     .Contains(thisPtr->GameObject.OwnerID)) ||
+						    (VisibilityPlugin.Instance.Configuration.ShowCompanyPet &&
+						     this.containers[UnitType.Players][ContainerType.Company]
+							     .Contains(thisPtr->GameObject.OwnerID)) ||
+						    (VisibilityPlugin.Instance.Configuration.ShowPartyPet &&
+						     this.containers[UnitType.Players][ContainerType.Party]
+							     .Contains(thisPtr->GameObject.OwnerID)) ||
+						    VisibilityPlugin.Instance.Configuration.Whitelist.Any(
+							    x => x.ObjectId == thisPtr->GameObject.OwnerID))
 						{
 							break;
 						}
-						else
-						{
-							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
-							break;
-						}
+
+						this.HideGameObject(thisPtr);
+						break;
 					case (byte)ObjectKind.BattleNpc
 						when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && thisPtr->NameID == 6565
 						: // Earthly Star
@@ -359,14 +389,13 @@ namespace Visibility.Utils
 						    && !this.containers[UnitType.Players][ContainerType.Party]
 							    .Contains(thisPtr->GameObject.OwnerID))
 						{
-							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+							this.HideGameObject(thisPtr);
 						}
 
 						break;
 					case (byte)ObjectKind.BattleNpc when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Chocobo:
-						if (!VisibilityPlugin.Instance.Configuration.HideChocobo
-						    || thisPtr->GameObject.OwnerID == this.localPlayer->Character.GameObject.ObjectID)
+						// Ignore own chocobo
+						if (thisPtr->GameObject.OwnerID == this.localPlayer->Character.GameObject.ObjectID)
 						{
 							break;
 						}
@@ -391,24 +420,32 @@ namespace Visibility.Utils
 							this.containers[UnitType.Chocobos][ContainerType.Company].Add(thisPtr->GameObject.ObjectID);
 						}
 
-						if ((VisibilityPlugin.Instance.Configuration.ShowFriendChocobo &&
+						// Hide chocobo if it belongs to a voided player
+						if (VisibilityPlugin.Instance.Configuration.VoidList.Any(
+							    x => x.ObjectId == thisPtr->GameObject.OwnerID))
+						{
+							this.HideGameObject(thisPtr);
+							break;
+						}
+
+						if (!VisibilityPlugin.Instance.Configuration.HideChocobo ||
+						    (VisibilityPlugin.Instance.Configuration.ShowFriendChocobo &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
-							     .Contains(thisPtr->GameObject.OwnerID))
-						    || (VisibilityPlugin.Instance.Configuration.ShowCompanyChocobo &&
-						        this.containers[UnitType.Players][ContainerType.Company]
-							        .Contains(thisPtr->GameObject.OwnerID))
-						    || (VisibilityPlugin.Instance.Configuration.ShowPartyChocobo &&
-						        this.containers[UnitType.Players][ContainerType.Party]
-							        .Contains(thisPtr->GameObject.OwnerID)))
+							     .Contains(thisPtr->GameObject.OwnerID)) ||
+						    (VisibilityPlugin.Instance.Configuration.ShowCompanyChocobo &&
+						     this.containers[UnitType.Players][ContainerType.Company]
+							     .Contains(thisPtr->GameObject.OwnerID)) ||
+						    (VisibilityPlugin.Instance.Configuration.ShowPartyChocobo &&
+						     this.containers[UnitType.Players][ContainerType.Party]
+							     .Contains(thisPtr->GameObject.OwnerID)) ||
+						    VisibilityPlugin.Instance.Configuration.Whitelist.Any(
+							    x => x.ObjectId == thisPtr->GameObject.OwnerID))
 						{
 							break;
 						}
-						else
-						{
-							thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-							this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
-							break;
-						}
+
+						this.HideGameObject(thisPtr);
+						break;
 				}
 			}
 
