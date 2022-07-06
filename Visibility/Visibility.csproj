@@ -5,10 +5,10 @@
     <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>1.1.1.5</AssemblyVersion>
-    <FileVersion>1.1.1.5</FileVersion>
+    <AssemblyVersion>1.1.2.1</AssemblyVersion>
+    <FileVersion>1.1.2.1</FileVersion>
     <IsPackable>false</IsPackable>
-    <PackageVersion>1.1.1.5</PackageVersion>
+    <PackageVersion>1.1.2.1</PackageVersion>
     <Authors>SheepGoMeh</Authors>
   </PropertyGroup>
   <PropertyGroup>
