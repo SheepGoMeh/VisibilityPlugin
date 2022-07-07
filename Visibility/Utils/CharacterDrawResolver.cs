@@ -209,6 +209,40 @@ namespace Visibility.Utils
 			this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
 		}
 
+		private static unsafe bool IsObjectIdInParty(uint objectId)
+		{
+			var groupManager = GroupManager.Instance();
+			var infoProxyCrossRealm = InfoProxyCrossRealm.Instance();
+
+			if (groupManager->MemberCount > 0 && groupManager->IsObjectIDInParty(objectId))
+			{
+				return true;
+			}
+
+			if (infoProxyCrossRealm->IsInCrossRealmParty == 0)
+			{
+				return false;
+			}
+
+			foreach (var group in infoProxyCrossRealm->CrossRealmGroupSpan)
+			{
+				if (group.GroupMemberCount == 0)
+				{
+					continue;
+				}
+
+				for (var i = 0; i < group.GroupMemberCount; ++i)
+				{
+					if (group.GroupMemberSpan[i].ObjectId == objectId)
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
 		private unsafe void CharacterEnableDrawDetour(Character* thisPtr)
 		{
 			var localPlayerAddress = VisibilityPlugin.ClientState.LocalPlayer?.Address;
@@ -244,13 +278,7 @@ namespace Visibility.Utils
 								.Remove(thisPtr->GameObject.ObjectID);
 						}
 
-						var groupManager = GroupManager.Instance();
-						var infoProxyCrossRealm = InfoProxyCrossRealm.Instance();
-
-						if ((groupManager->MemberCount > 0 &&
-						     groupManager->IsObjectIDInParty(thisPtr->GameObject.ObjectID)) ||
-						    (infoProxyCrossRealm->GroupCount > 0 &&
-						     InfoProxyCrossRealm.GetMemberByObjectId(thisPtr->GameObject.ObjectID) != null))
+						if (IsObjectIdInParty(thisPtr->GameObject.ObjectID))
 						{
 							this.containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 						}
