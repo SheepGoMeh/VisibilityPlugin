@@ -265,10 +265,7 @@ namespace Visibility.Configuration
 
 				VoidItem? itemToRemove = null;
 
-				if (this.sortedContainer[0].Count() != this.VoidList.Count)
-				{
-					this.sortedContainer[0] = this.VoidList;
-				}
+				this.sortedContainer[0] ??= this.VoidList;
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
@@ -460,10 +457,7 @@ namespace Visibility.Configuration
 
 				VoidItem? itemToRemove = null;
 
-				if (this.sortedContainer[1].Count() != this.Whitelist.Count)
-				{
-					this.sortedContainer[1] = this.Whitelist;
-				}
+				this.sortedContainer[1] ??= this.Whitelist;
 
 				var sortSpecs = ImGui.TableGetSortSpecs();
 
