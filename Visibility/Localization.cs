@@ -19,6 +19,7 @@ namespace Visibility
 			this.LoadStrings(Language.Italian);
 			this.LoadStrings(Language.Portuguese);
 			this.LoadStrings(Language.Spanish);
+			this.LoadStrings(Language.Swedish);
 			this.LoadStrings(Language.Russian);
 			this.LoadStrings(Language.Japanese);
 			this.LoadStrings(Language.ChineseSimplified);
@@ -30,14 +31,15 @@ namespace Visibility
 		{
 			var jsonString = language switch
 			{
-				Language.English => Properties.Resources.en_strings,
-				Language.French => Properties.Resources.fr_strings,
-				Language.German => Properties.Resources.de_strings,
-				Language.Italian => Properties.Resources.it_strings,
-				Language.Japanese => Properties.Resources.ja_strings,
+				Language.English => Properties.Resources.en_US_strings,
+				Language.French => Properties.Resources.fr_FR_strings,
+				Language.German => Properties.Resources.de_DE_strings,
+				Language.Italian => Properties.Resources.it_IT_strings,
+				Language.Japanese => Properties.Resources.ja_JP_strings,
 				Language.Portuguese => Properties.Resources.pt_BR_strings,
-				Language.Russian => Properties.Resources.ru_strings,
+				Language.Russian => Properties.Resources.ru_RU_strings,
 				Language.Spanish => Properties.Resources.es_ES_strings,
+				Language.Swedish => Properties.Resources.sv_SE_strings,
 				Language.ChineseSimplified => Properties.Resources.zh_CN_strings,
 				Language.ChineseTraditional => Properties.Resources.zh_TW_strings,
 				_ => throw new ArgumentOutOfRangeException(nameof(language), language, null)
@@ -59,6 +61,7 @@ namespace Visibility
 			Portuguese,
 			Russian,
 			Spanish,
+			Swedish,
 			ChineseSimplified,
 			ChineseTraditional
 		}

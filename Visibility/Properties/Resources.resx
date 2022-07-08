@@ -118,26 +118,26 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="en.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Languages\en\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  <data name="en-US.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\en-US\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="es-ES.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\es-ES\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="fr.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Languages\fr\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="fr-FR.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\fr-FR\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="de.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Languages\de\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="de-DE.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\de-DE\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="it.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Languages\it\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="it-IT.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\it-IT\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="ru.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Languages\ru\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="ru-RU.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\ru-RU\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="ja.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Languages\ja\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="ja-JP.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\ja-JP\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="zh-CN.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\zh-CN\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
@@ -147,5 +147,8 @@
   </data>
   <data name="pt-BR.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Languages\pt-BR\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="sv-SE.strings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Languages\sv-SE\strings.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>
