@@ -1,0 +1,3 @@
+files:
+  - source: /Visibility/Languages/strings.json
+    translation: /Visibility/Languages/%locale%/strings.json
