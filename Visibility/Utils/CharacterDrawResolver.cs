@@ -495,8 +495,8 @@ namespace Visibility.Utils
 			if (nowLoadingWidget != IntPtr.Zero && !((AtkUnitBase*)nowLoadingWidget)->IsVisible &&
 			    !VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene])
 			{
-				if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
-				    && (thisPtr->StatusFlags & (byte)StatusFlags.PartyMember) > 0)
+				if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player &&
+				    IsObjectIdInParty(thisPtr->GameObject.ObjectID))
 				{
 					this.containers[UnitType.Players][ContainerType.Party].Add(thisPtr->GameObject.ObjectID);
 					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
