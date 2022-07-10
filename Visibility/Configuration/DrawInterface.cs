@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using Visibility.Void;
 
@@ -19,33 +20,34 @@ namespace Visibility.Configuration
 		private readonly bool[] sortAscending = { true, true };
 		private readonly Func<VoidItem, object>[] sortKeySelector = new Func<VoidItem, object>[2];
 
-		private void CenteredCheckbox(string propertyName)
+		private void CenteredCheckbox(
+			ref bool property,
+			[CallerArgumentExpression("property")] string propertyName = "")
 		{
-			var state = (bool)this.GetBackingField(propertyName).GetValue(this)!;
 			ImGui.SetCursorPosX(
 				ImGui.GetCursorPosX() +
 				((ImGui.GetColumnWidth() + (2 * ImGui.GetStyle().FramePadding.X)) / 2) -
 				(2 * ImGui.GetStyle().ItemSpacing.X) - (2 * ImGui.GetStyle().CellPadding.X));
 
-			if (!ImGui.Checkbox($"###{propertyName}", ref state))
+			if (!ImGui.Checkbox($"###{propertyName}", ref property))
 			{
 				return;
 			}
 
-			this.ChangeSetting(propertyName, state ? 1 : 0);
+			this.ChangeSetting(ref property, property ? 1 : 0, propertyName);
 			this.Save();
 		}
 
-		private void Checkbox(string propertyName)
+		private void Checkbox(
+			ref bool property,
+			[CallerArgumentExpression("property")] string propertyName = "")
 		{
-			var state = (bool)this.GetBackingField(propertyName).GetValue(this)!;
-
-			if (!ImGui.Checkbox($"###{propertyName}", ref state))
+			if (!ImGui.Checkbox($"###{propertyName}", ref property))
 			{
 				return;
 			}
 
-			this.ChangeSetting(propertyName, state ? 1 : 0);
+			this.ChangeSetting(ref property, property ? 1 : 0, propertyName);
 			this.Save();
 		}
 
@@ -57,37 +59,23 @@ namespace Visibility.Configuration
 
 			if (ImGui.Begin($"{VisibilityPlugin.Instance.Name} Config", ref drawConfig, ImGuiWindowFlags.NoResize))
 			{
-				this.Checkbox(nameof(this.Enabled));
+				this.Checkbox(ref this.Enabled);
 
 				ImGui.SameLine();
 				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEnable);
 				var cursorY = ImGui.GetCursorPosY();
-				var comboWidth =
-					(ImGui.CalcTextSize(
-						VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", Localization.Language.English)).X * 2) +
-					(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
-				ImGui.SameLine(
-					(ImGui.GetContentRegionMax().X / 2) -
-					ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage).X - comboWidth);
-				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage);
-				ImGui.SameLine();
-				ImGui.PushItemWidth(comboWidth);
-				if (ImGui.BeginCombo("###language", VisibilityPlugin.Instance.PluginLocalization.LanguageName))
-				{
-					foreach (var language in VisibilityPlugin.Instance.PluginLocalization.AvailableLanguages.Where(
-						         language =>
-							         ImGui.Selectable(
-								         VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", language))))
-					{
-						VisibilityPlugin.Instance.Configuration.Language = language;
-						VisibilityPlugin.Instance.PluginLocalization.CurrentLanguage = language;
-						this.Save();
-					}
 
-					ImGui.EndCombo();
+				ImGui.SameLine();
+				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 50);
+				if (this.AdvancedEnabled)
+				{
+					var territoryType = this.CurrentConfig.TerritoryType;
+					if (this.ComboWithFilter("Current Config", ref territoryType, this.territoryPlaceNameDictionary))
+					{
+						this.UpdateCurrentConfig(territoryType);
+					}
 				}
 
-				ImGui.PopItemWidth();
 				ImGui.SameLine(
 					ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
 					ImGui.GetScrollX());
@@ -120,57 +108,57 @@ namespace Visibility.Configuration
 					ImGui.TableNextColumn();
 					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPlayers);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.HidePlayer));
+					this.CenteredCheckbox(ref this.CurrentConfig.HidePlayer);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowPartyPlayer));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowPartyPlayer);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowFriendPlayer));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowFriendPlayer);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowCompanyPlayer));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowCompanyPlayer);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowDeadPlayer));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowDeadPlayer);
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
 					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPets);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.HidePet));
+					this.CenteredCheckbox(ref this.CurrentConfig.HidePet);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowPartyPet));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowPartyPet);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowFriendPet));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowFriendPet);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowCompanyPet));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowCompanyPet);
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
 					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionChocobos);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.HideChocobo));
+					this.CenteredCheckbox(ref this.CurrentConfig.HideChocobo);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowPartyChocobo));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowPartyChocobo);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowFriendChocobo));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowFriendChocobo);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowCompanyChocobo));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowCompanyChocobo);
 					ImGui.TableNextRow();
 
 					ImGui.TableNextColumn();
 					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionMinions);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.HideMinion));
+					this.CenteredCheckbox(ref this.CurrentConfig.HideMinion);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowPartyMinion));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowPartyMinion);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowFriendMinion));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowFriendMinion);
 					ImGui.TableNextColumn();
-					this.CenteredCheckbox(nameof(this.ShowCompanyMinion));
+					this.CenteredCheckbox(ref this.CurrentConfig.ShowCompanyMinion);
 					ImGui.TableNextRow();
 
 					ImGui.EndTable();
 				}
 
-				this.Checkbox(nameof(this.HideStar));
+				this.Checkbox(ref this.CurrentConfig.HideStar);
 				ImGui.SameLine();
 				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEarthlyStar);
 				if (ImGui.IsItemHovered())
@@ -178,6 +166,38 @@ namespace Visibility.Configuration
 					ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionEarthlyStarTip);
 				}
 
+				ImGui.NextColumn();
+				this.Checkbox(ref this.AdvancedEnabled);
+				ImGui.SameLine();
+				ImGui.Text("Advanced options");
+				
+				ImGui.NextColumn();
+				var comboWidth =
+					(ImGui.CalcTextSize(
+						VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", Localization.Language.English)).X * 2) +
+					(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
+				ImGui.SameLine(
+					(ImGui.GetContentRegionMax().X / 2) -
+					ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage).X - comboWidth);
+				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage);
+				ImGui.SameLine();
+				ImGui.PushItemWidth(comboWidth);
+				if (ImGui.BeginCombo("###language", VisibilityPlugin.Instance.PluginLocalization.LanguageName))
+				{
+					foreach (var language in VisibilityPlugin.Instance.PluginLocalization.AvailableLanguages.Where(
+						         language =>
+							         ImGui.Selectable(
+								         VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", language))))
+					{
+						VisibilityPlugin.Instance.Configuration.Language = language;
+						VisibilityPlugin.Instance.PluginLocalization.CurrentLanguage = language;
+						this.Save();
+					}
+
+					ImGui.EndCombo();
+				}
+
+				ImGui.PopItemWidth();
 				ImGui.NextColumn();
 				ImGui.Separator();
 

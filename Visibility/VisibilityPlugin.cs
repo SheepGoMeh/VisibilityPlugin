@@ -100,7 +100,7 @@ namespace Visibility
 			Instance = this;
 			this.Configuration = PluginInterface.GetPluginConfig() as VisibilityConfiguration ??
 			                     new VisibilityConfiguration();
-			this.Configuration.Init();
+			this.Configuration.Init(ClientState.TerritoryType);
 			this.PluginLocalization = new Localization(this.Configuration.Language);
 
 			CommandManager.AddHandler(
@@ -151,9 +151,22 @@ namespace Visibility
 			PluginInterface.UiBuilder.Draw += this.BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi += this.OpenConfigUi;
 			ChatGui.ChatMessage += this.OnChatMessage;
+			ClientState.TerritoryChanged += this.ClientStateOnTerritoryChanged;
 
 			this.Api = new VisibilityApi();
 			this.IpcProvider = new VisibilityProvider(this.Api);
+		}
+
+		private void ClientStateOnTerritoryChanged(object? sender, ushort e)
+		{
+			if (this.Configuration.AdvancedEnabled == false)
+			{
+				return;
+			}
+
+			this.Configuration.Enabled = false;
+			this.Configuration.UpdateCurrentConfig(ClientState.TerritoryType);
+			this.Configuration.Enabled = true;
 		}
 
 		private void FrameworkOnOnUpdateEvent(Framework framework)
@@ -196,6 +209,7 @@ namespace Visibility
 
 			this.characterDrawResolver.Dispose();
 
+			ClientState.TerritoryChanged -= this.ClientStateOnTerritoryChanged;
 			Framework.Update -= this.FrameworkOnOnUpdateEvent;
 			PluginInterface.UiBuilder.Draw -= this.BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi -= this.OpenConfigUi;

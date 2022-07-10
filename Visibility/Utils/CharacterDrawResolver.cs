@@ -323,15 +323,15 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (!VisibilityPlugin.Instance.Configuration.HidePlayer ||
-						    (VisibilityPlugin.Instance.Configuration.ShowDeadPlayer && thisPtr->Health == 0) ||
-						    (VisibilityPlugin.Instance.Configuration.ShowFriendPlayer &&
+						if (!VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer ||
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer && thisPtr->Health == 0) ||
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
-						    (VisibilityPlugin.Instance.Configuration.ShowCompanyPlayer &&
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Company]
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
-						    (VisibilityPlugin.Instance.Configuration.ShowPartyPlayer &&
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Party]
 							     .Contains(thisPtr->GameObject.ObjectID)))
 						{
@@ -398,14 +398,14 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (!VisibilityPlugin.Instance.Configuration.HidePet ||
-						    (VisibilityPlugin.Instance.Configuration.ShowFriendPet &&
+						if (!VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePet ||
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPet &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
-						    (VisibilityPlugin.Instance.Configuration.ShowCompanyPet &&
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyPet &&
 						     this.containers[UnitType.Players][ContainerType.Company]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
-						    (VisibilityPlugin.Instance.Configuration.ShowPartyPet &&
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPet &&
 						     this.containers[UnitType.Players][ContainerType.Party]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
 						    VisibilityPlugin.Instance.Configuration.Whitelist.Any(
@@ -419,7 +419,7 @@ namespace Visibility.Utils
 					case (byte)ObjectKind.BattleNpc
 						when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && thisPtr->NameID == 6565
 						: // Earthly Star
-						if (VisibilityPlugin.Instance.Configuration.HideStar
+						if (VisibilityPlugin.Instance.Configuration.CurrentConfig.HideStar
 						    && VisibilityPlugin.Condition[ConditionFlag.InCombat]
 						    && thisPtr->GameObject.OwnerID != this.localPlayer->Character.GameObject.ObjectID
 						    && !this.containers[UnitType.Players][ContainerType.Party]
@@ -464,14 +464,14 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (!VisibilityPlugin.Instance.Configuration.HideChocobo ||
-						    (VisibilityPlugin.Instance.Configuration.ShowFriendChocobo &&
+						if (!VisibilityPlugin.Instance.Configuration.CurrentConfig.HideChocobo ||
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendChocobo &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
-						    (VisibilityPlugin.Instance.Configuration.ShowCompanyChocobo &&
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyChocobo &&
 						     this.containers[UnitType.Players][ContainerType.Company]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
-						    (VisibilityPlugin.Instance.Configuration.ShowPartyChocobo &&
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyChocobo &&
 						     this.containers[UnitType.Players][ContainerType.Party]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
 						    VisibilityPlugin.Instance.Configuration.Whitelist.Any(
@@ -503,8 +503,8 @@ namespace Visibility.Utils
 					this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				}
 
-				if (VisibilityPlugin.Instance.Configuration.HidePlayer
-				    && VisibilityPlugin.Instance.Configuration.ShowDeadPlayer
+				if (VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer
+				    && VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer
 				    && thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
 				    && thisPtr->Health == 0
 				    && this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
@@ -530,7 +530,7 @@ namespace Visibility.Utils
 		private unsafe void CompanionEnableDrawDetour(Companion* thisPtr)
 		{
 			if (VisibilityPlugin.Instance.Configuration.Enabled
-			    && VisibilityPlugin.Instance.Configuration.HideMinion
+			    && VisibilityPlugin.Instance.Configuration.CurrentConfig.HideMinion
 			    && this.localPlayer != null
 			    && thisPtr->Character.CompanionOwnerID != this.localPlayer->Character.GameObject.ObjectID)
 			{
@@ -554,13 +554,13 @@ namespace Visibility.Utils
 					this.containers[UnitType.Minions][ContainerType.Company].Add(thisPtr->Character.CompanionOwnerID);
 				}
 
-				if ((VisibilityPlugin.Instance.Configuration.ShowFriendMinion &&
+				if ((VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendMinion &&
 				     this.containers[UnitType.Players][ContainerType.Friend]
 					     .Contains(thisPtr->Character.CompanionOwnerID))
-				    || (VisibilityPlugin.Instance.Configuration.ShowCompanyMinion &&
+				    || (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyMinion &&
 				        this.containers[UnitType.Players][ContainerType.Company]
 					        .Contains(thisPtr->Character.CompanionOwnerID))
-				    || (VisibilityPlugin.Instance.Configuration.ShowPartyMinion &&
+				    || (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyMinion &&
 				        this.containers[UnitType.Players][ContainerType.Party]
 					        .Contains(thisPtr->Character.CompanionOwnerID)))
 				{

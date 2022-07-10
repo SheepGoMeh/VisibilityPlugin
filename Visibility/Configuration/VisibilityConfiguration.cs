@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
 using Dalamud.Configuration;
+using Lumina.Excel.GeneratedSheets;
 using Visibility.Utils;
 using Visibility.Void;
 
@@ -13,25 +16,8 @@ namespace Visibility.Configuration
 
 		public Localization.Language Language { get; private set; }
 
-		public bool Enabled { get; set; }
-		public bool HidePet { get; set; }
-		public bool HidePlayer { get; set; }
-		public bool HideMinion { get; set; }
-		public bool HideChocobo { get; set; }
-		public bool HideStar { get; set; }
-		public bool ShowCompanyPet { get; set; }
-		public bool ShowCompanyPlayer { get; set; }
-		public bool ShowCompanyMinion { get; set; }
-		public bool ShowCompanyChocobo { get; set; }
-		public bool ShowPartyPet { get; set; }
-		public bool ShowPartyPlayer { get; set; }
-		public bool ShowPartyMinion { get; set; }
-		public bool ShowPartyChocobo { get; set; }
-		public bool ShowFriendPet { get; set; }
-		public bool ShowFriendPlayer { get; set; }
-		public bool ShowFriendMinion { get; set; }
-		public bool ShowFriendChocobo { get; set; }
-		public bool ShowDeadPlayer { get; set; }
+		public bool Enabled;
+		public bool AdvancedEnabled;
 
 		public List<VoidItem> VoidList { get; } = new List<VoidItem>();
 		public List<VoidItem> Whitelist { get; } = new List<VoidItem>();
@@ -49,6 +35,7 @@ namespace Visibility.Configuration
 			new byte[16],
 			new byte[16],
 			new byte[128],
+			new byte[128],
 			new byte[128]
 		};
 
@@ -64,101 +51,142 @@ namespace Visibility.Configuration
 			939, // The Diadem
 		};
 
+		[NonSerialized] private readonly HashSet<ushort> allowedTerritory = new();
+
+		[NonSerialized]
+		private readonly Dictionary<ushort, string> territoryPlaceNameDictionary = new()
+		{
+			{ 0, "Default" }
+		};
+
+		public readonly Dictionary<ushort, TerritoryConfig> TerritoryConfigDictionary = new();
+
+		[NonSerialized] public TerritoryConfig CurrentConfig = null!;
+
 		private void ChangeSetting(string propertyName)
 		{
 			switch (propertyName)
 			{
-				case nameof(this.Enabled):
+				case "this.Enabled":
 					if (!VisibilityPlugin.Instance.Disable) // Make sure the disable event is finished before enabling again
 					{
 						VisibilityPlugin.Instance.Disable = !this.Enabled;
 					}
 					break;
-				case nameof(this.HidePet):
+				case "this.CurrentConfig.HidePet":
 					VisibilityPlugin.Instance.ShowPets(ContainerType.All);
 					break;
-				case nameof(this.HidePlayer):
+				case "this.CurrentConfig.HidePlayer":
 					VisibilityPlugin.Instance.ShowPlayers(ContainerType.All);
 					break;
-				case nameof(this.HideMinion):
+				case "this.CurrentConfig.HideMinion":
 					VisibilityPlugin.Instance.ShowMinions(ContainerType.All);
 					break;
-				case nameof(this.HideChocobo):
+				case "this.CurrentConfig.HideChocobo":
 					VisibilityPlugin.Instance.ShowChocobos(ContainerType.All);
 					break;
-				case nameof(this.ShowCompanyPet):
+				case "this.CurrentConfig.ShowCompanyPet":
 					VisibilityPlugin.Instance.ShowPets(ContainerType.Company);
 					break;
-				case nameof(this.ShowCompanyPlayer):
+				case "this.CurrentConfig.ShowCompanyPlayer":
 					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Company);
 					break;
-				case nameof(this.ShowCompanyMinion):
+				case "this.CurrentConfig.ShowCompanyMinion":
 					VisibilityPlugin.Instance.ShowMinions(ContainerType.Company);
 					break;
-				case nameof(this.ShowCompanyChocobo):
+				case "this.CurrentConfig.ShowCompanyChocobo":
 					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Company);
 					break;
-				case nameof(this.ShowPartyPet):
+				case "this.CurrentConfig.ShowPartyPet":
 					VisibilityPlugin.Instance.ShowPets(ContainerType.Party);
 					break;
-				case nameof(this.ShowPartyPlayer):
+				case "this.CurrentConfig.ShowPartyPlayer":
 					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Party);
 					break;
-				case nameof(this.ShowPartyMinion):
+				case "this.CurrentConfig.ShowPartyMinion":
 					VisibilityPlugin.Instance.ShowMinions(ContainerType.Party);
 					break;
-				case nameof(this.ShowPartyChocobo):
+				case "this.CurrentConfig.ShowPartyChocobo":
 					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Party);
 					break;
-				case nameof(this.ShowFriendPet):
+				case "this.CurrentConfig.ShowFriendPet":
 					VisibilityPlugin.Instance.ShowPets(ContainerType.Friend);
 					break;
-				case nameof(this.ShowFriendPlayer):
+				case "this.CurrentConfig.ShowFriendPlayer":
 					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Friend);
 					break;
-				case nameof(this.ShowFriendMinion):
+				case "this.CurrentConfig.ShowFriendMinion":
 					VisibilityPlugin.Instance.ShowMinions(ContainerType.Friend);
 					break;
-				case nameof(this.ShowFriendChocobo):
+				case "this.CurrentConfig.ShowFriendChocobo":
 					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Friend);
 					break;
 			}
 		}
-		
-		private FieldInfo GetBackingField(string propertyName)
-		{
-			return this.GetType().GetField($"<{propertyName}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!;
-		}
 
-		private void ChangeSetting(string propertyName, int val)
+		private void ChangeSetting(
+			ref bool property,
+			int val,
+			[CallerArgumentExpression("property")] string propertyName = "")
 		{
-			var field = this.GetBackingField(propertyName);
-			var state = (bool) field.GetValue(this)!;
-			field.SetValue(this, val > 1 ? !state : val > 0);
+			property = val > 1 ? !property : val > 0;
 			this.ChangeSetting(propertyName);
 		}
 
-		public void Init()
+		public void Init(ushort territoryType)
 		{
-			this.SettingDictionary["enabled"] = x => this.ChangeSetting(nameof(this.Enabled), x);
-			this.SettingDictionary["hidepet"] = x => this.ChangeSetting(nameof(this.HidePet), x);
-			this.SettingDictionary["hidestar"] = x => this.ChangeSetting(nameof(this.HideStar), x);
-			this.SettingDictionary["hideplayer"] = x => this.ChangeSetting(nameof(this.HidePlayer), x);
-			this.SettingDictionary["hidechocobo"] = x => this.ChangeSetting(nameof(this.HideChocobo), x);
-			this.SettingDictionary["hideminion"] = x => this.ChangeSetting(nameof(this.HideMinion), x);
-			this.SettingDictionary["showcompanypet"] = x => this.ChangeSetting(nameof(this.ShowCompanyPet), x);
-			this.SettingDictionary["showcompanyplayer"] = x => this.ChangeSetting(nameof(this.ShowCompanyPlayer), x);
-			this.SettingDictionary["showcompanychocobo"] = x => this.ChangeSetting(nameof(this.ShowCompanyChocobo), x);
-			this.SettingDictionary["showcompanyminion"] = x => this.ChangeSetting(nameof(this.ShowCompanyMinion), x);
-			this.SettingDictionary["showpartypet"] = x => this.ChangeSetting(nameof(this.ShowPartyPet), x);
-			this.SettingDictionary["showpartyplayer"] = x => this.ChangeSetting(nameof(this.ShowPartyPlayer), x);
-			this.SettingDictionary["showpartychocobo"] = x => this.ChangeSetting(nameof(this.ShowPartyChocobo), x);
-			this.SettingDictionary["showpartyminion"] = x => this.ChangeSetting(nameof(this.ShowPartyMinion), x);
-			this.SettingDictionary["showfriendpet"] = x => this.ChangeSetting(nameof(this.ShowFriendPet), x);
-			this.SettingDictionary["showfriendplayer"] = x => this.ChangeSetting(nameof(this.ShowFriendPlayer), x);
-			this.SettingDictionary["showfriendchocobo"] = x => this.ChangeSetting(nameof(this.ShowFriendChocobo), x);
-			this.SettingDictionary["showfriendminion"] = x => this.ChangeSetting(nameof(this.ShowFriendMinion), x);
-			this.SettingDictionary["showdeadplayer"] = x => this.ChangeSetting(nameof(this.ShowDeadPlayer), x);
+			this.SettingDictionary["enabled"] = x => this.ChangeSetting(ref this.Enabled, x);
+			this.SettingDictionary["hidepet"] = x => this.ChangeSetting(ref this.CurrentConfig.HidePet, x);
+			this.SettingDictionary["hidestar"] = x => this.ChangeSetting(ref this.CurrentConfig.HideStar, x);
+			this.SettingDictionary["hideplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.HidePlayer, x);
+			this.SettingDictionary["hidechocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.HideChocobo, x);
+			this.SettingDictionary["hideminion"] = x => this.ChangeSetting(ref this.CurrentConfig.HideMinion, x);
+			this.SettingDictionary["showcompanypet"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyPet, x);
+			this.SettingDictionary["showcompanyplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyPlayer, x);
+			this.SettingDictionary["showcompanychocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyChocobo, x);
+			this.SettingDictionary["showcompanyminion"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyMinion, x);
+			this.SettingDictionary["showpartypet"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyPet, x);
+			this.SettingDictionary["showpartyplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyPlayer, x);
+			this.SettingDictionary["showpartychocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyChocobo, x);
+			this.SettingDictionary["showpartyminion"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyMinion, x);
+			this.SettingDictionary["showfriendpet"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendPet, x);
+			this.SettingDictionary["showfriendplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendPlayer, x);
+			this.SettingDictionary["showfriendchocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendChocobo, x);
+			this.SettingDictionary["showfriendminion"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendMinion, x);
+			this.SettingDictionary["showdeadplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowDeadPlayer, x);
+
+			var valueTuples = VisibilityPlugin.DataManager.GameData.Excel.GetSheet<TerritoryType>()!.Where(
+				x =>
+					(x.TerritoryIntendedUse is 0 or 1 or 13 || this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) &&
+					!string.IsNullOrEmpty(x.Name) && x.RowId != 136).Select(
+				x => ((ushort)x.RowId, x.PlaceName?.Value?.Name ?? "Unknown Place"));
+
+			foreach (var (rowId, placeName) in valueTuples)
+			{
+				this.allowedTerritory.Add(rowId);
+				this.territoryPlaceNameDictionary[rowId] = placeName;
+			}
+
+			this.UpdateCurrentConfig(territoryType);
+		}
+
+		public void UpdateCurrentConfig(ushort territoryType)
+		{
+			if (this.AdvancedEnabled == false ||
+			    this.allowedTerritory.Contains(territoryType) == false)
+			{
+				territoryType = 0;
+			}
+
+			if (this.TerritoryConfigDictionary.ContainsKey(territoryType) == false)
+			{
+				this.TerritoryConfigDictionary[territoryType] = territoryType == 0
+					? new TerritoryConfig()
+					: this.TerritoryConfigDictionary[0].Clone();
+			}
+
+			this.CurrentConfig = this.TerritoryConfigDictionary[territoryType];
+			this.CurrentConfig.TerritoryType = territoryType;
 		}
 
 		public void Save()
