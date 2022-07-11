@@ -45,5 +45,8 @@
   "ColumnReason": "Razón",
   "ColumnAction": "Acción",
   "OptionLanguage": "Idioma",
-  "LanguageName": "Español"
+  "LanguageName": "Español",
+  "AdvancedOption": "Advanced configuration",
+  "AdvancedOptionTooltip": "Toggles configuration per area",
+  "ResetToCurrentArea": "Reset to current area"
 }

@@ -45,5 +45,8 @@
   "ColumnReason": "理由",
   "ColumnAction": "動作",
   "OptionLanguage": "言語",
-  "LanguageName": "日本語"
+  "LanguageName": "日本語",
+  "AdvancedOption": "Advanced configuration",
+  "AdvancedOptionTooltip": "Toggles configuration per area",
+  "ResetToCurrentArea": "Reset to current area"
 }
