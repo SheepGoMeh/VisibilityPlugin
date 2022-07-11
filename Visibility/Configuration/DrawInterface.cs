@@ -82,7 +82,7 @@ namespace Visibility.Configuration
 					ImGui.SameLine();
 					if (this.CurrentConfig != this.currentEditedConfig)
 					{
-						if (ImGui.Button("Reset to current area"))
+						if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.ResetToCurrentArea))
 						{
 							this.currentEditedConfig = this.CurrentConfig;
 						}
@@ -182,7 +182,11 @@ namespace Visibility.Configuration
 				ImGui.NextColumn();
 				this.Checkbox(ref this.AdvancedEnabled);
 				ImGui.SameLine();
-				ImGui.Text("Advanced options");
+				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.AdvancedOption);
+				if (ImGui.IsItemHovered())
+				{
+					ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.AdvancedOptionTooltip);
+				}
 				
 				ImGui.NextColumn();
 				var comboWidth =
