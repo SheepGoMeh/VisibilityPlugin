@@ -45,5 +45,8 @@
   "ColumnReason": "Причина",
   "ColumnAction": "Действие",
   "OptionLanguage": "Язык",
-  "LanguageName": "Русский"
+  "LanguageName": "Русский",
+  "AdvancedOption": "Advanced configuration",
+  "AdvancedOptionTooltip": "Toggles configuration per area",
+  "ResetToCurrentArea": "Reset to current area"
 }
