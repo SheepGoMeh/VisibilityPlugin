@@ -46,7 +46,7 @@
   "ColumnAction": "Action",
   "OptionLanguage": "Langue",
   "LanguageName": "Français",
-  "AdvancedOption": "Advanced configuration",
-  "AdvancedOptionTooltip": "Toggles configuration per area",
-  "ResetToCurrentArea": "Reset to current area"
+  "AdvancedOption": "Configuration avancée",
+  "AdvancedOptionTooltip": "Activer/désactiver la configuration par zone",
+  "ResetToCurrentArea": "Rétablir la zone actuelle"
 }
