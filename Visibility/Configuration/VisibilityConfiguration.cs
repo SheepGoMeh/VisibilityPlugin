@@ -156,10 +156,9 @@ namespace Visibility.Configuration
 			this.SettingDictionary["showdeadplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowDeadPlayer, x);
 
 			var valueTuples = VisibilityPlugin.DataManager.GameData.Excel.GetSheet<TerritoryType>()!.Where(
-				x =>
-					(x.TerritoryIntendedUse is 0 or 1 or 13 || this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) &&
-					!string.IsNullOrEmpty(x.Name) && x.RowId != 136).Select(
-				x => ((ushort)x.RowId, x.PlaceName?.Value?.Name ?? "Unknown Place"));
+				x => (x.TerritoryIntendedUse is 0 or 1 or 13 or 19 or 23 ||
+				      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !string.IsNullOrEmpty(x.Name) &&
+				     x.RowId != 136).Select(x => ((ushort)x.RowId, x.PlaceName?.Value?.Name ?? "Unknown Place"));
 
 			foreach (var (rowId, placeName) in valueTuples)
 			{
