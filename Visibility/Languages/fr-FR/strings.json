@@ -45,5 +45,8 @@
   "ColumnReason": "Motif",
   "ColumnAction": "Action",
   "OptionLanguage": "Langue",
-  "LanguageName": "Français"
+  "LanguageName": "Français",
+  "AdvancedOption": "Advanced configuration",
+  "AdvancedOptionTooltip": "Toggles configuration per area",
+  "ResetToCurrentArea": "Reset to current area"
 }
