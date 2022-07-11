@@ -45,5 +45,8 @@
   "ColumnReason": "Anledning",
   "ColumnAction": "Handling",
   "OptionLanguage": "Språk",
-  "LanguageName": "svenska"
+  "LanguageName": "svenska",
+  "AdvancedOption": "Advanced configuration",
+  "AdvancedOptionTooltip": "Toggles configuration per area",
+  "ResetToCurrentArea": "Reset to current area"
 }
