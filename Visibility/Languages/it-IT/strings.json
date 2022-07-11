@@ -45,5 +45,8 @@
   "ColumnReason": "Motivo",
   "ColumnAction": "Azione",
   "OptionLanguage": "Lingua",
-  "LanguageName": "Italiano"
+  "LanguageName": "Italiano",
+  "AdvancedOption": "Advanced configuration",
+  "AdvancedOptionTooltip": "Toggles configuration per area",
+  "ResetToCurrentArea": "Reset to current area"
 }
