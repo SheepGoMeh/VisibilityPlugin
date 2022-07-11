@@ -113,5 +113,8 @@ namespace Visibility
 		public string ColumnAction => this.GetString("ColumnAction", this.CurrentLanguage);
 		public string OptionLanguage => this.GetString("OptionLanguage", this.CurrentLanguage);
 		public string LanguageName => this.GetString("LanguageName", this.CurrentLanguage);
+		public string AdvancedOption => this.GetString("AdvancedOption", this.CurrentLanguage);
+		public string AdvancedOptionTooltip => this.GetString("AdvancedOptionTooltip", this.CurrentLanguage);
+		public string ResetToCurrentArea => this.GetString("ResetToCurrentArea", this.CurrentLanguage);
 	}
 }

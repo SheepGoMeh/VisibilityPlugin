@@ -45,5 +45,8 @@
   "ColumnReason": "Reason",
   "ColumnAction": "Action",
   "OptionLanguage": "Language",
-  "LanguageName": "English"
+  "LanguageName": "English",
+  "AdvancedOption": "Advanced configuration",
+  "AdvancedOptionTooltip": "Toggles configuration per area",
+  "ResetToCurrentArea": "Reset to current area"
 }
