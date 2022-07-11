@@ -62,6 +62,7 @@ namespace Visibility.Configuration
 		public readonly Dictionary<ushort, TerritoryConfig> TerritoryConfigDictionary = new();
 
 		[NonSerialized] public TerritoryConfig CurrentConfig = null!;
+		[NonSerialized] private TerritoryConfig currentEditedConfig = null!;
 
 		private void ChangeSetting(string propertyName)
 		{
@@ -127,9 +128,21 @@ namespace Visibility.Configuration
 		private void ChangeSetting(
 			ref bool property,
 			int val,
+			bool edit = false,
 			[CallerArgumentExpression("property")] string propertyName = "")
 		{
 			property = val > 1 ? !property : val > 0;
+			
+			if (propertyName.Contains("currentEditedConfig"))
+			{
+				if (edit)
+				{
+					return;
+				}
+
+				propertyName = propertyName.Replace("currentEditedConfig", "CurrentConfig");
+			}
+
 			this.ChangeSetting(propertyName);
 		}
 
@@ -169,7 +182,7 @@ namespace Visibility.Configuration
 			this.UpdateCurrentConfig(territoryType);
 		}
 
-		public void UpdateCurrentConfig(ushort territoryType)
+		public void UpdateCurrentConfig(ushort territoryType, bool edit = false)
 		{
 			if (this.AdvancedEnabled == false ||
 			    this.allowedTerritory.Contains(territoryType) == false)
@@ -184,8 +197,17 @@ namespace Visibility.Configuration
 					: this.TerritoryConfigDictionary[0].Clone();
 			}
 
-			this.CurrentConfig = this.TerritoryConfigDictionary[territoryType];
-			this.CurrentConfig.TerritoryType = territoryType;
+			if (edit)
+			{
+				this.currentEditedConfig = this.TerritoryConfigDictionary[territoryType];
+				this.currentEditedConfig.TerritoryType = territoryType;
+			}
+			else
+			{
+				this.CurrentConfig = this.TerritoryConfigDictionary[territoryType];
+				this.CurrentConfig.TerritoryType = territoryType;
+				this.currentEditedConfig = this.CurrentConfig;
+			}
 		}
 
 		public void Save()
