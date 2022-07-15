@@ -107,16 +107,16 @@ namespace Visibility.Utils
 				this.localPlayer = (BattleChara*)localPlayerAddress.Value;
 			}
 
-			this.hookCharacterEnableDraw = new Hook<CharacterEnableDrawPrototype>(
+			this.hookCharacterEnableDraw = Hook<CharacterEnableDrawPrototype>.FromAddress(
 				this.address.CharacterEnableDrawAddress,
 				this.CharacterEnableDrawDetour);
-			this.hookCharacterDisableDraw = new Hook<CharacterDisableDrawPrototype>(
+			this.hookCharacterDisableDraw = Hook<CharacterDisableDrawPrototype>.FromAddress(
 				this.address.CharacterDisableDrawAddress,
 				this.CharacterDisableDrawDetour);
-			this.hookCompanionEnableDraw = new Hook<CompanionEnableDrawPrototype>(
+			this.hookCompanionEnableDraw = Hook<CompanionEnableDrawPrototype>.FromAddress(
 				this.address.CompanionEnableDrawAddress,
 				this.CompanionEnableDrawDetour);
-			this.hookCharacterDtor = new Hook<CharacterDtorPrototype>(
+			this.hookCharacterDtor = Hook<CharacterDtorPrototype>.FromAddress(
 				this.address.CharacterDtorAddress,
 				this.CharacterDtorDetour);
 
