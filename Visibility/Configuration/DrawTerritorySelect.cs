@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
-using Dalamud.Interface;
 using ImGuiNET;
 
 namespace Visibility.Configuration;
@@ -10,7 +9,7 @@ namespace Visibility.Configuration;
 public partial class VisibilityConfiguration
 {
 	[NonSerialized] private bool comboNewOpen;
-	
+
 	/// <summary>
 	/// Creates a ComboBox with a simple text filter
 	/// </summary>
@@ -19,8 +18,17 @@ public partial class VisibilityConfiguration
 	/// <param name="itemsDictionary">Input dictionary</param>
 	/// <param name="textBuffer">Buffer for text input</param>
 	/// <param name="maxItems">Maximum amount of items displayed vertically</param>
+	/// <param name="searchIcon">Search icon string</param>
+	/// <param name="fontPtr">ImGui font pointer for search icon</param>
 	/// <returns></returns>
-	private bool ComboWithFilter(string label, ref ushort currentItem, Dictionary<ushort, string> itemsDictionary, byte[] textBuffer, uint maxItems = 5)
+	private bool ComboWithFilter(
+		string label,
+		ref ushort currentItem,
+		Dictionary<ushort, string> itemsDictionary,
+		byte[] textBuffer,
+		uint maxItems = 5,
+		string searchIcon = "",
+		ImFontPtr? fontPtr = null)
 	{
 		var previewValue = itemsDictionary.ContainsKey(currentItem) ? itemsDictionary[currentItem] : string.Empty;
 		
@@ -51,7 +59,7 @@ public partial class VisibilityConfiguration
 
 		ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(240, 240, 240, 255));
 		ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0, 0, 0, 255));
-		ImGui.PushItemWidth(ImGui.GetWindowContentRegionWidth());
+		ImGui.PushItemWidth(ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X);
 
 		if (!this.comboNewOpen)
 		{
@@ -61,15 +69,23 @@ public partial class VisibilityConfiguration
 
 		ImGui.InputText("##ComboWithFilter_inputText", textBuffer, (uint)textBuffer.Length);
 
-		ImGui.PushFont(UiBuilder.IconFont);
+		if (fontPtr.HasValue)
+		{
+			ImGui.PushFont(fontPtr.Value);
+		}
 
-		var iconString = FontAwesomeIcon.Search.ToIconString();
-		var iconSize = ImGui.CalcTextSize(iconString, true);
-		ImGui.SameLine();
-		ImGui.SetCursorPosX(ImGui.GetCursorPosX() - iconSize.X - (ImGui.GetStyle().ItemInnerSpacing.X * 3));
-		ImGui.Text(iconString);
-		
-		ImGui.PopFont();
+		if (string.IsNullOrEmpty(searchIcon) == false)
+		{
+			var iconSize = ImGui.CalcTextSize(searchIcon, true);
+			ImGui.SameLine();
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() - iconSize.X - (ImGui.GetStyle().ItemInnerSpacing.X * 3));
+			ImGui.Text(searchIcon);
+		}
+
+		if (fontPtr.HasValue)
+		{
+			ImGui.PopFont();
+		}
 
 		ImGui.PopStyleColor(2);
 

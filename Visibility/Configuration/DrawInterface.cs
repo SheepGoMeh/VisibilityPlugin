@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Dalamud.Interface;
 using ImGuiNET;
 using Visibility.Void;
 
@@ -74,7 +75,14 @@ namespace Visibility.Configuration
 					var territoryType = this.currentEditedConfig.TerritoryType;
 					
 					ImGui.SetNextItemWidth(250f);
-					if (this.ComboWithFilter("##currentConfig", ref territoryType, this.territoryPlaceNameDictionary, this.buffer[8]))
+					if (this.ComboWithFilter(
+						    "##currentConfig",
+						    ref territoryType,
+						    this.territoryPlaceNameDictionary,
+						    this.buffer[8],
+						    5,
+						    FontAwesomeIcon.Search.ToIconString(),
+						    UiBuilder.IconFont))
 					{
 						this.UpdateCurrentConfig(territoryType, true);
 					}
