@@ -503,14 +503,24 @@ namespace Visibility.Utils
 					this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				}
 
-				if (VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer
-				    && VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer
-				    && thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player
-				    && thisPtr->Health == 0
-				    && this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+				if (VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer)
 				{
-					thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-					this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+					if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
+					    thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player && thisPtr->Health == 0 &&
+					    this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+					{
+						thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+						this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+					}
+
+					if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
+					    thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player &&
+					    this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID) &&
+					    (thisPtr->StatusFlags & (byte)StatusFlags.Friend) > 0)
+					{
+						thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+						this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+					}
 				}
 				else if (this.objectIdsToShow.Contains(thisPtr->GameObject.ObjectID))
 				{
