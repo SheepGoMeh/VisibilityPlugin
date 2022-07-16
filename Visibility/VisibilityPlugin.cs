@@ -83,6 +83,8 @@ namespace Visibility
 
 		public readonly Localization PluginLocalization;
 		public readonly VisibilityConfiguration Configuration;
+		
+		public readonly ContextMenu ContextMenu;
 		public static VisibilityPlugin Instance { get; private set; } = null!;
 
 		private bool drawConfig;
@@ -102,6 +104,12 @@ namespace Visibility
 			                     new VisibilityConfiguration();
 			this.Configuration.Init(ClientState.TerritoryType);
 			this.PluginLocalization = new Localization(this.Configuration.Language);
+			this.ContextMenu = new ContextMenu();
+
+			if (this.Configuration.EnableContextMenu)
+			{
+				this.ContextMenu.Toggle();
+			}
 
 			CommandManager.AddHandler(
 				PluginCommandName,
@@ -206,6 +214,7 @@ namespace Visibility
 
 			this.IpcProvider.Dispose();
 			this.Api.Dispose();
+			this.ContextMenu.Dispose();
 
 			this.characterDrawResolver.Dispose();
 

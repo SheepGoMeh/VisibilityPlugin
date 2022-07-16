@@ -18,6 +18,7 @@ namespace Visibility.Configuration
 
 		public bool Enabled;
 		public bool AdvancedEnabled;
+		public bool EnableContextMenu;
 
 		public List<VoidItem> VoidList { get; } = new List<VoidItem>();
 		public List<VoidItem> Whitelist { get; } = new List<VoidItem>();
@@ -73,6 +74,9 @@ namespace Visibility.Configuration
 					{
 						VisibilityPlugin.Instance.Disable = !this.Enabled;
 					}
+					break;
+				case "this.EnableContextMenu":
+					VisibilityPlugin.Instance.ContextMenu.Toggle();
 					break;
 				case "this.CurrentConfig.HidePet":
 					VisibilityPlugin.Instance.ShowPets(ContainerType.All);

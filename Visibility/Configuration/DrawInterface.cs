@@ -224,6 +224,15 @@ namespace Visibility.Configuration
 
 				ImGui.PopItemWidth();
 				ImGui.NextColumn();
+				this.Checkbox(ref this.EnableContextMenu);
+				ImGui.SameLine();
+				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenu);
+				if (ImGui.IsItemHovered())
+				{
+					ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenuTip);
+				}
+
+				ImGui.NextColumn();
 				ImGui.Separator();
 
 				ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
