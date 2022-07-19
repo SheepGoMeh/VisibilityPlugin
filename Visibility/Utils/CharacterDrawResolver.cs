@@ -419,7 +419,7 @@ namespace Visibility.Utils
 					case (byte)ObjectKind.BattleNpc
 						when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && thisPtr->NameID == 6565
 						: // Earthly Star
-						if (VisibilityPlugin.Instance.Configuration.CurrentConfig.HideStar
+						if (VisibilityPlugin.Instance.Configuration.HideStar
 						    && VisibilityPlugin.Condition[ConditionFlag.InCombat]
 						    && thisPtr->GameObject.OwnerID != this.localPlayer->Character.GameObject.ObjectID
 						    && !this.containers[UnitType.Players][ContainerType.Party]

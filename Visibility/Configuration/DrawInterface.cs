@@ -179,7 +179,7 @@ namespace Visibility.Configuration
 					ImGui.EndTable();
 				}
 
-				this.Checkbox(ref this.currentEditedConfig.HideStar);
+				this.Checkbox(ref this.HideStar);
 				ImGui.SameLine();
 				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEarthlyStar);
 				if (ImGui.IsItemHovered())

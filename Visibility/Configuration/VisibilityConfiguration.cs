@@ -17,6 +17,7 @@ namespace Visibility.Configuration
 		public Localization.Language Language { get; private set; }
 
 		public bool Enabled;
+		public bool HideStar;
 		public bool AdvancedEnabled;
 		public bool EnableContextMenu;
 
@@ -154,7 +155,7 @@ namespace Visibility.Configuration
 		{
 			this.SettingDictionary["enabled"] = x => this.ChangeSetting(ref this.Enabled, x);
 			this.SettingDictionary["hidepet"] = x => this.ChangeSetting(ref this.CurrentConfig.HidePet, x);
-			this.SettingDictionary["hidestar"] = x => this.ChangeSetting(ref this.CurrentConfig.HideStar, x);
+			this.SettingDictionary["hidestar"] = x => this.ChangeSetting(ref this.HideStar, x);
 			this.SettingDictionary["hideplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.HidePlayer, x);
 			this.SettingDictionary["hidechocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.HideChocobo, x);
 			this.SettingDictionary["hideminion"] = x => this.ChangeSetting(ref this.CurrentConfig.HideMinion, x);
