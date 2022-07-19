@@ -393,11 +393,10 @@ namespace Visibility
 					command == "VoidUIManual")
 				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual");
 
-			var playerString = Encoding.UTF8.GetString(
-				new SeString(
-					new TextPayload(playerName),
-					new IconPayload(BitmapFontIcon.CrossWorld),
-					new TextPayload(world.Name)).Encode());
+			var playerString = new SeString(
+				new PlayerPayload(playerName, world.RowId),
+				new IconPayload(BitmapFontIcon.CrossWorld),
+				new TextPayload(world.Name));
 
 			if (!this.Configuration.VoidList.Any(
 				    x =>
@@ -426,11 +425,10 @@ namespace Visibility
 			{
 				var voidItem = new VoidItem(actor, arguments, false);
 
-				var playerString = Encoding.UTF8.GetString(
-					new SeString(
-						new TextPayload(actor.Name.TextValue),
-						new IconPayload(BitmapFontIcon.CrossWorld),
-						new TextPayload(actor.HomeWorld.GameData!.Name)).Encode());
+				var playerString = new SeString(
+					new PlayerPayload(actor.Name.TextValue, actor.HomeWorld.GameData!.RowId),
+					new IconPayload(BitmapFontIcon.CrossWorld),
+					new TextPayload(actor.HomeWorld.GameData!.Name));
 
 				if (!this.Configuration.VoidList.Any(
 					    x =>
@@ -500,11 +498,10 @@ namespace Visibility
 					command == "WhitelistUIManual")
 				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "WhitelistUIManual");
 
-			var playerString = Encoding.UTF8.GetString(
-				new SeString(
-					new TextPayload(playerName),
-					new IconPayload(BitmapFontIcon.CrossWorld),
-					new TextPayload(world.Name)).Encode());
+			var playerString = new SeString(
+				new PlayerPayload(playerName, world.RowId),
+				new IconPayload(BitmapFontIcon.CrossWorld),
+				new TextPayload(world.Name));
 
 			if (!this.Configuration.Whitelist.Any(
 				    x =>
@@ -539,11 +536,10 @@ namespace Visibility
 			{
 				var item = new VoidItem(actor, arguments, false);
 
-				var playerString = Encoding.UTF8.GetString(
-					new SeString(
-						new TextPayload(actor.Name.TextValue),
-						new IconPayload(BitmapFontIcon.CrossWorld),
-						new TextPayload(actor.HomeWorld.GameData!.Name)).Encode());
+				var playerString = new SeString(
+					new PlayerPayload(actor.Name.TextValue, actor.HomeWorld.GameData!.RowId),
+					new IconPayload(BitmapFontIcon.CrossWorld),
+					new TextPayload(actor.HomeWorld.GameData!.Name));
 
 				if (!this.Configuration.Whitelist.Any(
 					    x =>

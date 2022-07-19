@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Newtonsoft.Json;
 
 namespace Visibility
@@ -47,6 +50,49 @@ namespace Visibility
 
 			this.AvailableLanguages.Add(language);
 			this.strings[language] = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)!;
+		}
+
+		private static SeString FormatSeString(string format, params SeString[] args)
+		{
+			var result = new SeString();
+			var rx = new Regex(@"{(\d+)}", RegexOptions.Compiled);
+
+			var matches = rx.Matches(format);
+
+			for (var i = 0; i < matches.Count; ++i)
+			{
+				var matchGroup = matches[i].Groups[0];
+				var nextMatchGroup = i + 1 < matches.Count ? matches[i + 1].Groups[0] : null;
+				var index = int.Parse(matches[i].Groups[1].Value);
+
+				// If index is less than array size, append string
+				if (index < args.Length)
+				{
+					result.Append(args[index]);
+				}
+
+				// Copy substring between current match and next match
+				if (nextMatchGroup != null && nextMatchGroup.Index - matchGroup.Index > matchGroup.Length)
+				{
+					result.Append(
+						new TextPayload(
+							format.Substring(
+								matchGroup.Index + matchGroup.Length,
+								nextMatchGroup.Index - (matchGroup.Index + matchGroup.Length))));
+				}
+
+				// Copy substring between current match and end of string
+				else if (nextMatchGroup == null && format.Length - matchGroup.Index > matchGroup.Length)
+				{
+					result.Append(
+						new TextPayload(
+							format.Substring(
+								matchGroup.Index + matchGroup.Length,
+								format.Length - (matchGroup.Index + matchGroup.Length))));
+				}
+			}
+
+			return result;
 		}
 
 		public string GetString(string key, Language language) => this.strings[language].ContainsKey(key) ? this.strings[language][key] : key;
@@ -116,5 +162,7 @@ namespace Visibility
 		public string AdvancedOption => this.GetString("AdvancedOption", this.CurrentLanguage);
 		public string AdvancedOptionTooltip => this.GetString("AdvancedOptionTooltip", this.CurrentLanguage);
 		public string ResetToCurrentArea => this.GetString("ResetToCurrentArea", this.CurrentLanguage);
+		public SeString EntryAdded(string name, SeString entryName) => FormatSeString(this.GetString("EntryAdded", this.CurrentLanguage), name, entryName);
+		public SeString EntryExistsError(string name, SeString entryName) => FormatSeString(this.GetString("EntryExistsError", this.CurrentLanguage), name, entryName);
 	}
 }
