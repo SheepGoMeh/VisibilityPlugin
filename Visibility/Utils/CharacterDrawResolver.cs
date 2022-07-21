@@ -325,7 +325,7 @@ namespace Visibility.Utils
 						}
 
 						if (!VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer ||
-						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer && thisPtr->Health == 0) ||
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer && thisPtr->EventState == 2) || // EventState of 2 implies dead player
 						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
@@ -508,7 +508,7 @@ namespace Visibility.Utils
 				if (VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer)
 				{
 					if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
-					    thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player && thisPtr->Health == 0 &&
+					    thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player && thisPtr->EventState == 2 &&
 					    this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
 					{
 						thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
