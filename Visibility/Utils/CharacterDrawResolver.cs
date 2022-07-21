@@ -290,7 +290,7 @@ namespace Visibility.Utils
 						if ((VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
 						     || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
 						     || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene]
-							 || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback])
+						     || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback])
 						    && !VisibilityPlugin.Instance.Configuration.TerritoryTypeWhitelist.Contains(
 							    VisibilityPlugin.ClientState.TerritoryType))
 						{
@@ -387,7 +387,7 @@ namespace Visibility.Utils
 						if (VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
 						    || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
 						    || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene]
-                            || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback])
+						    || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback])
 						{
 							break;
 						}
