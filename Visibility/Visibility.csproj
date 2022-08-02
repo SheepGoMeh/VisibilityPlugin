@@ -74,7 +74,4 @@
     <Content Include="..\res\visibility.png" Link="images\image1.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
     <Content Include="..\res\voidlist.png" Link="images\image2.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Utils\PlaceholderResolver.cs" />
-  </ItemGroup>
 </Project>
