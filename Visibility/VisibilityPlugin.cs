@@ -316,24 +316,25 @@ namespace Visibility
 					return;
 				}
 
-				int value;
+				var value = false;
+				var toggle = false;
 
 				switch (args[1].ToLowerInvariant())
 				{
 					case "0":
 					case "off":
 					case "false":
-						value = 0;
+						value = true;
 						break;
 
 					case "1":
 					case "on":
 					case "true":
-						value = 1;
+						value = false;
 						break;
 
 					case "toggle":
-						value = 2;
+						toggle = true;
 						break;
 					default:
 						ChatGui.Print(
@@ -341,7 +342,7 @@ namespace Visibility
 						return;
 				}
 
-				this.Configuration.SettingDictionary[args[0].ToLowerInvariant()].Invoke(value);
+				this.Configuration.SettingDictionary[args[0]].Invoke(value, toggle, false);
 				this.Configuration.Save();
 			}
 		}

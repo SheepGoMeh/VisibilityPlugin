@@ -121,7 +121,8 @@ namespace Visibility.Api
 
 		public void Enable(bool state)
 		{
-			VisibilityPlugin.Instance.Configuration.SettingDictionary["enabled"].Invoke(state ? 1 : 0);
+			VisibilityPlugin.Instance.Configuration
+				.SettingDictionary[nameof(VisibilityPlugin.Instance.Configuration.Enabled)].Invoke(state, false, false);
 		}
 
 		public void Dispose()

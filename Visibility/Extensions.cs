@@ -13,6 +13,24 @@ namespace Visibility
 	{
 		public static string Format(this string format, params object[] args) => string.Format(format, args);
 
+		/// <summary>
+		/// Toggles boolean value if toggle is true, otherwise sets it to value
+		/// </summary>
+		/// <param name="property">Boolean property being modified</param>
+		/// <param name="value">Value if not toggled</param>
+		/// <param name="toggle">If true, toggle property</param>
+		public static void ToggleBool(this ref bool property, bool value, bool toggle = false)
+		{
+			if (toggle)
+			{
+				property = !property;
+			}
+			else
+			{
+				property = value;
+			}
+		}
+
 		public static bool IsStatus(this GameObject actor, StatusFlags flag)
 		{
 			return (Marshal.ReadByte(actor.Address + 0x1906) & (byte) flag) > 0;

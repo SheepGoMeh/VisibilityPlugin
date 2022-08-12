@@ -32,6 +32,14 @@ namespace Visibility
 			this.enabled = !this.enabled;
 		}
 
+		public void Toggle(bool value, bool toggle)
+		{
+			if (this.enabled != value || toggle)
+			{
+				this.Toggle();
+			}
+		}
+
 		private void Dispose(bool disposing)
 		{
 			if (!disposing)

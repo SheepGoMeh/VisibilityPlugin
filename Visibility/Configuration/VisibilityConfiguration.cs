@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using Dalamud.Configuration;
 using Lumina.Excel.GeneratedSheets;
 using Visibility.Utils;
@@ -42,7 +40,7 @@ namespace Visibility.Configuration
 		};
 
 		[NonSerialized]
-		public readonly Dictionary<string, Action<int>> SettingDictionary = new Dictionary<string, Action<int>>();
+		public readonly Dictionary<string, Action<bool, bool, bool>> SettingDictionary = new(StringComparer.InvariantCultureIgnoreCase);
 
 		[NonSerialized]
 		public readonly HashSet<ushort> TerritoryTypeWhitelist = new HashSet<ushort>
@@ -66,112 +64,263 @@ namespace Visibility.Configuration
 		[NonSerialized] public TerritoryConfig CurrentConfig = null!;
 		[NonSerialized] private TerritoryConfig currentEditedConfig = null!;
 
-		private void ChangeSetting(string propertyName)
+		public void Init(ushort territoryType)
 		{
-			switch (propertyName)
+			this.SettingDictionary[nameof(this.Enabled)] = (val, toggle, _) =>
 			{
-				case "this.Enabled":
-					if (!VisibilityPlugin.Instance.Disable) // Make sure the disable event is finished before enabling again
-					{
-						VisibilityPlugin.Instance.Disable = !this.Enabled;
-					}
-					break;
-				case "this.EnableContextMenu":
-					VisibilityPlugin.Instance.ContextMenu.Toggle();
-					break;
-				case "this.CurrentConfig.HidePet":
-					VisibilityPlugin.Instance.ShowPets(ContainerType.All);
-					break;
-				case "this.CurrentConfig.HidePlayer":
-					VisibilityPlugin.Instance.ShowPlayers(ContainerType.All);
-					break;
-				case "this.CurrentConfig.HideMinion":
-					VisibilityPlugin.Instance.ShowMinions(ContainerType.All);
-					break;
-				case "this.CurrentConfig.HideChocobo":
-					VisibilityPlugin.Instance.ShowChocobos(ContainerType.All);
-					break;
-				case "this.CurrentConfig.ShowCompanyPet":
-					VisibilityPlugin.Instance.ShowPets(ContainerType.Company);
-					break;
-				case "this.CurrentConfig.ShowCompanyPlayer":
-					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Company);
-					break;
-				case "this.CurrentConfig.ShowCompanyMinion":
-					VisibilityPlugin.Instance.ShowMinions(ContainerType.Company);
-					break;
-				case "this.CurrentConfig.ShowCompanyChocobo":
-					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Company);
-					break;
-				case "this.CurrentConfig.ShowPartyPet":
-					VisibilityPlugin.Instance.ShowPets(ContainerType.Party);
-					break;
-				case "this.CurrentConfig.ShowPartyPlayer":
-					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Party);
-					break;
-				case "this.CurrentConfig.ShowPartyMinion":
-					VisibilityPlugin.Instance.ShowMinions(ContainerType.Party);
-					break;
-				case "this.CurrentConfig.ShowPartyChocobo":
-					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Party);
-					break;
-				case "this.CurrentConfig.ShowFriendPet":
-					VisibilityPlugin.Instance.ShowPets(ContainerType.Friend);
-					break;
-				case "this.CurrentConfig.ShowFriendPlayer":
-					VisibilityPlugin.Instance.ShowPlayers(ContainerType.Friend);
-					break;
-				case "this.CurrentConfig.ShowFriendMinion":
-					VisibilityPlugin.Instance.ShowMinions(ContainerType.Friend);
-					break;
-				case "this.CurrentConfig.ShowFriendChocobo":
-					VisibilityPlugin.Instance.ShowChocobos(ContainerType.Friend);
-					break;
-			}
-		}
-
-		private void ChangeSetting(
-			ref bool property,
-			int val,
-			bool edit = false,
-			[CallerArgumentExpression("property")] string propertyName = "")
-		{
-			property = val > 1 ? !property : val > 0;
+				this.Enabled.ToggleBool(val, toggle);
+				
+				if (!VisibilityPlugin.Instance.Disable) // Make sure the disable event is finished before enabling again
+				{
+					VisibilityPlugin.Instance.Disable = !this.Enabled;
+				}
+			};
 			
-			if (propertyName.Contains("currentEditedConfig"))
+			this.SettingDictionary[nameof(this.HideStar)] = (val, toggle, _) => this.HideStar.ToggleBool(val, toggle);
+			this.SettingDictionary[nameof(this.AdvancedEnabled)] = (val, toggle, _) => this.AdvancedEnabled.ToggleBool(val, toggle);
+
+			this.SettingDictionary[nameof(this.EnableContextMenu)] = (val, toggle, _) =>
+			{
+				this.EnableContextMenu.ToggleBool(val, toggle);
+
+				VisibilityPlugin.Instance.ContextMenu.Toggle(val, toggle);
+			};
+
+			this.SettingDictionary[nameof(TerritoryConfig.HidePet)] = (val, toggle, edit) =>
 			{
 				if (edit)
 				{
-					return;
+					this.currentEditedConfig.HidePet.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.HidePet.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPets(ContainerType.All);
+			};
+
+			this.SettingDictionary[nameof(TerritoryConfig.HidePlayer)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.HidePlayer.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.HidePlayer.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPlayers(ContainerType.All);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.HideChocobo)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.HideChocobo.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.HideChocobo.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowChocobos(ContainerType.All);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.HideMinion)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.HideMinion.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.HideMinion.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowMinions(ContainerType.All);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyPet)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowCompanyPet.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowCompanyPet.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPets(ContainerType.Company);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyPlayer)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowCompanyPlayer.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowCompanyPlayer.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPlayers(ContainerType.Company);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyChocobo)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowCompanyChocobo.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowCompanyChocobo.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowChocobos(ContainerType.Company);
+			};
+
+			this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyMinion)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowCompanyMinion.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowCompanyMinion.ToggleBool(val, toggle);
 				}
 
-				propertyName = propertyName.Replace("currentEditedConfig", "CurrentConfig");
-			}
+				VisibilityPlugin.Instance.ShowMinions(ContainerType.Company);
+			};
 
-			this.ChangeSetting(propertyName);
-		}
+			this.SettingDictionary[nameof(TerritoryConfig.ShowPartyPet)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowPartyPet.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowPartyPet.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPets(ContainerType.Party);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.ShowPartyPlayer)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowPartyPlayer.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowPartyPlayer.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPlayers(ContainerType.Party);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.ShowPartyChocobo)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowPartyChocobo.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowPartyChocobo.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowChocobos(ContainerType.Party);
+			};
 
-		public void Init(ushort territoryType)
-		{
-			this.SettingDictionary["enabled"] = x => this.ChangeSetting(ref this.Enabled, x);
-			this.SettingDictionary["hidepet"] = x => this.ChangeSetting(ref this.CurrentConfig.HidePet, x);
-			this.SettingDictionary["hidestar"] = x => this.ChangeSetting(ref this.HideStar, x);
-			this.SettingDictionary["hideplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.HidePlayer, x);
-			this.SettingDictionary["hidechocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.HideChocobo, x);
-			this.SettingDictionary["hideminion"] = x => this.ChangeSetting(ref this.CurrentConfig.HideMinion, x);
-			this.SettingDictionary["showcompanypet"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyPet, x);
-			this.SettingDictionary["showcompanyplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyPlayer, x);
-			this.SettingDictionary["showcompanychocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyChocobo, x);
-			this.SettingDictionary["showcompanyminion"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowCompanyMinion, x);
-			this.SettingDictionary["showpartypet"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyPet, x);
-			this.SettingDictionary["showpartyplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyPlayer, x);
-			this.SettingDictionary["showpartychocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyChocobo, x);
-			this.SettingDictionary["showpartyminion"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowPartyMinion, x);
-			this.SettingDictionary["showfriendpet"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendPet, x);
-			this.SettingDictionary["showfriendplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendPlayer, x);
-			this.SettingDictionary["showfriendchocobo"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendChocobo, x);
-			this.SettingDictionary["showfriendminion"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowFriendMinion, x);
-			this.SettingDictionary["showdeadplayer"] = x => this.ChangeSetting(ref this.CurrentConfig.ShowDeadPlayer, x);
+			this.SettingDictionary[nameof(TerritoryConfig.ShowPartyMinion)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowPartyMinion.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowPartyMinion.ToggleBool(val, toggle);
+				}
+
+				VisibilityPlugin.Instance.ShowMinions(ContainerType.Party);
+			};
+
+			this.SettingDictionary[nameof(TerritoryConfig.ShowFriendPet)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowFriendPet.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowFriendPet.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPets(ContainerType.Friend);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.ShowFriendPlayer)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowFriendPlayer.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowFriendPlayer.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowPlayers(ContainerType.Friend);
+			};
+			
+			this.SettingDictionary[nameof(TerritoryConfig.ShowFriendChocobo)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowFriendChocobo.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowFriendChocobo.ToggleBool(val, toggle);
+				}
+				
+				VisibilityPlugin.Instance.ShowChocobos(ContainerType.Friend);
+			};
+
+			this.SettingDictionary[nameof(TerritoryConfig.ShowFriendMinion)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowFriendMinion.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowFriendMinion.ToggleBool(val, toggle);
+				}
+
+				VisibilityPlugin.Instance.ShowMinions(ContainerType.Friend);
+			};
+
+			this.SettingDictionary[nameof(TerritoryConfig.ShowDeadPlayer)] = (val, toggle, edit) =>
+			{
+				if (edit)
+				{
+					this.currentEditedConfig.ShowDeadPlayer.ToggleBool(val, toggle);
+				}
+				else
+				{
+					this.CurrentConfig.ShowDeadPlayer.ToggleBool(val, toggle);
+				}
+			};
 
 			var valueTuples = VisibilityPlugin.DataManager.GameData.Excel.GetSheet<TerritoryType>()!.Where(
 				x => (x.TerritoryIntendedUse is 0 or 1 or 13 or 19 or 23 ||
