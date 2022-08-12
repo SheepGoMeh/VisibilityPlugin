@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Logging;
 
 namespace Visibility
@@ -29,11 +28,6 @@ namespace Visibility
 			{
 				property = value;
 			}
-		}
-
-		public static bool IsStatus(this GameObject actor, StatusFlags flag)
-		{
-			return (Marshal.ReadByte(actor.Address + 0x1906) & (byte) flag) > 0;
 		}
 
 		public static string GetFirstname(this GameObject actor)
@@ -63,47 +57,6 @@ namespace Visibility
 			return new string(arr);
 		}
 
-		public static async void Rerender(this GameObject a)
-		{
-			await Task.Run(
-				async () =>
-			{
-				try
-				{
-					var addrRenderToggle = a.Address + 0x104;
-					var renderToggle = Marshal.ReadInt32(addrRenderToggle);
-
-					if (a is PlayerCharacter)
-					{
-						renderToggle |= (int)VisibilityFlags.Invisible;
-						Marshal.WriteInt32(addrRenderToggle, renderToggle);
-						await Task.Delay(100);
-						renderToggle &= ~(int)VisibilityFlags.Invisible;
-						Marshal.WriteInt32(addrRenderToggle, renderToggle);
-						await Task.Delay(100);
-					}
-					else
-					{
-						renderToggle |= (int)VisibilityFlags.Invisible;
-						Marshal.WriteInt32(addrRenderToggle, renderToggle);
-						await Task.Delay(10);
-						renderToggle &= ~(int)VisibilityFlags.Invisible;
-						Marshal.WriteInt32(addrRenderToggle, renderToggle);
-					}
-				}
-#if DEBUG
-				catch (Exception ex)
-				{
-					PluginLog.LogError(ex.ToString());
-#else
-				catch (Exception)
-				{
-					// ignored
-#endif
-				}
-			});
-		}
-
 		public static async void Render(this GameObject a)
 		{
 			await Task.Run(
@@ -121,32 +74,6 @@ namespace Visibility
 					}
 
 					renderToggle &= ~(int)VisibilityFlags.Invisible;
-					Marshal.WriteInt32(addrRenderToggle, renderToggle);
-				}
-#if DEBUG
-				catch (Exception ex)
-				{
-					PluginLog.LogError(ex.ToString());
-#else
-				catch (Exception)
-				{
-					// ignored
-#endif
-				}
-			});
-		}
-
-		public static async void Hide(this GameObject a)
-		{
-			await Task.Run(
-				() =>
-			{
-				try
-				{
-					var addrRenderToggle = a.Address + 0x104;
-					var renderToggle = Marshal.ReadInt32(addrRenderToggle);
-
-					renderToggle |= (int)VisibilityFlags.Invisible;
 					Marshal.WriteInt32(addrRenderToggle, renderToggle);
 				}
 #if DEBUG
