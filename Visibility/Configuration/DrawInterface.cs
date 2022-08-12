@@ -121,7 +121,51 @@ namespace Visibility.Configuration
 					ImGui.TableNextColumn();
 					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPlayers);
 					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.HidePlayer, nameof(this.currentEditedConfig.HidePlayer));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowPartyPlayer, nameof(this.currentEditedConfig.ShowPartyPlayer));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowFriendPlayer, nameof(this.currentEditedConfig.ShowFriendPlayer));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyPlayer, nameof(this.currentEditedConfig.ShowCompanyPlayer));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowDeadPlayer, nameof(this.currentEditedConfig.ShowDeadPlayer));
+					ImGui.TableNextRow();
 
+					ImGui.TableNextColumn();
+					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPets);
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.HidePet, nameof(this.currentEditedConfig.HidePet));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowPartyPet, nameof(this.currentEditedConfig.ShowPartyPet));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowFriendPet, nameof(this.currentEditedConfig.ShowFriendPet));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyPet, nameof(this.currentEditedConfig.ShowCompanyPet));
+					ImGui.TableNextRow();
+
+					ImGui.TableNextColumn();
+					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionChocobos);
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.HideChocobo, nameof(this.currentEditedConfig.HideChocobo));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowPartyChocobo, nameof(this.currentEditedConfig.ShowPartyChocobo));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowFriendChocobo, nameof(this.currentEditedConfig.ShowFriendChocobo));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyChocobo, nameof(this.currentEditedConfig.ShowCompanyChocobo));
+					ImGui.TableNextRow();
+
+					ImGui.TableNextColumn();
+					ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionMinions);
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.HideMinion, nameof(this.currentEditedConfig.HideMinion));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowPartyMinion, nameof(this.currentEditedConfig.ShowPartyMinion));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowFriendMinion, nameof(this.currentEditedConfig.ShowFriendMinion));
+					ImGui.TableNextColumn();
+					this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyMinion, nameof(this.currentEditedConfig.ShowCompanyMinion));
 					ImGui.TableNextRow();
 
 					ImGui.EndTable();
@@ -201,51 +245,6 @@ namespace Visibility.Configuration
 					this.showListWindow[1] = !this.showListWindow[1];
 				}
 
-				this.CenteredCheckbox(this.currentEditedConfig.HidePlayer, nameof(this.currentEditedConfig.HidePlayer));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowPartyPlayer, nameof(this.currentEditedConfig.ShowPartyPlayer));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowFriendPlayer, nameof(this.currentEditedConfig.ShowFriendPlayer));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyPlayer, nameof(this.currentEditedConfig.ShowCompanyPlayer));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowDeadPlayer, nameof(this.currentEditedConfig.ShowDeadPlayer));
-				ImGui.TableNextRow();
-
-				ImGui.TableNextColumn();
-				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPets);
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.HidePet, nameof(this.currentEditedConfig.HidePet));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowPartyPet, nameof(this.currentEditedConfig.ShowPartyPet));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowFriendPet, nameof(this.currentEditedConfig.ShowFriendPet));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyPet, nameof(this.currentEditedConfig.ShowCompanyPet));
-				ImGui.TableNextRow();
-
-				ImGui.TableNextColumn();
-				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionChocobos);
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.HideChocobo, nameof(this.currentEditedConfig.HideChocobo));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowPartyChocobo, nameof(this.currentEditedConfig.ShowPartyChocobo));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowFriendChocobo, nameof(this.currentEditedConfig.ShowFriendChocobo));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyChocobo, nameof(this.currentEditedConfig.ShowCompanyChocobo));
-				ImGui.TableNextRow();
-
-				ImGui.TableNextColumn();
-				ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionMinions);
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.HideMinion, nameof(this.currentEditedConfig.HideMinion));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowPartyMinion, nameof(this.currentEditedConfig.ShowPartyMinion));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowFriendMinion, nameof(this.currentEditedConfig.ShowFriendMinion));
-				ImGui.TableNextColumn();
-				this.CenteredCheckbox(this.currentEditedConfig.ShowCompanyMinion, nameof(this.currentEditedConfig.ShowCompanyMinion));
 				ImGui.SameLine(
 					ImGui.GetContentRegionMax().X - ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
 					(2 * ImGui.GetStyle().FramePadding.X));
