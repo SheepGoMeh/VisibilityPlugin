@@ -12,7 +12,7 @@ namespace Visibility.Configuration
 	{
 		public int Version { get; set; }
 
-		public Localization.Language Language { get; private set; }
+		public Localization.Language Language { get; set; }
 
 		public bool Enabled;
 		public bool HideStar;
