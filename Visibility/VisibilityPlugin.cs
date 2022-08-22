@@ -324,13 +324,13 @@ namespace Visibility
 					case "0":
 					case "off":
 					case "false":
-						value = true;
+						value = false;
 						break;
 
 					case "1":
 					case "on":
 					case "true":
-						value = false;
+						value = true;
 						break;
 
 					case "toggle":
