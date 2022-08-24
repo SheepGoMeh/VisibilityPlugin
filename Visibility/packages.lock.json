@@ -4,15 +4,15 @@
     "net6.0-windows7.0": {
       "Dalamud.ContextMenu": {
         "type": "Direct",
-        "requested": "[1.1.0, )",
-        "resolved": "1.1.0",
-        "contentHash": "NDaq7blwyGDVtmnt6F5w5lpuxR9e6xspgPxpXRAwoS9LAVjR9TQRjG8xY0UwS7dv41micptE36jZBc5tPltr3g=="
+        "requested": "[1.2.1, )",
+        "resolved": "1.2.1",
+        "contentHash": "RiBkn1OYRTnVbfUGYolLBE8MOeXjok+JiZaryb27oGa7YARCTu0XgUzkRiCglujknsHOn5kAaXsT3TUJmqMigg=="
       },
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[2.1.7, )",
-        "resolved": "2.1.7",
-        "contentHash": "jnZ/sdInyn07ycuWI+pPOtP/xE3v+c4+jYJfDt36FWnBF9NKqkpzfviJtPl/jGLgbaCmFIXu+Yid0N8GvdKefg=="
+        "requested": "[2.1.8, )",
+        "resolved": "2.1.8",
+        "contentHash": "YqagNXs9InxmqkXzq7kLveImxnodkBEicAhydMXVp7dFjC7xb76U6zGgAax4/BWIWfZeWzr5DJyQSev31kj81A=="
       }
     }
   }
