@@ -6,6 +6,5 @@
   "Punchline": "Allows you to hide players, pets, chocobos and minions.",
   "Tags": ["Blacklist", "Void", "VoidList", "Ban", "Hide", "Visibility", "QoL"],
   "RepoUrl": "https://github.com/SheepGoMeh/VisibilityPlugin",
-  "ApplicableVersion": "any",
-  "DalamudApiLevel": 6
+  "ApplicableVersion": "any"
 }
