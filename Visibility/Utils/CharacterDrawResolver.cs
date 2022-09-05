@@ -254,9 +254,8 @@ namespace Visibility.Utils
 
 			var nowLoadingWidget = VisibilityPlugin.GameGui.GetAddonByName("NowLoading", 1);
 
-			if (VisibilityPlugin.Instance.Configuration.Enabled && nowLoadingWidget != IntPtr.Zero &&
-			    !((AtkUnitBase*)nowLoadingWidget)->IsVisible && localPlayerAddress.HasValue &&
-			    thisPtr != (Character*)this.localPlayer)
+			if (nowLoadingWidget != IntPtr.Zero && !((AtkUnitBase*)nowLoadingWidget)->IsVisible &&
+			    localPlayerAddress.HasValue && thisPtr != (Character*)this.localPlayer)
 			{
 				switch (thisPtr->GameObject.ObjectKind)
 				{
@@ -324,8 +323,10 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (!VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer ||
-						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer && thisPtr->EventState == 2) || // EventState of 2 implies dead player
+						if (!VisibilityPlugin.Instance.Configuration.Enabled ||
+						    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer ||
+						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
+						     thisPtr->EventState == 2) || // EventState of 2 implies dead player
 						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.ObjectID)) ||
@@ -400,7 +401,8 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (!VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePet ||
+						if (!VisibilityPlugin.Instance.Configuration.Enabled ||
+						    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePet ||
 						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPet &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
@@ -421,7 +423,8 @@ namespace Visibility.Utils
 					case (byte)ObjectKind.BattleNpc
 						when thisPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && thisPtr->NameID == 6565
 						: // Earthly Star
-						if (VisibilityPlugin.Instance.Configuration.HideStar
+						if (VisibilityPlugin.Instance.Configuration.Enabled &&
+						    VisibilityPlugin.Instance.Configuration.HideStar
 						    && VisibilityPlugin.Condition[ConditionFlag.InCombat]
 						    && thisPtr->GameObject.OwnerID != this.localPlayer->Character.GameObject.ObjectID
 						    && !this.containers[UnitType.Players][ContainerType.Party]
@@ -466,7 +469,8 @@ namespace Visibility.Utils
 							break;
 						}
 
-						if (!VisibilityPlugin.Instance.Configuration.CurrentConfig.HideChocobo ||
+						if (!VisibilityPlugin.Instance.Configuration.Enabled ||
+						    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HideChocobo ||
 						    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendChocobo &&
 						     this.containers[UnitType.Players][ContainerType.Friend]
 							     .Contains(thisPtr->GameObject.OwnerID)) ||
@@ -505,7 +509,7 @@ namespace Visibility.Utils
 					this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				}
 
-				if (VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer)
+				if (VisibilityPlugin.Instance.Configuration.Enabled && VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer)
 				{
 					if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
 					    thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Player && thisPtr->EventState == 2 &&
