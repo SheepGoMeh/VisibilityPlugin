@@ -252,9 +252,9 @@ namespace Visibility.Utils
 				this.localPlayer = (BattleChara*)localPlayerAddress.Value;
 			}
 
-			var nowLoadingWidget = VisibilityPlugin.GameGui.GetAddonByName("NowLoading", 1);
+			var namePlateWidget = VisibilityPlugin.GameGui.GetAddonByName("NamePlate", 1);
 
-			if (nowLoadingWidget != IntPtr.Zero && !((AtkUnitBase*)nowLoadingWidget)->IsVisible &&
+			if (namePlateWidget != IntPtr.Zero && ((AtkUnitBase*)namePlateWidget)->IsVisible &&
 			    localPlayerAddress.HasValue && thisPtr != (Character*)this.localPlayer)
 			{
 				switch (thisPtr->GameObject.ObjectKind)
