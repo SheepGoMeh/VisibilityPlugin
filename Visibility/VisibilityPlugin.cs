@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Data;
 using Dalamud.Game;
@@ -57,10 +56,6 @@ namespace Visibility
 
 		[PluginService]
 		[RequiredVersion("1.0")]
-		public static SigScanner SigScanner { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
 		public static GameGui GameGui { get; set; } = null!;
 
 		[PluginService]
@@ -90,8 +85,7 @@ namespace Visibility
 		private bool drawConfig;
 		private bool refresh;
 		public bool Disable;
-
-		private readonly CharacterDrawResolver characterDrawResolver;
+		private readonly FrameworkHandler frameworkHandler;
 
 		public VisibilityApi Api { get; }
 
@@ -151,8 +145,7 @@ namespace Visibility
 					ShowInHelp = true
 				});
 
-			this.characterDrawResolver = new CharacterDrawResolver();
-			this.characterDrawResolver.Init();
+			this.frameworkHandler = new FrameworkHandler();
 
 			Framework.Update += this.FrameworkOnOnUpdateEvent;
 
@@ -167,6 +160,8 @@ namespace Visibility
 
 		private void ClientStateOnTerritoryChanged(object? sender, ushort e)
 		{
+			this.frameworkHandler.OnTerritoryChanged();
+
 			if (this.Configuration.AdvancedEnabled == false)
 			{
 				return;
@@ -181,7 +176,7 @@ namespace Visibility
 		{
 			if (this.Disable)
 			{
-				this.characterDrawResolver.ShowAll();
+				this.frameworkHandler.ShowAll();
 
 				this.Disable = false;
 
@@ -203,6 +198,10 @@ namespace Visibility
 				this.Disable = true;
 				this.Configuration.Enabled = false;
 			}
+			else
+			{
+				this.frameworkHandler.Update();
+			}
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -216,8 +215,6 @@ namespace Visibility
 			this.Api.Dispose();
 			this.ContextMenu.Dispose();
 
-			this.characterDrawResolver.Dispose();
-
 			ClientState.TerritoryChanged -= this.ClientStateOnTerritoryChanged;
 			Framework.Update -= this.FrameworkOnOnUpdateEvent;
 			PluginInterface.UiBuilder.Draw -= this.BuildUi;
@@ -228,6 +225,8 @@ namespace Visibility
 			CommandManager.RemoveHandler(VoidTargetCommandName);
 			CommandManager.RemoveHandler(WhitelistCommandName);
 			CommandManager.RemoveHandler(WhitelistTargetCommandName);
+
+			this.frameworkHandler.Dispose();
 		}
 
 		public void Dispose()
@@ -238,32 +237,32 @@ namespace Visibility
 
 		public void Show(UnitType unitType, ContainerType containerType)
 		{
-			this.characterDrawResolver.Show(unitType, containerType);
+			this.frameworkHandler.Show(unitType, containerType);
 		}
 
 		public void ShowPlayers(ContainerType type)
 		{
-			this.characterDrawResolver.ShowPlayers(type);
+			this.frameworkHandler.ShowPlayers(type);
 		}
 
 		public void ShowPets(ContainerType type)
 		{
-			this.characterDrawResolver.ShowPets(type);
+			this.frameworkHandler.ShowPets(type);
 		}
 
 		public void ShowMinions(ContainerType type)
 		{
-			this.characterDrawResolver.ShowMinions(type);
+			this.frameworkHandler.ShowMinions(type);
 		}
 
 		public void ShowChocobos(ContainerType type)
 		{
-			this.characterDrawResolver.ShowChocobos(type);
+			this.frameworkHandler.ShowChocobos(type);
 		}
 
 		public void ShowPlayer(uint id)
 		{
-			this.characterDrawResolver.ShowPlayer(id);
+			this.frameworkHandler.ShowPlayer(id);
 		}
 
 		private void PluginCommand(string command, string arguments)
