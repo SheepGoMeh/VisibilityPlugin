@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
@@ -73,27 +72,41 @@ public class FrameworkHandler : IDisposable
 
 	private readonly HashSet<uint> hiddenMinionObjectIds = new ();
 	private readonly HashSet<uint> minionObjectIdsToShow = new ();
+	private int counter;
 
 	public unsafe void Update()
 	{
-		var localPlayerAddress = VisibilityPlugin.ClientState.LocalPlayer?.Address;
+		var localPlayerGameObject =
+			FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectManager.GetGameObjectByIndex(0);
 		var namePlateWidget = VisibilityPlugin.GameGui.GetAddonByName("NamePlate", 1);
 
 		if (namePlateWidget == IntPtr.Zero || !((AtkUnitBase*)namePlateWidget)->IsVisible ||
-		    !localPlayerAddress.HasValue)
+		    localPlayerGameObject == null || localPlayerGameObject->ObjectID == 0xE0000000)
 		{
 			return;
 		}
 
-		var localPlayer = (Character*)localPlayerAddress;
-
-		for (var i = 0; i != VisibilityPlugin.ObjectTable.Length; ++i)
+		// Only handle every fifth framework update
+		if (++this.counter != 5)
 		{
-			var objectAddress = VisibilityPlugin.ObjectTable.GetObjectAddress(i);
-			var characterPtr = (Character*)objectAddress;
+			return;
+		}
 
-			if (objectAddress == IntPtr.Zero || objectAddress == localPlayerAddress ||
-			    !characterPtr->GameObject.IsCharacter())
+		this.counter = 0;
+
+		var isBound = VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
+		              || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
+		              || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene]
+		              || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback];
+
+		var localPlayer = (Character*)localPlayerGameObject;
+
+		for (var i = 0; i != 200; ++i)
+		{
+			var gameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectManager.GetGameObjectByIndex(i);
+			var characterPtr = (Character*)gameObject;
+
+			if (gameObject == null || gameObject == localPlayerGameObject || !gameObject->IsCharacter())
 			{
 				continue;
 			}
@@ -101,11 +114,11 @@ public class FrameworkHandler : IDisposable
 			switch ((ObjectKind)characterPtr->GameObject.ObjectKind)
 			{
 				case ObjectKind.Player:
-					this.PlayerHandler(characterPtr, localPlayer);
+					this.PlayerHandler(characterPtr, localPlayer, isBound);
 					break;
 				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet &&
 				                               characterPtr->NameID != 6565:
-					this.PetHandler(characterPtr, localPlayer);
+					this.PetHandler(characterPtr, localPlayer, isBound);
 					break;
 				case ObjectKind.BattleNpc
 					when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && characterPtr->NameID == 6565
@@ -143,7 +156,7 @@ public class FrameworkHandler : IDisposable
 		}
 	}
 
-	private unsafe void PlayerHandler(Character* characterPtr, Character* localPlayer)
+	private unsafe void PlayerHandler(Character* characterPtr, Character* localPlayer, bool isBound)
 	{
 		if (characterPtr->GameObject.ObjectID == 0xE0000000)
 		{
@@ -183,11 +196,7 @@ public class FrameworkHandler : IDisposable
 			this.containers[UnitType.Players][ContainerType.Party].Remove(characterPtr->GameObject.ObjectID);
 		}
 
-		if ((VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
-		     || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
-		     || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene]
-		     || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback])
-		    && !VisibilityPlugin.Instance.Configuration.TerritoryTypeWhitelist.Contains(
+		if (isBound && !VisibilityPlugin.Instance.Configuration.TerritoryTypeWhitelist.Contains(
 			    VisibilityPlugin.ClientState.TerritoryType))
 		{
 			return;
@@ -205,7 +214,7 @@ public class FrameworkHandler : IDisposable
 				.Remove(characterPtr->GameObject.ObjectID);
 		}
 
-		var voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.FirstOrDefault(
+		var voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
 			x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
 			     x.HomeworldId == characterPtr->HomeWorld);
 
@@ -248,7 +257,7 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		var whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.FirstOrDefault(
+		var whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
 			x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
 			     x.HomeworldId == characterPtr->HomeWorld);
 
@@ -265,7 +274,7 @@ public class FrameworkHandler : IDisposable
 		this.HideGameObject(characterPtr);
 	}
 
-	private unsafe void PetHandler(Character* characterPtr, Character* localPlayer)
+	private unsafe void PetHandler(Character* characterPtr, Character* localPlayer, bool isBound)
 	{
 		// Ignore own pet
 		if (characterPtr->GameObject.OwnerID == localPlayer->GameObject.ObjectID)
@@ -302,16 +311,14 @@ public class FrameworkHandler : IDisposable
 		}
 
 		// Do not hide pets in duties
-		if (VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
-		    || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
-		    || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene]
-		    || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback])
+		if (isBound)
 		{
 			return;
 		}
 
 		// Hide pet if it belongs to a voided player
-		if (VisibilityPlugin.Instance.Configuration.VoidList.Any(x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		if (VisibilityPlugin.Instance.Configuration.VoidList.Exists(
+			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
 		{
 			this.HideGameObject(characterPtr);
 			return;
@@ -328,7 +335,8 @@ public class FrameworkHandler : IDisposable
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPet &&
 		     this.containers[UnitType.Players][ContainerType.Party]
 			     .Contains(characterPtr->GameObject.OwnerID)) ||
-		    VisibilityPlugin.Instance.Configuration.Whitelist.Any(x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		    VisibilityPlugin.Instance.Configuration.Whitelist.Exists(
+			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
 		{
 			return;
 		}
@@ -373,7 +381,8 @@ public class FrameworkHandler : IDisposable
 		}
 
 		// Hide chocobo if it belongs to a voided player
-		if (VisibilityPlugin.Instance.Configuration.VoidList.Any(x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		if (VisibilityPlugin.Instance.Configuration.VoidList.Exists(
+			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
 		{
 			this.HideGameObject(characterPtr);
 			return;
@@ -390,7 +399,8 @@ public class FrameworkHandler : IDisposable
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyChocobo &&
 		     this.containers[UnitType.Players][ContainerType.Party]
 			     .Contains(characterPtr->GameObject.OwnerID)) ||
-		    VisibilityPlugin.Instance.Configuration.Whitelist.Any(x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		    VisibilityPlugin.Instance.Configuration.Whitelist.Exists(
+			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
 		{
 			return;
 		}
