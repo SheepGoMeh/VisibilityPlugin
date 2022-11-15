@@ -230,7 +230,7 @@ public class FrameworkHandler : IDisposable
 		}
 
 		if (((VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
-		      characterPtr->EventState == 2) || // EventState of 2 implies dead player
+		      characterPtr->GameObject.IsDead()) ||
 		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer && isObjectIdInParty) ||
 		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer && isFriend)) &&
 		    this.hiddenObjectIds.Contains(characterPtr->GameObject.ObjectID))
@@ -243,7 +243,7 @@ public class FrameworkHandler : IDisposable
 		if (!VisibilityPlugin.Instance.Configuration.Enabled ||
 		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
-		     characterPtr->EventState == 2) ||
+		     characterPtr->GameObject.IsDead()) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
 		     this.containers[UnitType.Players][ContainerType.Friend]
 			     .Contains(characterPtr->GameObject.ObjectID)) ||
