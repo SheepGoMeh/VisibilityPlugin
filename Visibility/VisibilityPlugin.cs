@@ -342,8 +342,7 @@ namespace Visibility
 				if (!this.Configuration.SettingDictionary.Keys.Any(
 					    x => x.Equals(args[0], StringComparison.InvariantCultureIgnoreCase)))
 				{
-					ChatGui.Print(
-						this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[0]));
+					ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[0]));
 					return;
 				}
 
@@ -368,8 +367,7 @@ namespace Visibility
 						toggle = true;
 						break;
 					default:
-						ChatGui.Print(
-							this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[1]));
+						ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[1]));
 						return;
 				}
 
@@ -382,8 +380,7 @@ namespace Visibility
 		{
 			if (string.IsNullOrEmpty(arguments))
 			{
-				ChatGui.Print(
-					this.PluginLocalization.NoArgumentsError(this.PluginLocalization.VoidListName));
+				ChatGui.Print(this.PluginLocalization.NoArgumentsError(this.PluginLocalization.VoidListName));
 				return;
 			}
 
@@ -391,8 +388,7 @@ namespace Visibility
 
 			if (args.Length < 3)
 			{
-				ChatGui.Print(
-					this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.VoidListName));
+				ChatGui.Print(this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.VoidListName));
 				return;
 			}
 
@@ -489,8 +485,7 @@ namespace Visibility
 			}
 			else
 			{
-				ChatGui.Print(
-					this.PluginLocalization.InvalidTargetError(this.PluginLocalization.VoidListName));
+				ChatGui.Print(this.PluginLocalization.InvalidTargetError(this.PluginLocalization.VoidListName));
 			}
 		}
 
@@ -498,8 +493,7 @@ namespace Visibility
 		{
 			if (string.IsNullOrEmpty(arguments))
 			{
-				ChatGui.Print(
-					this.PluginLocalization.NoArgumentsError(this.PluginLocalization.WhitelistName));
+				ChatGui.Print(this.PluginLocalization.NoArgumentsError(this.PluginLocalization.WhitelistName));
 				return;
 			}
 
@@ -507,8 +501,7 @@ namespace Visibility
 
 			if (args.Length < 3)
 			{
-				ChatGui.Print(
-					this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.WhitelistName));
+				ChatGui.Print(this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.WhitelistName));
 				return;
 			}
 
@@ -558,8 +551,7 @@ namespace Visibility
 					this.ShowPlayer(actor.ObjectId);
 				}
 
-				ChatGui.Print(
-					this.PluginLocalization.EntryAdded(this.PluginLocalization.WhitelistName, playerString));
+				ChatGui.Print(this.PluginLocalization.EntryAdded(this.PluginLocalization.WhitelistName, playerString));
 			}
 			else
 			{
@@ -603,8 +595,7 @@ namespace Visibility
 			}
 			else
 			{
-				ChatGui.Print(
-					this.PluginLocalization.InvalidTargetError(this.PluginLocalization.WhitelistName));
+				ChatGui.Print(this.PluginLocalization.InvalidTargetError(this.PluginLocalization.WhitelistName));
 			}
 		}
 
