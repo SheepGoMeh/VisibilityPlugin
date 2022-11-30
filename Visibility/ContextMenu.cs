@@ -81,8 +81,7 @@ namespace Visibility
 							new TextPayload(
 								VisibilityPlugin.Instance.PluginLocalization.ContextMenuAdd(
 									VisibilityPlugin.Instance.PluginLocalization.VoidListName))),
-						AddToVoidList,
-						false)
+						AddToVoidList)
 					: new GameObjectContextMenuItem(
 						new SeString(
 							new UIForegroundPayload(539),
@@ -91,8 +90,7 @@ namespace Visibility
 							new TextPayload(
 								VisibilityPlugin.Instance.PluginLocalization.ContextMenuRemove(
 									VisibilityPlugin.Instance.PluginLocalization.VoidListName))),
-						RemoveFromVoidList,
-						false));
+						RemoveFromVoidList));
 
 			args.AddCustomItem(
 				VisibilityPlugin.Instance.Configuration.Whitelist.SingleOrDefault(
@@ -105,8 +103,7 @@ namespace Visibility
 							new TextPayload(
 								VisibilityPlugin.Instance.PluginLocalization.ContextMenuAdd(
 									VisibilityPlugin.Instance.PluginLocalization.WhitelistName))),
-						AddToWhitelist,
-						false)
+						AddToWhitelist)
 					: new GameObjectContextMenuItem(
 						new SeString(
 							new UIForegroundPayload(539),
@@ -115,8 +112,7 @@ namespace Visibility
 							new TextPayload(
 								VisibilityPlugin.Instance.PluginLocalization.ContextMenuRemove(
 									VisibilityPlugin.Instance.PluginLocalization.WhitelistName))),
-						RemoveFromWhitelist,
-						false));
+						RemoveFromWhitelist));
 		}
 
 		private static void AddToVoidList(GameObjectContextMenuItemSelectedArgs args)
