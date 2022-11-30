@@ -63,18 +63,18 @@ namespace Visibility.Api
 				return;
 			}
 
-			if (VisibilityPlugin.ObjectTable
-				    .SingleOrDefault(
-					    x =>
-						    x is PlayerCharacter playerCharacter &&
-						    playerCharacter.Name.TextValue.Equals(item.Name, StringComparison.Ordinal) &&
-						    playerCharacter.HomeWorld.Id == item.HomeworldId) is PlayerCharacter a)
-			{
-				a.Render();
-			}
-
 			VisibilityPlugin.Instance.Configuration.VoidList.Remove(item);
 			VisibilityPlugin.Instance.Configuration.Save();
+
+			if (item.ObjectId > 0)
+			{
+				VisibilityPlugin.Instance.RemoveChecked(item.ObjectId);
+				VisibilityPlugin.Instance.ShowPlayer(item.ObjectId);
+			}
+			else
+			{
+				VisibilityPlugin.Instance.RemoveChecked(item.Name);
+			}
 		}
 
 		public IEnumerable<string> GetWhitelistEntries()

@@ -78,8 +78,9 @@ namespace Visibility
 
 		public readonly Localization PluginLocalization;
 		public readonly VisibilityConfiguration Configuration;
-		
+
 		public readonly ContextMenu ContextMenu;
+
 		public static VisibilityPlugin Instance { get; private set; } = null!;
 
 		private bool drawConfig;
@@ -265,6 +266,37 @@ namespace Visibility
 			this.frameworkHandler.ShowPlayer(id);
 		}
 
+		public void RemoveChecked(uint id)
+		{
+			this.frameworkHandler.RemoveChecked(id);
+		}
+
+		public void RemoveChecked(string name)
+		{
+			var gameObject = ObjectTable.SingleOrDefault(
+				x => x is PlayerCharacter character && character.Name.TextValue.Equals(
+					name,
+					StringComparison.InvariantCultureIgnoreCase));
+
+			if (gameObject != null)
+			{
+				this.frameworkHandler.RemoveChecked(gameObject.ObjectId);
+			}
+		}
+
+		public void ShowPlayer(string name)
+		{
+			var gameObject = ObjectTable.SingleOrDefault(
+				x => x is PlayerCharacter character && character.Name.TextValue.Equals(
+					name,
+					StringComparison.InvariantCultureIgnoreCase));
+
+			if (gameObject != null)
+			{
+				this.frameworkHandler.ShowPlayer(gameObject.ObjectId);
+			}
+		}
+
 		private void PluginCommand(string command, string arguments)
 		{
 			if (this.refresh)
@@ -378,20 +410,24 @@ namespace Visibility
 
 			var playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
-			var voidItem = ObjectTable
-				.SingleOrDefault(
-					x => x is PlayerCharacter character
-					     && character.HomeWorld.Id == world.RowId
-					     && character.Name.TextValue.Equals(
-						     playerName,
-						     StringComparison.InvariantCultureIgnoreCase)) is not PlayerCharacter actor
-				? new VoidItem(
+			VoidItem voidItem;
+			var gameObject = ObjectTable.SingleOrDefault(
+				x => x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
+				     character.Name.TextValue.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
+
+			if (gameObject is PlayerCharacter actor)
+			{
+				voidItem = new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual");
+			}
+			else
+			{
+				voidItem = new VoidItem(
 					playerName,
 					world.Name,
 					world.RowId,
 					args.Length == 3 ? string.Empty : args[3],
-					command == "VoidUIManual")
-				: new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual");
+					command == "VoidUIManual");
+			}
 
 			var playerString = new SeString(
 				new PlayerPayload(playerName, world.RowId),
@@ -404,8 +440,13 @@ namespace Visibility
 			{
 				this.Configuration.VoidList.Add(voidItem);
 				this.Configuration.Save();
-				ChatGui.Print(
-					this.PluginLocalization.EntryAdded(this.PluginLocalization.VoidListName, playerString));
+
+				if (gameObject != null)
+				{
+					this.RemoveChecked(gameObject.ObjectId);
+				}
+
+				ChatGui.Print(this.PluginLocalization.EntryAdded(this.PluginLocalization.VoidListName, playerString));
 			}
 			else
 			{
@@ -436,6 +477,7 @@ namespace Visibility
 				{
 					this.Configuration.VoidList.Add(voidItem);
 					this.Configuration.Save();
+					this.RemoveChecked(actor.ObjectId);
 					ChatGui.Print(
 						this.PluginLocalization.EntryAdded(this.PluginLocalization.VoidListName, playerString));
 				}
@@ -512,6 +554,7 @@ namespace Visibility
 
 				if (actor != null)
 				{
+					this.RemoveChecked(actor.ObjectId);
 					this.ShowPlayer(actor.ObjectId);
 				}
 
@@ -547,6 +590,7 @@ namespace Visibility
 				{
 					this.Configuration.Whitelist.Add(item);
 					this.Configuration.Save();
+					this.RemoveChecked(actor.ObjectId);
 					this.ShowPlayer(actor.ObjectId);
 					ChatGui.Print(
 						this.PluginLocalization.EntryAdded(this.PluginLocalization.WhitelistName, playerString));

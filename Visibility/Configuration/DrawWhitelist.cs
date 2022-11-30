@@ -120,6 +120,15 @@ public partial class VisibilityConfiguration
 						this.sortKeySelector[1],
 						this.sortAscending[1],
 						out this.sortKeySelector[1]);
+
+					if (itemToRemove.ObjectId > 0)
+					{
+						VisibilityPlugin.Instance.RemoveChecked(itemToRemove.ObjectId);
+					}
+					else
+					{
+						VisibilityPlugin.Instance.RemoveChecked(itemToRemove.Name);
+					}
 				}
 
 				var manual = true;

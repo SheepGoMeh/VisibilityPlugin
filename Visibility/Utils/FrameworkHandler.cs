@@ -29,6 +29,10 @@ public class FrameworkHandler : IDisposable
 {
 	private readonly HashSet<uint> hiddenObjectIds = new ();
 	private readonly HashSet<uint> objectIdsToShow = new ();
+	private readonly HashSet<uint> checkedVoidedObjectIds = new (capacity: 1000);
+	private readonly HashSet<uint> checkedWhitelistedObjectIds = new (capacity: 1000);
+	private readonly HashSet<uint> voidedObjectIds = new (capacity: 1000);
+	private readonly HashSet<uint> whitelistedObjectIds = new (capacity: 1000);
 
 	private readonly Dictionary<UnitType, Dictionary<ContainerType, HashSet<uint>>> containers = new ()
 	{
@@ -214,17 +218,23 @@ public class FrameworkHandler : IDisposable
 				.Remove(characterPtr->GameObject.ObjectID);
 		}
 
-		var voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
-			x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
-			     x.HomeworldId == characterPtr->HomeWorld);
-
-		if (voidedPlayer != null)
+		if (!this.checkedVoidedObjectIds.Contains(characterPtr->GameObject.ObjectID))
 		{
-			if (voidedPlayer.ObjectId != characterPtr->GameObject.ObjectID)
+			var voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
+				x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
+				     x.HomeworldId == characterPtr->HomeWorld);
+
+			if (voidedPlayer != null)
 			{
 				voidedPlayer.ObjectId = characterPtr->GameObject.ObjectID;
+				this.voidedObjectIds.Add(characterPtr->GameObject.ObjectID);
 			}
 
+			this.checkedVoidedObjectIds.Add(characterPtr->GameObject.ObjectID);
+		}
+
+		if (this.voidedObjectIds.Contains(characterPtr->GameObject.ObjectID))
+		{
 			this.HideGameObject(characterPtr);
 			return;
 		}
@@ -257,17 +267,23 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		var whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
-			x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
-			     x.HomeworldId == characterPtr->HomeWorld);
-
-		if (whitelistedPlayer != null)
+		if (!this.checkedWhitelistedObjectIds.Contains(characterPtr->GameObject.ObjectID))
 		{
-			if (whitelistedPlayer.ObjectId != characterPtr->GameObject.ObjectID)
+			var whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
+				x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
+				     x.HomeworldId == characterPtr->HomeWorld);
+
+			if (whitelistedPlayer != null)
 			{
 				whitelistedPlayer.ObjectId = characterPtr->GameObject.ObjectID;
+				this.whitelistedObjectIds.Add(characterPtr->GameObject.ObjectID);
 			}
 
+			this.checkedWhitelistedObjectIds.Add(characterPtr->GameObject.ObjectID);
+		}
+
+		if (this.whitelistedObjectIds.Contains(characterPtr->GameObject.ObjectID))
+		{
 			return;
 		}
 
@@ -317,8 +333,7 @@ public class FrameworkHandler : IDisposable
 		}
 
 		// Hide pet if it belongs to a voided player
-		if (VisibilityPlugin.Instance.Configuration.VoidList.Exists(
-			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		if (this.voidedObjectIds.Contains(characterPtr->GameObject.OwnerID))
 		{
 			this.HideGameObject(characterPtr);
 			return;
@@ -335,8 +350,7 @@ public class FrameworkHandler : IDisposable
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPet &&
 		     this.containers[UnitType.Players][ContainerType.Party]
 			     .Contains(characterPtr->GameObject.OwnerID)) ||
-		    VisibilityPlugin.Instance.Configuration.Whitelist.Exists(
-			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		    this.whitelistedObjectIds.Contains(characterPtr->GameObject.OwnerID))
 		{
 			return;
 		}
@@ -381,8 +395,7 @@ public class FrameworkHandler : IDisposable
 		}
 
 		// Hide chocobo if it belongs to a voided player
-		if (VisibilityPlugin.Instance.Configuration.VoidList.Exists(
-			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		if (this.voidedObjectIds.Contains(characterPtr->GameObject.OwnerID))
 		{
 			this.HideGameObject(characterPtr);
 			return;
@@ -399,8 +412,7 @@ public class FrameworkHandler : IDisposable
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyChocobo &&
 		     this.containers[UnitType.Players][ContainerType.Party]
 			     .Contains(characterPtr->GameObject.OwnerID)) ||
-		    VisibilityPlugin.Instance.Configuration.Whitelist.Exists(
-			    x => x.ObjectId == characterPtr->GameObject.OwnerID))
+		    this.whitelistedObjectIds.Contains(characterPtr->GameObject.OwnerID))
 		{
 			return;
 		}
@@ -541,6 +553,10 @@ public class FrameworkHandler : IDisposable
 		this.objectIdsToShow.Clear();
 		this.hiddenMinionObjectIds.Clear();
 		this.minionObjectIdsToShow.Clear();
+		this.checkedVoidedObjectIds.Clear();
+		this.checkedWhitelistedObjectIds.Clear();
+		this.voidedObjectIds.Clear();
+		this.whitelistedObjectIds.Clear();
 	}
 
 	public void ShowPlayers(ContainerType type) => this.Show(UnitType.Players, type);
@@ -570,6 +586,7 @@ public class FrameworkHandler : IDisposable
 				}
 
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+				this.minionObjectIdsToShow.Add(thisPtr->CompanionOwnerID);
 				this.minionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
 			}
 			else
@@ -580,9 +597,19 @@ public class FrameworkHandler : IDisposable
 				}
 
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+				this.RemoveChecked(thisPtr->GameObject.ObjectID);
+				this.objectIdsToShow.Add(thisPtr->GameObject.ObjectID);
 				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
 		}
+	}
+
+	public void RemoveChecked(uint id)
+	{
+		this.voidedObjectIds.Remove(id);
+		this.whitelistedObjectIds.Remove(id);
+		this.checkedVoidedObjectIds.Remove(id);
+		this.checkedWhitelistedObjectIds.Remove(id);
 	}
 
 	public void ShowPlayer(uint id)

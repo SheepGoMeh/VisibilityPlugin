@@ -113,18 +113,6 @@ public partial class VisibilityConfiguration
 
 				if (itemToRemove != null)
 				{
-					if (VisibilityPlugin.ObjectTable
-						    .SingleOrDefault(
-							    x =>
-								    x is PlayerCharacter playerCharacter &&
-								    playerCharacter.Name.TextValue.Equals(
-									    itemToRemove.Name,
-									    StringComparison.Ordinal) &&
-								    playerCharacter.HomeWorld.Id == itemToRemove.HomeworldId) is PlayerCharacter a)
-					{
-						a.Render();
-					}
-
 					this.VoidList.Remove(itemToRemove);
 					this.Save();
 
@@ -133,6 +121,16 @@ public partial class VisibilityConfiguration
 						this.sortKeySelector[0],
 						this.sortAscending[0],
 						out this.sortKeySelector[0]);
+
+					if (itemToRemove.ObjectId > 0)
+					{
+						VisibilityPlugin.Instance.RemoveChecked(itemToRemove.ObjectId);
+						VisibilityPlugin.Instance.ShowPlayer(itemToRemove.ObjectId);
+					}
+					else
+					{
+						VisibilityPlugin.Instance.RemoveChecked(itemToRemove.Name);
+					}
 				}
 
 				var manual = true;
