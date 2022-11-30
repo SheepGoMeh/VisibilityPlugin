@@ -85,7 +85,8 @@ public class FrameworkHandler : IDisposable
 		var namePlateWidget = VisibilityPlugin.GameGui.GetAddonByName("NamePlate", 1);
 
 		if (namePlateWidget == IntPtr.Zero || !((AtkUnitBase*)namePlateWidget)->IsVisible ||
-		    localPlayerGameObject == null || localPlayerGameObject->ObjectID == 0xE0000000)
+		    localPlayerGameObject == null || localPlayerGameObject->ObjectID == 0xE0000000 ||
+		    VisibilityPlugin.Instance.Disable)
 		{
 			return;
 		}
