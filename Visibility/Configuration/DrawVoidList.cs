@@ -130,6 +130,7 @@ public partial class VisibilityConfiguration
 					else
 					{
 						VisibilityPlugin.Instance.RemoveChecked(itemToRemove.Name);
+						VisibilityPlugin.Instance.ShowPlayer(itemToRemove.Name);
 					}
 				}
 
