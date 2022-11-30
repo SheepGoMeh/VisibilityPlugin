@@ -147,7 +147,16 @@ namespace Visibility
 
 			VisibilityPlugin.Instance.Configuration.VoidList.Remove(entry);
 			VisibilityPlugin.Instance.Configuration.Save();
-			VisibilityPlugin.Instance.ShowPlayer(args.ObjectId);
+			if (entry.ObjectId > 0)
+			{
+				VisibilityPlugin.Instance.RemoveChecked(entry.ObjectId);
+				VisibilityPlugin.Instance.ShowPlayer(entry.ObjectId);
+			}
+			else
+			{
+				VisibilityPlugin.Instance.RemoveChecked(entry.Name);
+				VisibilityPlugin.Instance.ShowPlayer(entry.Name);
+			}
 			VisibilityPlugin.ChatGui.Print(message);
 		}
 
@@ -183,6 +192,14 @@ namespace Visibility
 
 			VisibilityPlugin.Instance.Configuration.Whitelist.Remove(entry);
 			VisibilityPlugin.Instance.Configuration.Save();
+			if (entry.ObjectId > 0)
+			{
+				VisibilityPlugin.Instance.RemoveChecked(entry.ObjectId);
+			}
+			else
+			{
+				VisibilityPlugin.Instance.RemoveChecked(entry.Name);
+			}
 			VisibilityPlugin.ChatGui.Print(message);
 		}
 	}
