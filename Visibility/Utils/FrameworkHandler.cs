@@ -76,7 +76,6 @@ public class FrameworkHandler : IDisposable
 
 	private readonly HashSet<uint> hiddenMinionObjectIds = new ();
 	private readonly HashSet<uint> minionObjectIdsToShow = new ();
-	private int counter;
 
 	public unsafe void Update()
 	{
@@ -90,14 +89,6 @@ public class FrameworkHandler : IDisposable
 		{
 			return;
 		}
-
-		// Only handle every fifth framework update
-		if (++this.counter != 5)
-		{
-			return;
-		}
-
-		this.counter = 0;
 
 		var isBound = VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
 		              || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
