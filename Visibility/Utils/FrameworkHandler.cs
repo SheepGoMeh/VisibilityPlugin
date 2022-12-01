@@ -97,7 +97,7 @@ public class FrameworkHandler : IDisposable
 
 		var localPlayer = (Character*)localPlayerGameObject;
 
-		for (var i = 0; i != 200; ++i)
+		for (var i = 1; i != 200; ++i)
 		{
 			var gameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectManager.GetGameObjectByIndex(i);
 			var characterPtr = (Character*)gameObject;
