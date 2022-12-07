@@ -591,9 +591,8 @@ public class FrameworkHandler : IDisposable
 					continue;
 				}
 
-				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				this.minionObjectIdsToShow.Add(thisPtr->CompanionOwnerID);
-				this.minionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
+				this.hiddenMinionObjectIds.Remove(thisPtr->CompanionOwnerID);
 			}
 			else
 			{
@@ -602,7 +601,6 @@ public class FrameworkHandler : IDisposable
 					continue;
 				}
 
-				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				this.RemoveChecked(thisPtr->GameObject.ObjectID);
 				this.objectIdsToShow.Add(thisPtr->GameObject.ObjectID);
 				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
