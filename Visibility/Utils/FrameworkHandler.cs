@@ -76,6 +76,7 @@ public class FrameworkHandler : IDisposable
 
 	private readonly HashSet<uint> hiddenMinionObjectIds = new ();
 	private readonly HashSet<uint> minionObjectIdsToShow = new ();
+	private bool isChangingTerritory;
 
 	public unsafe void Update()
 	{
@@ -85,7 +86,7 @@ public class FrameworkHandler : IDisposable
 
 		if (namePlateWidget == IntPtr.Zero || !((AtkUnitBase*)namePlateWidget)->IsVisible ||
 		    localPlayerGameObject == null || localPlayerGameObject->ObjectID == 0xE0000000 ||
-		    VisibilityPlugin.Instance.Disable)
+		    VisibilityPlugin.Instance.Disable || this.isChangingTerritory)
 		{
 			return;
 		}
@@ -528,10 +529,13 @@ public class FrameworkHandler : IDisposable
 			this.objectIdsToShow.UnionWith(this.containers[unitType][containerType]);
 			this.hiddenObjectIds.ExceptWith(this.containers[unitType][containerType]);
 		}
+
+		this.containers[unitType][containerType].Clear();
 	}
 
 	public void OnTerritoryChanged()
 	{
+		this.isChangingTerritory = true;
 		this.hiddenObjectIds.Clear();
 		this.objectIdsToShow.Clear();
 		this.hiddenMinionObjectIds.Clear();
@@ -540,6 +544,16 @@ public class FrameworkHandler : IDisposable
 		this.checkedWhitelistedObjectIds.Clear();
 		this.voidedObjectIds.Clear();
 		this.whitelistedObjectIds.Clear();
+
+		foreach (var (_, unitContainer) in this.containers)
+		{
+			foreach (var (_, container) in unitContainer)
+			{
+				container.Clear();
+			}
+		}
+
+		this.isChangingTerritory = false;
 	}
 
 	public void ShowPlayers(ContainerType type) => this.Show(UnitType.Players, type);
