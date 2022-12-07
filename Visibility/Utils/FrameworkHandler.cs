@@ -27,6 +27,12 @@ public enum UnitType
 
 public class FrameworkHandler : IDisposable
 {
+	private enum ObjectType
+	{
+		Character,
+		Companion
+	}
+
 	private readonly HashSet<uint> hiddenObjectIds = new ();
 	private readonly HashSet<uint> objectIdsToShow = new ();
 	private readonly HashSet<uint> checkedVoidedObjectIds = new (capacity: 1000);
@@ -139,20 +145,14 @@ public class FrameworkHandler : IDisposable
 			}
 		}
 
+		this.proximity = false;
 	}
 
 	private unsafe void PlayerHandler(Character* characterPtr, Character* localPlayer, bool isBound)
 	{
-		if (characterPtr->GameObject.ObjectID == 0xE0000000)
+		if (characterPtr->GameObject.ObjectID == 0xE0000000 ||
+		    this.ShowGameObject(characterPtr))
 		{
-			return;
-		}
-
-		if (this.objectIdsToShow.Contains(characterPtr->GameObject.ObjectID) &&
-		    characterPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible))
-		{
-			characterPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-			this.hiddenObjectIds.Remove(characterPtr->GameObject.ObjectID);
 			return;
 		}
 
@@ -276,16 +276,9 @@ public class FrameworkHandler : IDisposable
 	private unsafe void PetHandler(Character* characterPtr, Character* localPlayer, bool isBound)
 	{
 		// Ignore own pet
-		if (characterPtr->GameObject.OwnerID == localPlayer->GameObject.ObjectID)
+		if (characterPtr->GameObject.OwnerID == localPlayer->GameObject.ObjectID ||
+		    this.ShowGameObject(characterPtr))
 		{
-			return;
-		}
-
-		if (this.objectIdsToShow.Contains(characterPtr->GameObject.ObjectID) &&
-		    characterPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible))
-		{
-			characterPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-			this.hiddenObjectIds.Remove(characterPtr->GameObject.ObjectID);
 			return;
 		}
 
@@ -344,16 +337,9 @@ public class FrameworkHandler : IDisposable
 	private unsafe void ChocoboHandler(Character* characterPtr, Character* localPlayer)
 	{
 		// Ignore own chocobo
-		if (characterPtr->GameObject.OwnerID == localPlayer->GameObject.ObjectID)
+		if (characterPtr->GameObject.OwnerID == localPlayer->GameObject.ObjectID ||
+		    this.ShowGameObject(characterPtr))
 		{
-			return;
-		}
-
-		if (this.objectIdsToShow.Contains(characterPtr->GameObject.ObjectID) &&
-		    characterPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible))
-		{
-			characterPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-			this.hiddenObjectIds.Remove(characterPtr->GameObject.ObjectID);
 			return;
 		}
 
@@ -406,16 +392,10 @@ public class FrameworkHandler : IDisposable
 	private unsafe void MinionHandler(Companion* companionPtr, Character* localPlayer)
 	{
 		var characterPtr = (Character*)companionPtr;
-		if (localPlayer == null || characterPtr->CompanionOwnerID == localPlayer->GameObject.ObjectID)
+		if (localPlayer == null ||
+		    characterPtr->CompanionOwnerID == localPlayer->GameObject.ObjectID ||
+		    this.ShowGameObject(characterPtr, ObjectType.Companion))
 		{
-			return;
-		}
-
-		if (this.minionObjectIdsToShow.Contains(characterPtr->CompanionOwnerID) &&
-		    characterPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible))
-		{
-			characterPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
-			this.minionObjectIdsToShow.Remove(characterPtr->CompanionOwnerID);
 			return;
 		}
 
@@ -458,14 +438,43 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		characterPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-		this.hiddenMinionObjectIds.Add(characterPtr->CompanionOwnerID);
+		this.HideGameObject(characterPtr, ObjectType.Companion);
 	}
 
-	private unsafe void HideGameObject(Character* thisPtr)
+	private unsafe void HideGameObject(Character* thisPtr, ObjectType objectType = ObjectType.Character)
 	{
-		thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
-		this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+		switch (objectType)
+		{
+			case ObjectType.Character when !thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
+				this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+				thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
+				break;
+			case ObjectType.Companion when !thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
+				this.hiddenMinionObjectIds.Add(thisPtr->CompanionOwnerID);
+				thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
+				break;
+		}
+	}
+
+	private unsafe bool ShowGameObject(Character* thisPtr, ObjectType objectType = ObjectType.Character)
+	{
+		switch (objectType)
+		{
+			case ObjectType.Character when this.objectIdsToShow.Contains(thisPtr->GameObject.ObjectID) &&
+			                               thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
+				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+				this.objectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
+				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+				return true;
+			case ObjectType.Companion when this.minionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID) &&
+			                               thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
+				this.hiddenMinionObjectIds.Remove(thisPtr->CompanionOwnerID);
+				this.minionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
+				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
+				return true;
+		}
+
+		return false;
 	}
 
 	private static unsafe bool IsObjectIdInParty(uint objectId)
