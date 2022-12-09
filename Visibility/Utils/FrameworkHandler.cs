@@ -142,10 +142,12 @@ public class FrameworkHandler : IDisposable
 				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Chocobo:
 					this.ChocoboHandler(characterPtr, localPlayer);
 					break;
+				case ObjectKind.Companion:
+					this.MinionHandler(characterPtr, localPlayer);
+					break;
 			}
 		}
 
-		this.proximity = false;
 	}
 
 	private unsafe void PlayerHandler(Character* characterPtr, Character* localPlayer, bool isBound)
@@ -245,7 +247,6 @@ public class FrameworkHandler : IDisposable
 		     this.containers[UnitType.Players][ContainerType.Party]
 			     .Contains(characterPtr->GameObject.ObjectID)))
 		{
-			this.MinionHandler(characterPtr->CompanionObject, localPlayer);
 			return;
 		}
 
@@ -266,7 +267,6 @@ public class FrameworkHandler : IDisposable
 
 		if (this.whitelistedObjectIds.Contains(characterPtr->GameObject.ObjectID))
 		{
-			this.MinionHandler(characterPtr->CompanionObject, localPlayer);
 			return;
 		}
 
@@ -389,9 +389,8 @@ public class FrameworkHandler : IDisposable
 		this.HideGameObject(characterPtr);
 	}
 
-	private unsafe void MinionHandler(Companion* companionPtr, Character* localPlayer)
+	private unsafe void MinionHandler(Character* characterPtr, Character* localPlayer)
 	{
-		var characterPtr = (Character*)companionPtr;
 		if (localPlayer == null ||
 		    characterPtr->CompanionOwnerID == localPlayer->GameObject.ObjectID ||
 		    this.ShowGameObject(characterPtr, ObjectType.Companion))
