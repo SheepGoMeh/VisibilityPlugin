@@ -93,7 +93,8 @@ public class FrameworkHandler : IDisposable
 			FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectManager.GetGameObjectByIndex(0);
 		var namePlateWidget = VisibilityPlugin.GameGui.GetAddonByName("NamePlate", 1);
 
-		if (namePlateWidget == IntPtr.Zero || !((AtkUnitBase*)namePlateWidget)->IsVisible ||
+		if (namePlateWidget == IntPtr.Zero ||
+		    (!((AtkUnitBase*)namePlateWidget)->IsVisible && !VisibilityPlugin.Condition[ConditionFlag.Performing]) ||
 		    localPlayerGameObject == null || localPlayerGameObject->ObjectID == 0xE0000000 ||
 		    VisibilityPlugin.Instance.Disable || this.isChangingTerritory)
 		{
