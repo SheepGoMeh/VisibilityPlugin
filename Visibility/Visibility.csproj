@@ -5,8 +5,8 @@
     <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>1.1.4.0</AssemblyVersion>
-    <FileVersion>1.1.4.0</FileVersion>
+    <AssemblyVersion>1.1.4.5</AssemblyVersion>
+    <FileVersion>1.1.4.5</FileVersion>
     <IsPackable>false</IsPackable>
     <Authors>SheepGoMeh</Authors>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
