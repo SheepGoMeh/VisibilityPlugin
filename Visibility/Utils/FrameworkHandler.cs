@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
@@ -33,56 +34,58 @@ public class FrameworkHandler : IDisposable
 		Companion
 	}
 
-	private readonly HashSet<uint> hiddenObjectIds = new ();
-	private readonly HashSet<uint> objectIdsToShow = new ();
-	private readonly HashSet<uint> checkedVoidedObjectIds = new (capacity: 1000);
-	private readonly HashSet<uint> checkedWhitelistedObjectIds = new (capacity: 1000);
-	private readonly HashSet<uint> voidedObjectIds = new (capacity: 1000);
-	private readonly HashSet<uint> whitelistedObjectIds = new (capacity: 1000);
+	private readonly Dictionary<uint, long> hiddenObjectIds = new (capacity: 200);
+	private readonly Dictionary<uint, long> objectIdsToShow = new (capacity: 200);
+	private readonly Dictionary<uint, long> checkedVoidedObjectIds = new (capacity: 1000);
+	private readonly Dictionary<uint, long> checkedWhitelistedObjectIds = new (capacity: 1000);
+	private readonly Dictionary<uint, long> voidedObjectIds = new (capacity: 1000);
+	private readonly Dictionary<uint, long> whitelistedObjectIds = new (capacity: 1000);
 
-	private readonly Dictionary<UnitType, Dictionary<ContainerType, HashSet<uint>>> containers = new ()
+	private readonly Dictionary<UnitType, Dictionary<ContainerType, Dictionary<uint, long>>> containers = new ()
 	{
 		{
-			UnitType.Players, new Dictionary<ContainerType, HashSet<uint>>
+			UnitType.Players, new Dictionary<ContainerType, Dictionary<uint, long>>
 			{
-				{ ContainerType.All, new HashSet<uint>() },
-				{ ContainerType.Friend, new HashSet<uint>() },
-				{ ContainerType.Party, new HashSet<uint>() },
-				{ ContainerType.Company, new HashSet<uint>() },
+				{ ContainerType.All, new Dictionary<uint, long>() },
+				{ ContainerType.Friend, new Dictionary<uint, long>() },
+				{ ContainerType.Party, new Dictionary<uint, long>() },
+				{ ContainerType.Company, new Dictionary<uint, long>() },
 			}
 		},
 		{
-			UnitType.Pets, new Dictionary<ContainerType, HashSet<uint>>
+			UnitType.Pets, new Dictionary<ContainerType, Dictionary<uint, long>>
 			{
-				{ ContainerType.All, new HashSet<uint>() },
-				{ ContainerType.Friend, new HashSet<uint>() },
-				{ ContainerType.Party, new HashSet<uint>() },
-				{ ContainerType.Company, new HashSet<uint>() },
+				{ ContainerType.All, new Dictionary<uint, long>() },
+				{ ContainerType.Friend, new Dictionary<uint, long>() },
+				{ ContainerType.Party, new Dictionary<uint, long>() },
+				{ ContainerType.Company, new Dictionary<uint, long>() },
 			}
 		},
 		{
-			UnitType.Chocobos, new Dictionary<ContainerType, HashSet<uint>>
+			UnitType.Chocobos, new Dictionary<ContainerType, Dictionary<uint, long>>
 			{
-				{ ContainerType.All, new HashSet<uint>() },
-				{ ContainerType.Friend, new HashSet<uint>() },
-				{ ContainerType.Party, new HashSet<uint>() },
-				{ ContainerType.Company, new HashSet<uint>() },
+				{ ContainerType.All, new Dictionary<uint, long>() },
+				{ ContainerType.Friend, new Dictionary<uint, long>() },
+				{ ContainerType.Party, new Dictionary<uint, long>() },
+				{ ContainerType.Company, new Dictionary<uint, long>() },
 			}
 		},
 		{
-			UnitType.Minions, new Dictionary<ContainerType, HashSet<uint>>
+			UnitType.Minions, new Dictionary<ContainerType, Dictionary<uint, long>>
 			{
-				{ ContainerType.All, new HashSet<uint>() },
-				{ ContainerType.Friend, new HashSet<uint>() },
-				{ ContainerType.Party, new HashSet<uint>() },
-				{ ContainerType.Company, new HashSet<uint>() },
+				{ ContainerType.All, new Dictionary<uint, long>() },
+				{ ContainerType.Friend, new Dictionary<uint, long>() },
+				{ ContainerType.Party, new Dictionary<uint, long>() },
+				{ ContainerType.Company, new Dictionary<uint, long>() },
 			}
 		},
 	};
 
-	private readonly HashSet<uint> hiddenMinionObjectIds = new ();
-	private readonly HashSet<uint> minionObjectIdsToShow = new ();
+	private readonly Dictionary<uint, long> hiddenMinionObjectIds = new (capacity: 200);
+	private readonly Dictionary<uint, long> minionObjectIdsToShow = new (capacity: 200);
 	private bool isChangingTerritory;
+
+	private readonly HashSet<uint> idToDelete = new (capacity: 200);
 
 	public unsafe void Update()
 	{
@@ -132,7 +135,7 @@ public class FrameworkHandler : IDisposable
 					    && VisibilityPlugin.Condition[ConditionFlag.InCombat]
 					    && characterPtr->GameObject.OwnerID != localPlayer->GameObject.ObjectID
 					    && !this.containers[UnitType.Players][ContainerType.Party]
-						    .Contains(characterPtr->GameObject.OwnerID))
+						    .ContainsKey(characterPtr->GameObject.OwnerID))
 					{
 						this.HideGameObject(characterPtr);
 					}
@@ -148,6 +151,26 @@ public class FrameworkHandler : IDisposable
 			}
 		}
 
+		foreach (var (_, unitContainer) in this.containers)
+		{
+			foreach (var (_, container) in unitContainer)
+			{
+				foreach (var (id, ticks) in container)
+				{
+					if (ticks > Environment.TickCount64 + 5000)
+					{
+						this.idToDelete.Add(id);
+					}
+				}
+
+				foreach (var id in this.idToDelete)
+				{
+					container.Remove(id);
+				}
+				
+				this.idToDelete.Clear();
+			}
+		}
 	}
 
 	private unsafe void PlayerHandler(Character* characterPtr, Character* localPlayer, bool isBound)
@@ -158,13 +181,13 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		this.containers[UnitType.Players][ContainerType.All].Add(characterPtr->GameObject.ObjectID);
+		this.containers[UnitType.Players][ContainerType.All][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 
 		var isFriend = characterPtr->StatusFlags.TestFlag(StatusFlags.Friend);
 
 		if (isFriend)
 		{
-			this.containers[UnitType.Players][ContainerType.Friend].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Players][ContainerType.Friend][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 		else
 		{
@@ -176,7 +199,7 @@ public class FrameworkHandler : IDisposable
 
 		if (isObjectIdInParty)
 		{
-			this.containers[UnitType.Players][ContainerType.Party].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Players][ContainerType.Party][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 		else
 		{
@@ -193,7 +216,7 @@ public class FrameworkHandler : IDisposable
 		    && localPlayer->CurrentWorld == localPlayer->HomeWorld
 		    && UnsafeArrayEqual(characterPtr->FreeCompanyTag, localPlayer->FreeCompanyTag, 7))
 		{
-			this.containers[UnitType.Players][ContainerType.Company].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Players][ContainerType.Company][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 		else
 		{
@@ -201,7 +224,7 @@ public class FrameworkHandler : IDisposable
 				.Remove(characterPtr->GameObject.ObjectID);
 		}
 
-		if (!this.checkedVoidedObjectIds.Contains(characterPtr->GameObject.ObjectID))
+		if (!this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.ObjectID))
 		{
 			var voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
 				x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
@@ -210,13 +233,13 @@ public class FrameworkHandler : IDisposable
 			if (voidedPlayer != null)
 			{
 				voidedPlayer.ObjectId = characterPtr->GameObject.ObjectID;
-				this.voidedObjectIds.Add(characterPtr->GameObject.ObjectID);
+				this.voidedObjectIds[characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 			}
 
-			this.checkedVoidedObjectIds.Add(characterPtr->GameObject.ObjectID);
+			this.checkedVoidedObjectIds[characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
-		if (this.voidedObjectIds.Contains(characterPtr->GameObject.ObjectID))
+		if (this.voidedObjectIds.ContainsKey(characterPtr->GameObject.ObjectID))
 		{
 			this.HideGameObject(characterPtr);
 			return;
@@ -226,7 +249,7 @@ public class FrameworkHandler : IDisposable
 		      characterPtr->GameObject.IsDead()) ||
 		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer && isObjectIdInParty) ||
 		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer && isFriend)) &&
-		    this.hiddenObjectIds.Contains(characterPtr->GameObject.ObjectID))
+		    this.hiddenObjectIds.ContainsKey(characterPtr->GameObject.ObjectID))
 		{
 			characterPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 			this.hiddenObjectIds.Remove(characterPtr->GameObject.ObjectID);
@@ -239,18 +262,18 @@ public class FrameworkHandler : IDisposable
 		     characterPtr->GameObject.IsDead()) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
 		     this.containers[UnitType.Players][ContainerType.Friend]
-			     .Contains(characterPtr->GameObject.ObjectID)) ||
+			     .ContainsKey(characterPtr->GameObject.ObjectID)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyPlayer &&
 		     this.containers[UnitType.Players][ContainerType.Company]
-			     .Contains(characterPtr->GameObject.ObjectID)) ||
+			     .ContainsKey(characterPtr->GameObject.ObjectID)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer &&
 		     this.containers[UnitType.Players][ContainerType.Party]
-			     .Contains(characterPtr->GameObject.ObjectID)))
+			     .ContainsKey(characterPtr->GameObject.ObjectID)))
 		{
 			return;
 		}
 
-		if (!this.checkedWhitelistedObjectIds.Contains(characterPtr->GameObject.ObjectID))
+		if (!this.checkedWhitelistedObjectIds.ContainsKey(characterPtr->GameObject.ObjectID))
 		{
 			var whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
 				x => UnsafeArrayEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
@@ -259,13 +282,13 @@ public class FrameworkHandler : IDisposable
 			if (whitelistedPlayer != null)
 			{
 				whitelistedPlayer.ObjectId = characterPtr->GameObject.ObjectID;
-				this.whitelistedObjectIds.Add(characterPtr->GameObject.ObjectID);
+				this.whitelistedObjectIds[characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 			}
 
-			this.checkedWhitelistedObjectIds.Add(characterPtr->GameObject.ObjectID);
+			this.checkedWhitelistedObjectIds[characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
-		if (this.whitelistedObjectIds.Contains(characterPtr->GameObject.ObjectID))
+		if (this.whitelistedObjectIds.ContainsKey(characterPtr->GameObject.ObjectID))
 		{
 			return;
 		}
@@ -282,24 +305,24 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		this.containers[UnitType.Pets][ContainerType.All].Add(characterPtr->GameObject.ObjectID);
+		this.containers[UnitType.Pets][ContainerType.All][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 
 		if (this.containers[UnitType.Players][ContainerType.Friend]
-		    .Contains(characterPtr->GameObject.OwnerID))
+		    .ContainsKey(characterPtr->GameObject.OwnerID))
 		{
-			this.containers[UnitType.Pets][ContainerType.Friend].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Pets][ContainerType.Friend][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
 		if (this.containers[UnitType.Players][ContainerType.Party]
-		    .Contains(characterPtr->GameObject.OwnerID))
+		    .ContainsKey(characterPtr->GameObject.OwnerID))
 		{
-			this.containers[UnitType.Pets][ContainerType.Party].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Pets][ContainerType.Party][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
 		if (this.containers[UnitType.Players][ContainerType.Company]
-		    .Contains(characterPtr->GameObject.OwnerID))
+		    .ContainsKey(characterPtr->GameObject.OwnerID))
 		{
-			this.containers[UnitType.Pets][ContainerType.Company].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Pets][ContainerType.Company][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
 		// Do not hide pets in duties
@@ -309,7 +332,7 @@ public class FrameworkHandler : IDisposable
 		}
 
 		// Hide pet if it belongs to a voided player
-		if (this.voidedObjectIds.Contains(characterPtr->GameObject.OwnerID))
+		if (this.voidedObjectIds.ContainsKey(characterPtr->GameObject.OwnerID))
 		{
 			this.HideGameObject(characterPtr);
 			return;
@@ -319,14 +342,14 @@ public class FrameworkHandler : IDisposable
 		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePet ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPet &&
 		     this.containers[UnitType.Players][ContainerType.Friend]
-			     .Contains(characterPtr->GameObject.OwnerID)) ||
+			     .ContainsKey(characterPtr->GameObject.OwnerID)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyPet &&
 		     this.containers[UnitType.Players][ContainerType.Company]
-			     .Contains(characterPtr->GameObject.OwnerID)) ||
+			     .ContainsKey(characterPtr->GameObject.OwnerID)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPet &&
 		     this.containers[UnitType.Players][ContainerType.Party]
-			     .Contains(characterPtr->GameObject.OwnerID)) ||
-		    this.whitelistedObjectIds.Contains(characterPtr->GameObject.OwnerID))
+			     .ContainsKey(characterPtr->GameObject.OwnerID)) ||
+		    this.whitelistedObjectIds.ContainsKey(characterPtr->GameObject.OwnerID))
 		{
 			return;
 		}
@@ -343,28 +366,28 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		this.containers[UnitType.Chocobos][ContainerType.All].Add(characterPtr->GameObject.ObjectID);
+		this.containers[UnitType.Chocobos][ContainerType.All][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 
 		if (this.containers[UnitType.Players][ContainerType.Friend]
-		    .Contains(characterPtr->GameObject.OwnerID))
+		    .ContainsKey(characterPtr->GameObject.OwnerID))
 		{
-			this.containers[UnitType.Chocobos][ContainerType.Friend].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Chocobos][ContainerType.Friend][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
 		if (this.containers[UnitType.Players][ContainerType.Party]
-		    .Contains(characterPtr->GameObject.OwnerID))
+		    .ContainsKey(characterPtr->GameObject.OwnerID))
 		{
-			this.containers[UnitType.Chocobos][ContainerType.Party].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Chocobos][ContainerType.Party][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
 		if (this.containers[UnitType.Players][ContainerType.Company]
-		    .Contains(characterPtr->GameObject.OwnerID))
+		    .ContainsKey(characterPtr->GameObject.OwnerID))
 		{
-			this.containers[UnitType.Chocobos][ContainerType.Company].Add(characterPtr->GameObject.ObjectID);
+			this.containers[UnitType.Chocobos][ContainerType.Company][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
 
 		// Hide chocobo if it belongs to a voided player
-		if (this.voidedObjectIds.Contains(characterPtr->GameObject.OwnerID))
+		if (this.voidedObjectIds.ContainsKey(characterPtr->GameObject.OwnerID))
 		{
 			this.HideGameObject(characterPtr);
 			return;
@@ -374,14 +397,14 @@ public class FrameworkHandler : IDisposable
 		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HideChocobo ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendChocobo &&
 		     this.containers[UnitType.Players][ContainerType.Friend]
-			     .Contains(characterPtr->GameObject.OwnerID)) ||
+			     .ContainsKey(characterPtr->GameObject.OwnerID)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyChocobo &&
 		     this.containers[UnitType.Players][ContainerType.Company]
-			     .Contains(characterPtr->GameObject.OwnerID)) ||
+			     .ContainsKey(characterPtr->GameObject.OwnerID)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyChocobo &&
 		     this.containers[UnitType.Players][ContainerType.Party]
-			     .Contains(characterPtr->GameObject.OwnerID)) ||
-		    this.whitelistedObjectIds.Contains(characterPtr->GameObject.OwnerID))
+			     .ContainsKey(characterPtr->GameObject.OwnerID)) ||
+		    this.whitelistedObjectIds.ContainsKey(characterPtr->GameObject.OwnerID))
 		{
 			return;
 		}
@@ -404,35 +427,35 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		this.containers[UnitType.Minions][ContainerType.All].Add(characterPtr->CompanionOwnerID);
+		this.containers[UnitType.Minions][ContainerType.All][characterPtr->CompanionOwnerID] = Environment.TickCount64;
 
 		if (this.containers[UnitType.Players][ContainerType.Friend]
-		    .Contains(characterPtr->CompanionOwnerID))
+		    .ContainsKey(characterPtr->CompanionOwnerID))
 		{
-			this.containers[UnitType.Minions][ContainerType.Friend].Add(characterPtr->CompanionOwnerID);
+			this.containers[UnitType.Minions][ContainerType.Friend][characterPtr->CompanionOwnerID] = Environment.TickCount64;
 		}
 
 		if (this.containers[UnitType.Players][ContainerType.Party]
-		    .Contains(characterPtr->CompanionOwnerID))
+		    .ContainsKey(characterPtr->CompanionOwnerID))
 		{
-			this.containers[UnitType.Minions][ContainerType.Party].Add(characterPtr->CompanionOwnerID);
+			this.containers[UnitType.Minions][ContainerType.Party][characterPtr->CompanionOwnerID] = Environment.TickCount64;
 		}
 
 		if (this.containers[UnitType.Players][ContainerType.Company]
-		    .Contains(characterPtr->CompanionOwnerID))
+		    .ContainsKey(characterPtr->CompanionOwnerID))
 		{
-			this.containers[UnitType.Minions][ContainerType.Company].Add(characterPtr->CompanionOwnerID);
+			this.containers[UnitType.Minions][ContainerType.Company][characterPtr->CompanionOwnerID] = Environment.TickCount64;
 		}
 
 		if ((VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendMinion &&
 		     this.containers[UnitType.Players][ContainerType.Friend]
-			     .Contains(characterPtr->CompanionOwnerID))
+			     .ContainsKey(characterPtr->CompanionOwnerID))
 		    || (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyMinion &&
 		        this.containers[UnitType.Players][ContainerType.Company]
-			        .Contains(characterPtr->CompanionOwnerID))
+			        .ContainsKey(characterPtr->CompanionOwnerID))
 		    || (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyMinion &&
 		        this.containers[UnitType.Players][ContainerType.Party]
-			        .Contains(characterPtr->CompanionOwnerID)))
+			        .ContainsKey(characterPtr->CompanionOwnerID)))
 		{
 			return;
 		}
@@ -445,11 +468,11 @@ public class FrameworkHandler : IDisposable
 		switch (objectType)
 		{
 			case ObjectType.Character when !thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
-				this.hiddenObjectIds.Add(thisPtr->GameObject.ObjectID);
+				this.hiddenObjectIds[thisPtr->GameObject.ObjectID] = Environment.TickCount64;
 				thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
 				break;
 			case ObjectType.Companion when !thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
-				this.hiddenMinionObjectIds.Add(thisPtr->CompanionOwnerID);
+				this.hiddenMinionObjectIds[thisPtr->CompanionOwnerID] = Environment.TickCount64;
 				thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
 				break;
 		}
@@ -459,13 +482,13 @@ public class FrameworkHandler : IDisposable
 	{
 		switch (objectType)
 		{
-			case ObjectType.Character when this.objectIdsToShow.Contains(thisPtr->GameObject.ObjectID) &&
+			case ObjectType.Character when this.objectIdsToShow.ContainsKey(thisPtr->GameObject.ObjectID) &&
 			                               thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
 				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				this.objectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				return true;
-			case ObjectType.Companion when this.minionObjectIdsToShow.Contains(thisPtr->CompanionOwnerID) &&
+			case ObjectType.Companion when this.minionObjectIdsToShow.ContainsKey(thisPtr->CompanionOwnerID) &&
 			                               thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
 				this.hiddenMinionObjectIds.Remove(thisPtr->CompanionOwnerID);
 				this.minionObjectIdsToShow.Remove(thisPtr->CompanionOwnerID);
@@ -529,13 +552,21 @@ public class FrameworkHandler : IDisposable
 	{
 		if (unitType == UnitType.Minions)
 		{
-			this.minionObjectIdsToShow.UnionWith(this.containers[unitType][containerType]);
-			this.hiddenMinionObjectIds.ExceptWith(this.containers[unitType][containerType]);
+			this.containers[unitType][containerType].ToList().ForEach(
+				x =>
+			{
+				this.minionObjectIdsToShow[x.Key] = x.Value;
+				this.hiddenMinionObjectIds.Remove(x.Key);
+			});
 		}
 		else
 		{
-			this.objectIdsToShow.UnionWith(this.containers[unitType][containerType]);
-			this.hiddenObjectIds.ExceptWith(this.containers[unitType][containerType]);
+			this.containers[unitType][containerType].ToList().ForEach(
+				x =>
+				{
+					this.objectIdsToShow[x.Key] = x.Value;
+					this.hiddenObjectIds.Remove(x.Key);
+				});
 		}
 
 		this.containers[unitType][containerType].Clear();
@@ -585,23 +616,23 @@ public class FrameworkHandler : IDisposable
 
 			if (thisPtr->GameObject.ObjectKind == (byte)ObjectKind.Companion)
 			{
-				if (!this.hiddenMinionObjectIds.Contains(thisPtr->CompanionOwnerID))
+				if (!this.hiddenMinionObjectIds.ContainsKey(thisPtr->CompanionOwnerID))
 				{
 					continue;
 				}
 
-				this.minionObjectIdsToShow.Add(thisPtr->CompanionOwnerID);
+				this.minionObjectIdsToShow[thisPtr->CompanionOwnerID] = Environment.TickCount64;
 				this.hiddenMinionObjectIds.Remove(thisPtr->CompanionOwnerID);
 			}
 			else
 			{
-				if (!this.hiddenObjectIds.Contains(thisPtr->GameObject.ObjectID))
+				if (!this.hiddenObjectIds.ContainsKey(thisPtr->GameObject.ObjectID))
 				{
 					continue;
 				}
 
 				this.RemoveChecked(thisPtr->GameObject.ObjectID);
-				this.objectIdsToShow.Add(thisPtr->GameObject.ObjectID);
+				this.objectIdsToShow[thisPtr->GameObject.ObjectID] = Environment.TickCount64;
 				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
 		}
@@ -617,12 +648,12 @@ public class FrameworkHandler : IDisposable
 
 	public void ShowPlayer(uint id)
 	{
-		if (!this.hiddenObjectIds.Contains(id))
+		if (!this.hiddenObjectIds.ContainsKey(id))
 		{
 			return;
 		}
 
-		this.objectIdsToShow.Add(id);
+		this.objectIdsToShow[id] = Environment.TickCount64;
 		this.hiddenObjectIds.Remove(id);
 	}
 
