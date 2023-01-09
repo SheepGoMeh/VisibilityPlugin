@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>Library</OutputType>
     <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>1.1.4.5</AssemblyVersion>
-    <FileVersion>1.1.4.5</FileVersion>
+    <AssemblyVersion>1.1.4.6</AssemblyVersion>
+    <FileVersion>1.1.4.6</FileVersion>
     <IsPackable>false</IsPackable>
     <Authors>SheepGoMeh</Authors>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" />
-    <PackageReference Include="DalamudPackager" Version="2.1.9" />
+    <PackageReference Include="DalamudPackager" Version="2.1.10" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\Resources.Designer.cs">
