@@ -32,7 +32,7 @@ public partial class VisibilityConfiguration
 	{
 		var previewValue = itemsDictionary.ContainsKey(currentItem) ? itemsDictionary[currentItem] : string.Empty;
 		
-		Dictionary<ushort, string> items = new();
+		Dictionary<ushort, string> items = new ();
 
 		foreach (var (key, name) in itemsDictionary)
 		{

@@ -91,9 +91,9 @@ public class FrameworkHandler : IDisposable
 	{
 		var localPlayerGameObject =
 			FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectManager.GetGameObjectByIndex(0);
-		var namePlateWidget = VisibilityPlugin.GameGui.GetAddonByName("NamePlate", 1);
+		var namePlateWidget = VisibilityPlugin.GameGui.GetAddonByName("NamePlate");
 
-		if (namePlateWidget == IntPtr.Zero ||
+		if (namePlateWidget == nint.Zero ||
 		    (!((AtkUnitBase*)namePlateWidget)->IsVisible && !VisibilityPlugin.Condition[ConditionFlag.Performing]) ||
 		    localPlayerGameObject == null || localPlayerGameObject->ObjectID == 0xE0000000 ||
 		    VisibilityPlugin.Instance.Disable || this.isChangingTerritory)
@@ -131,10 +131,9 @@ public class FrameworkHandler : IDisposable
 					when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && characterPtr->NameID == 6565
 					: // Earthly Star
 				{
-					if (VisibilityPlugin.Instance.Configuration.Enabled &&
-					    VisibilityPlugin.Instance.Configuration.HideStar
-					    && VisibilityPlugin.Condition[ConditionFlag.InCombat]
-					    && characterPtr->GameObject.OwnerID != localPlayer->GameObject.ObjectID
+					if (VisibilityPlugin.Instance.Configuration is { Enabled: true, HideStar: true } 
+					    && VisibilityPlugin.Condition[ConditionFlag.InCombat] 
+					    && characterPtr->GameObject.OwnerID != localPlayer->GameObject.ObjectID 
 					    && !this.containers[UnitType.Players][ContainerType.Party]
 						    .ContainsKey(characterPtr->GameObject.OwnerID))
 					{

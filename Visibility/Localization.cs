@@ -9,8 +9,8 @@ namespace Visibility
 {
 	public class Localization
 	{
-		private readonly Dictionary<Language, Dictionary<string, string>> strings = new();
-		public List<Language> AvailableLanguages { get; } = new();
+		private readonly Dictionary<Language, Dictionary<string, string>> strings = new ();
+		public List<Language> AvailableLanguages { get; } = new ();
 
 		public Language CurrentLanguage;
 

@@ -40,7 +40,7 @@ namespace Visibility.Configuration
 		};
 
 		[NonSerialized]
-		public readonly Dictionary<string, Action<bool, bool, bool>> SettingDictionary = new(StringComparer.InvariantCultureIgnoreCase);
+		public readonly Dictionary<string, Action<bool, bool, bool>> SettingDictionary = new (StringComparer.InvariantCultureIgnoreCase);
 
 		[NonSerialized]
 		public readonly HashSet<ushort> TerritoryTypeWhitelist = new HashSet<ushort>
@@ -51,15 +51,15 @@ namespace Visibility.Configuration
 			939, // The Diadem
 		};
 
-		[NonSerialized] private readonly HashSet<ushort> allowedTerritory = new();
+		[NonSerialized] private readonly HashSet<ushort> allowedTerritory = new ();
 
 		[NonSerialized]
-		private readonly Dictionary<ushort, string> territoryPlaceNameDictionary = new()
+		private readonly Dictionary<ushort, string> territoryPlaceNameDictionary = new ()
 		{
 			{ 0, "Default" }
 		};
 
-		public readonly Dictionary<ushort, TerritoryConfig> TerritoryConfigDictionary = new();
+		public readonly Dictionary<ushort, TerritoryConfig> TerritoryConfigDictionary = new ();
 
 		[NonSerialized] public TerritoryConfig CurrentConfig = null!;
 		[NonSerialized] private TerritoryConfig currentEditedConfig = null!;
