@@ -49,6 +49,7 @@ namespace Visibility.Configuration
 			899, // The Falling City of Nym
 			900, // The Endeavor
 			939, // The Diadem
+			1098, // Sylphstep
 		};
 
 		[NonSerialized] private readonly HashSet<ushort> allowedTerritory = new ();
