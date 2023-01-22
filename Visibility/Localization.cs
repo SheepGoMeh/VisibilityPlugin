@@ -95,7 +95,7 @@ namespace Visibility
 			return result;
 		}
 
-		public string GetString(string key, Language language) => this.strings[language].ContainsKey(key) ? this.strings[language][key] : key;
+		public string GetString(string key, Language language) => this.strings[language].TryGetValue(key, out var value) ? value : key;
 
 		public enum Language
 		{
