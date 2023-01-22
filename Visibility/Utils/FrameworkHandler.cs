@@ -4,6 +4,7 @@ using System.Linq;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -101,7 +102,8 @@ public class FrameworkHandler : IDisposable
 			return;
 		}
 
-		var isBound = VisibilityPlugin.Condition[ConditionFlag.BoundByDuty]
+		var isBound = (VisibilityPlugin.Condition[ConditionFlag.BoundByDuty] &&
+		               localPlayerGameObject->EventId.Type != EventHandlerType.TreasureHuntDirector)
 		              || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
 		              || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene]
 		              || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback];
