@@ -46,7 +46,7 @@
   "ColumnAction": "操作",
   "OptionLanguage": "语言",
   "LanguageName": "简体中文",
-  "AdvancedOption": "Advanced configuration",
-  "AdvancedOptionTooltip": "Toggles configuration per area",
-  "ResetToCurrentArea": "Reset to current area"
+  "AdvancedOption": "高级设置",
+  "AdvancedOptionTooltip": "对每个区域单独设置",
+  "ResetToCurrentArea": "返回当前区域设置"
 }
