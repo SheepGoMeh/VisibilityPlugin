@@ -57,11 +57,6 @@ namespace Visibility
 			return new string(arr);
 		}
 
-		public static bool TestFlag(this byte value, StatusFlags flag)
-		{
-			return (value & (byte)flag) != 0;
-		}
-
 		public static bool TestFlag(this int value, VisibilityFlags flag)
 		{
 			return (value & (byte)flag) != 0;

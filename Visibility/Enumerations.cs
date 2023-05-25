@@ -3,18 +3,6 @@
 namespace Visibility
 {
 	[Flags]
-	public enum StatusFlags : byte
-	{
-		None = 0,
-		Hostile = 1 << 0,
-		InCombat = 1 << 1,
-		WeaponOut = 1 << 2,
-		PartyMember = 1 << 5,
-		AllianceMember = 1 << 6,
-		Friend = 1 << 7,
-	}
-
-	[Flags]
 	public enum VisibilityFlags
 	{
 		None = 0,

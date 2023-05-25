@@ -185,9 +185,7 @@ public class FrameworkHandler : IDisposable
 
 		this.containers[UnitType.Players][ContainerType.All][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 
-		var isFriend = characterPtr->StatusFlags.TestFlag(StatusFlags.Friend);
-
-		if (isFriend)
+		if (characterPtr->IsFriend)
 		{
 			this.containers[UnitType.Players][ContainerType.Friend][characterPtr->GameObject.ObjectID] = Environment.TickCount64;
 		}
@@ -250,7 +248,7 @@ public class FrameworkHandler : IDisposable
 		if (((VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
 		      characterPtr->GameObject.IsDead()) ||
 		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer && isObjectIdInParty) ||
-		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer && isFriend)) &&
+		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer && characterPtr->IsFriend)) &&
 		    this.hiddenObjectIds.ContainsKey(characterPtr->GameObject.ObjectID))
 		{
 			characterPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
