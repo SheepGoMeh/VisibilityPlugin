@@ -1,10 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Logging;
 
 namespace Visibility
 {
@@ -60,38 +55,6 @@ namespace Visibility
 		public static bool TestFlag(this int value, VisibilityFlags flag)
 		{
 			return (value & (byte)flag) != 0;
-		}
-
-		public static async void Render(this GameObject a)
-		{
-			await Task.Run(
-				() =>
-			{
-				try
-				{
-					var addrRenderToggle = a.Address + 0x104;
-					var renderToggle = Marshal.ReadInt32(addrRenderToggle);
-					if ((renderToggle & (int) VisibilityFlags.Invisible) != (int) VisibilityFlags.Invisible &&
-					    (a.ObjectKind != ObjectKind.MountType ||
-					     (renderToggle & (int) VisibilityFlags.Unknown15) != (int) VisibilityFlags.Unknown15))
-					{
-						return;
-					}
-
-					renderToggle &= ~(int)VisibilityFlags.Invisible;
-					Marshal.WriteInt32(addrRenderToggle, renderToggle);
-				}
-#if DEBUG
-				catch (Exception ex)
-				{
-					PluginLog.LogError(ex.ToString());
-#else
-				catch (Exception)
-				{
-					// ignored
-#endif
-				}
-			});
 		}
 	}
 }
