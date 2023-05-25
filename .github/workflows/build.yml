@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Build
+
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+    - master
+
+jobs:
+  pull_request:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Creates pull request
+      uses: daemitus/DalamudPluginPR2@master
+      with: 
+        token: ${{ secrets.PAT }}
+        plugin_name: Visibility
+        project_path: Visibility
+        plugin_owners: SheepGoMeh
