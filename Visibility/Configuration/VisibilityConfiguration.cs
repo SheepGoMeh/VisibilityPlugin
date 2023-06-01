@@ -42,15 +42,7 @@ namespace Visibility.Configuration
 		[NonSerialized]
 		public readonly Dictionary<string, Action<bool, bool, bool>> SettingDictionary = new (StringComparer.InvariantCultureIgnoreCase);
 
-		[NonSerialized]
-		public readonly HashSet<ushort> TerritoryTypeWhitelist = new HashSet<ushort>
-		{
-			792, // The Fall of Belah'dia 
-			899, // The Falling City of Nym
-			900, // The Endeavor
-			939, // The Diadem
-			1098, // Sylphstep
-		};
+		[NonSerialized] public readonly HashSet<ushort> TerritoryTypeWhitelist = new ();
 
 		[NonSerialized] private readonly HashSet<ushort> allowedTerritory = new ();
 
@@ -323,14 +315,17 @@ namespace Visibility.Configuration
 				}
 			};
 
-			var valueTuples = VisibilityPlugin.DataManager.GameData.Excel.GetSheet<TerritoryType>()!.Where(
-				x => (x.TerritoryIntendedUse is 0 or 1 or 13 or 19 or 23 ||
-				      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !string.IsNullOrEmpty(x.Name) &&
-				     x.RowId != 136).Select(x => ((ushort)x.RowId, x.PlaceName?.Value?.Name ?? "Unknown Place"));
+			var valueTuples = VisibilityPlugin.DataManager.GameData.Excel.GetSheet<TerritoryType>()!
+				.Where(
+					x => (x.TerritoryIntendedUse is 0 or 1 or 13 or 19 or 21 or 23 or 44 or 46 or 47 ||
+					      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !string.IsNullOrEmpty(x.Name) &&
+					     x.RowId != 136)
+				.Select(x => ((ushort)x.RowId, x.PlaceName?.Value?.Name ?? "Unknown Place"));
 
 			foreach (var (rowId, placeName) in valueTuples)
 			{
 				this.allowedTerritory.Add(rowId);
+				this.TerritoryTypeWhitelist.Add(rowId);
 				this.territoryPlaceNameDictionary[rowId] = placeName;
 			}
 
