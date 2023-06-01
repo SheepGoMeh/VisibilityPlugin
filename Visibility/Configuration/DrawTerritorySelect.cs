@@ -30,7 +30,7 @@ public partial class VisibilityConfiguration
 		string searchIcon = "",
 		ImFontPtr? fontPtr = null)
 	{
-		var previewValue = itemsDictionary.ContainsKey(currentItem) ? itemsDictionary[currentItem] : string.Empty;
+		var previewValue = itemsDictionary.TryGetValue(currentItem, out var value) ? value : string.Empty;
 		
 		Dictionary<ushort, string> items = new ();
 
