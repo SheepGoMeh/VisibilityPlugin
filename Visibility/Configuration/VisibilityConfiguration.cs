@@ -47,7 +47,7 @@ namespace Visibility.Configuration
 		[NonSerialized] private readonly HashSet<ushort> allowedTerritory = new ();
 
 		[NonSerialized]
-		private readonly Dictionary<ushort, string> territoryPlaceNameDictionary = new ()
+		public readonly Dictionary<ushort, string> TerritoryPlaceNameDictionary = new ()
 		{
 			{ 0, "Default" }
 		};
@@ -55,7 +55,7 @@ namespace Visibility.Configuration
 		public readonly Dictionary<ushort, TerritoryConfig> TerritoryConfigDictionary = new ();
 
 		[NonSerialized] public TerritoryConfig CurrentConfig = null!;
-		[NonSerialized] private TerritoryConfig currentEditedConfig = null!;
+		[NonSerialized] public TerritoryConfig CurrentEditedConfig = null!;
 
 		public void Init(ushort territoryType)
 		{
@@ -83,7 +83,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.HidePet.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.HidePet.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -97,7 +97,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.HidePlayer.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.HidePlayer.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -111,7 +111,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.HideChocobo.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.HideChocobo.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -125,7 +125,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.HideMinion.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.HideMinion.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -139,7 +139,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowCompanyPet.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowCompanyPet.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -153,7 +153,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowCompanyPlayer.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowCompanyPlayer.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -167,7 +167,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowCompanyChocobo.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowCompanyChocobo.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -181,7 +181,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowCompanyMinion.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowCompanyMinion.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -195,7 +195,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowPartyPet.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowPartyPet.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -209,7 +209,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowPartyPlayer.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowPartyPlayer.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -223,7 +223,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowPartyChocobo.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowPartyChocobo.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -237,7 +237,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowPartyMinion.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowPartyMinion.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -251,7 +251,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowFriendPet.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowFriendPet.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -265,7 +265,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowFriendPlayer.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowFriendPlayer.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -279,7 +279,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowFriendChocobo.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowFriendChocobo.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -293,7 +293,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowFriendMinion.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowFriendMinion.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -307,7 +307,7 @@ namespace Visibility.Configuration
 			{
 				if (edit)
 				{
-					this.currentEditedConfig.ShowDeadPlayer.ToggleBool(val, toggle);
+					this.CurrentEditedConfig.ShowDeadPlayer.ToggleBool(val, toggle);
 				}
 				else
 				{
@@ -326,7 +326,7 @@ namespace Visibility.Configuration
 			{
 				this.allowedTerritory.Add(rowId);
 				this.TerritoryTypeWhitelist.Add(rowId);
-				this.territoryPlaceNameDictionary[rowId] = placeName;
+				this.TerritoryPlaceNameDictionary[rowId] = placeName;
 			}
 
 			this.UpdateCurrentConfig(territoryType);
@@ -349,14 +349,14 @@ namespace Visibility.Configuration
 
 			if (edit)
 			{
-				this.currentEditedConfig = this.TerritoryConfigDictionary[territoryType];
-				this.currentEditedConfig.TerritoryType = territoryType;
+				this.CurrentEditedConfig = this.TerritoryConfigDictionary[territoryType];
+				this.CurrentEditedConfig.TerritoryType = territoryType;
 			}
 			else
 			{
 				this.CurrentConfig = this.TerritoryConfigDictionary[territoryType];
 				this.CurrentConfig.TerritoryType = territoryType;
-				this.currentEditedConfig = this.CurrentConfig;
+				this.CurrentEditedConfig = this.CurrentConfig;
 			}
 		}
 

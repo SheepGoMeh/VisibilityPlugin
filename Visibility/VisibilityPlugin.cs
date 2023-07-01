@@ -11,6 +11,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
+using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
@@ -83,7 +84,6 @@ namespace Visibility
 
 		public static VisibilityPlugin Instance { get; private set; } = null!;
 
-		private bool drawConfig;
 		private bool refresh;
 		public bool Disable;
 		private readonly FrameworkHandler frameworkHandler;
@@ -91,6 +91,10 @@ namespace Visibility
 		public VisibilityApi Api { get; }
 
 		public VisibilityProvider IpcProvider { get; }
+
+		public WindowSystem WindowSystem { get; }
+		
+		public Windows.Configuration ConfigurationWindow { get; }
 
 		public VisibilityPlugin()
 		{
@@ -149,6 +153,10 @@ namespace Visibility
 			this.frameworkHandler = new FrameworkHandler();
 
 			Framework.Update += this.FrameworkOnOnUpdateEvent;
+
+			this.WindowSystem = new WindowSystem("VisibilityPlugin");
+			this.ConfigurationWindow = new Windows.Configuration();
+			this.WindowSystem.AddWindow(this.ConfigurationWindow);
 
 			PluginInterface.UiBuilder.Draw += this.BuildUi;
 			PluginInterface.UiBuilder.OpenConfigUi += this.OpenConfigUi;
@@ -212,6 +220,7 @@ namespace Visibility
 				return;
 			}
 
+			this.WindowSystem.RemoveAllWindows();
 			this.IpcProvider.Dispose();
 			this.Api.Dispose();
 			this.ContextMenu.Dispose();
@@ -306,7 +315,7 @@ namespace Visibility
 
 			if (string.IsNullOrEmpty(arguments))
 			{
-				this.drawConfig = !this.drawConfig;
+				this.ConfigurationWindow.Toggle();
 			}
 			else
 			{
@@ -601,12 +610,12 @@ namespace Visibility
 
 		private void OpenConfigUi()
 		{
-			this.drawConfig = !this.drawConfig;
+			this.ConfigurationWindow.Toggle();
 		}
 
 		private void BuildUi()
 		{
-			this.drawConfig = this.drawConfig && this.Configuration.DrawConfigUi();
+			this.WindowSystem.Draw();
 		}
 
 		private void OnChatMessage(

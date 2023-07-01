@@ -4,26 +4,52 @@ using System.Numerics;
 using System.Text;
 using ImGuiNET;
 
-namespace Visibility.Configuration;
+namespace Visibility.Utils;
 
-public partial class VisibilityConfiguration
+public static class ImGuiElements
 {
-	[NonSerialized] private bool comboNewOpen;
+	public static void Checkbox(bool value, string name)
+	{
+		if (!ImGui.Checkbox($"###{name}", ref value))
+		{
+			return;
+		}
+
+		if (!VisibilityPlugin.Instance.Configuration.SettingDictionary.TryGetValue(name, out var onValueChanged))
+		{
+			return;
+		}
+
+		onValueChanged(value, false, true);
+		VisibilityPlugin.Instance.Configuration.Save();
+	}
+
+	public static void CenteredCheckbox(bool value, string name)
+	{
+		ImGui.SetCursorPosX(
+			ImGui.GetCursorPosX() +
+			((ImGui.GetColumnWidth() + (2 * ImGui.GetStyle().FramePadding.X)) / 2) -
+			(2 * ImGui.GetStyle().ItemSpacing.X) - (2 * ImGui.GetStyle().CellPadding.X));
+
+		Checkbox(value, name);
+	}
 
 	/// <summary>
 	/// Creates a ComboBox with a simple text filter
 	/// </summary>
 	/// <param name="label">Widget label</param>
 	/// <param name="currentItem">Item output</param>
+	/// <param name="comboNewOpen">Boolean tracking if a new combo windows is open</param>
 	/// <param name="itemsDictionary">Input dictionary</param>
 	/// <param name="textBuffer">Buffer for text input</param>
 	/// <param name="maxItems">Maximum amount of items displayed vertically</param>
 	/// <param name="searchIcon">Search icon string</param>
 	/// <param name="fontPtr">ImGui font pointer for search icon</param>
 	/// <returns></returns>
-	private bool ComboWithFilter(
+	public static bool ComboWithFilter(
 		string label,
 		ref ushort currentItem,
+		ref bool comboNewOpen,
 		Dictionary<ushort, string> itemsDictionary,
 		byte[] textBuffer,
 		uint maxItems = 5,
@@ -53,7 +79,7 @@ public partial class VisibilityConfiguration
 				Array.Clear(textBuffer, 0, textBuffer.Length);
 			}
 
-			this.comboNewOpen = false;
+			comboNewOpen = false;
 			return valueChanged;
 		}
 
@@ -61,10 +87,10 @@ public partial class VisibilityConfiguration
 		ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0, 0, 0, 255));
 		ImGui.PushItemWidth(ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X);
 
-		if (!this.comboNewOpen)
+		if (!comboNewOpen)
 		{
 			ImGui.SetKeyboardFocusHere();
-			this.comboNewOpen = true;
+			comboNewOpen = true;
 		}
 
 		ImGui.InputText("##ComboWithFilter_inputText", textBuffer, (uint)textBuffer.Length);
@@ -125,7 +151,7 @@ public partial class VisibilityConfiguration
 			return valueChanged;
 		}
 
-		this.comboNewOpen = false;
+		comboNewOpen = false;
 		Array.Clear(textBuffer, 0, textBuffer.Length);
 
 		return valueChanged;
