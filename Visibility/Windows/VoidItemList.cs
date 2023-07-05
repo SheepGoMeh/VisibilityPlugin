@@ -201,9 +201,18 @@ public class VoidItemList : Window
 
 		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.OptionAddPlayer))
 		{
-			VisibilityPlugin.Instance.VoidPlayer(
-				manual ? "VoidUIManual" : string.Empty,
-				$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
+			if (this.isWhitelist)
+			{
+				VisibilityPlugin.Instance.WhitelistPlayer(
+					manual ? "WhitelistUIManual" : string.Empty,
+					$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
+			}
+			else
+			{
+				VisibilityPlugin.Instance.VoidPlayer(
+					manual ? "VoidUIManual" : string.Empty,
+					$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
+			}
 
 			foreach (var item in this.buffer)
 			{
