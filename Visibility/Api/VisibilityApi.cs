@@ -40,7 +40,7 @@ namespace Visibility.Api
 		{
 			this.CheckInitialised();
 
-			var world = VisibilityPlugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+			var world = Service.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
 
 			if (world == null)
 			{
@@ -92,7 +92,7 @@ namespace Visibility.Api
 		{
 			this.CheckInitialised();
 
-			var world = VisibilityPlugin.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+			var world = Service.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
 
 			if (world == null)
 			{

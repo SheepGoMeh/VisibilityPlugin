@@ -315,7 +315,7 @@ namespace Visibility.Configuration
 				}
 			};
 
-			var valueTuples = VisibilityPlugin.DataManager.GameData.Excel.GetSheet<TerritoryType>()!
+			var valueTuples = Service.DataManager.GameData.Excel.GetSheet<TerritoryType>()!
 				.Where(
 					x => (x.TerritoryIntendedUse is 0 or 1 or 13 or 19 or 21 or 23 or 44 or 46 or 47 ||
 					      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !string.IsNullOrEmpty(x.Name) &&
@@ -362,7 +362,7 @@ namespace Visibility.Configuration
 
 		public void Save()
 		{
-			VisibilityPlugin.PluginInterface.SavePluginConfig(this);
+			Service.PluginInterface.SavePluginConfig(this);
 		}
 	}
 }

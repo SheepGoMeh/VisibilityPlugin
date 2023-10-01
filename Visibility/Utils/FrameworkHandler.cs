@@ -92,21 +92,21 @@ public class FrameworkHandler : IDisposable
 	{
 		var localPlayerGameObject =
 			FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectManager.GetGameObjectByIndex(0);
-		var namePlateWidget = VisibilityPlugin.GameGui.GetAddonByName("NamePlate");
+		var namePlateWidget = Service.GameGui.GetAddonByName("NamePlate");
 
 		if (namePlateWidget == nint.Zero ||
-		    (!((AtkUnitBase*)namePlateWidget)->IsVisible && !VisibilityPlugin.Condition[ConditionFlag.Performing]) ||
+		    (!((AtkUnitBase*)namePlateWidget)->IsVisible && !Service.Condition[ConditionFlag.Performing]) ||
 		    localPlayerGameObject == null || localPlayerGameObject->ObjectID == 0xE0000000 ||
 		    VisibilityPlugin.Instance.Disable || this.isChangingTerritory)
 		{
 			return;
 		}
 
-		var isBound = (VisibilityPlugin.Condition[ConditionFlag.BoundByDuty] &&
+		var isBound = (Service.Condition[ConditionFlag.BoundByDuty] &&
 		               localPlayerGameObject->EventId.Type != EventHandlerType.TreasureHuntDirector)
-		              || VisibilityPlugin.Condition[ConditionFlag.BetweenAreas]
-		              || VisibilityPlugin.Condition[ConditionFlag.WatchingCutscene]
-		              || VisibilityPlugin.Condition[ConditionFlag.DutyRecorderPlayback];
+		              || Service.Condition[ConditionFlag.BetweenAreas]
+		              || Service.Condition[ConditionFlag.WatchingCutscene]
+		              || Service.Condition[ConditionFlag.DutyRecorderPlayback];
 
 		var localPlayer = (Character*)localPlayerGameObject;
 
@@ -134,7 +134,7 @@ public class FrameworkHandler : IDisposable
 					: // Earthly Star
 				{
 					if (VisibilityPlugin.Instance.Configuration is { Enabled: true, HideStar: true } 
-					    && VisibilityPlugin.Condition[ConditionFlag.InCombat] 
+					    && Service.Condition[ConditionFlag.InCombat] 
 					    && characterPtr->GameObject.OwnerID != localPlayer->GameObject.ObjectID 
 					    && !this.containers[UnitType.Players][ContainerType.Party]
 						    .ContainsKey(characterPtr->GameObject.OwnerID))
@@ -207,7 +207,7 @@ public class FrameworkHandler : IDisposable
 		}
 
 		if (isBound && !VisibilityPlugin.Instance.Configuration.TerritoryTypeWhitelist.Contains(
-			    VisibilityPlugin.ClientState.TerritoryType))
+			    Service.ClientState.TerritoryType))
 		{
 			return;
 		}
@@ -514,7 +514,7 @@ public class FrameworkHandler : IDisposable
 			return false;
 		}
 
-		foreach (var group in infoProxyCrossRealm->CrossRealmGroupSpan)
+		foreach (var group in infoProxyCrossRealm->CrossRealmGroupArraySpan)
 		{
 			if (group.GroupMemberCount == 0)
 			{
@@ -523,7 +523,7 @@ public class FrameworkHandler : IDisposable
 
 			for (var i = 0; i < group.GroupMemberCount; ++i)
 			{
-				if (group.GroupMemberSpan[i].ObjectId == objectId)
+				if (group.GroupMembersSpan[i].ObjectId == objectId)
 				{
 					return true;
 				}
@@ -605,12 +605,12 @@ public class FrameworkHandler : IDisposable
 
 	public unsafe void ShowAll()
 	{
-		if (VisibilityPlugin.ClientState.LocalPlayer == null)
+		if (Service.ClientState.LocalPlayer == null)
 		{
 			return;
 		}
 
-		foreach (var actor in VisibilityPlugin.ObjectTable)
+		foreach (var actor in Service.ObjectTable)
 		{
 			var thisPtr = (Character*)actor.Address;
 
