@@ -113,6 +113,7 @@ namespace Visibility.Ipc
 				this.ProviderEnable =
 					VisibilityPlugin.PluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
 				this.ProviderEnable.RegisterAction(api.Enable);
+				this.ProviderEnable?.SendMessage(true);
 			}
 			catch (Exception e)
 			{
