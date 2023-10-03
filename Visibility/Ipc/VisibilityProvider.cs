@@ -34,90 +34,90 @@ namespace Visibility.Ipc
 
 			try
 			{
-				this.ProviderApiVersion = VisibilityPlugin.PluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
+				this.ProviderApiVersion = Service.PluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
 				this.ProviderApiVersion.RegisterFunc(() => api.ApiVersion);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderApiVersion}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderApiVersion}:\n{e}");
 			}
 
 			try
 			{
 				this.ProviderGetVoidListEntries =
-					VisibilityPlugin.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetVoidListEntries);
+					Service.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetVoidListEntries);
 				this.ProviderGetVoidListEntries.RegisterFunc(api.GetVoidListEntries);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderGetVoidListEntries}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderGetVoidListEntries}:\n{e}");
 			}
 
 			try
 			{
 				this.ProviderAddToVoidList =
-					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToVoidList);
+					Service.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToVoidList);
 				this.ProviderAddToVoidList.RegisterAction(api.AddToVoidList);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToVoidList}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToVoidList}:\n{e}");
 			}
 
 			try
 			{
 				this.ProviderRemoveFromVoidList =
-					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromVoidList);
+					Service.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromVoidList);
 				this.ProviderRemoveFromVoidList.RegisterAction(api.RemoveFromVoidList);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromVoidList}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromVoidList}:\n{e}");
 			}
 			
 			try
 			{
 				this.ProviderGetWhitelistEntries =
-					VisibilityPlugin.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
+					Service.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
 				this.ProviderGetWhitelistEntries.RegisterFunc(api.GetWhitelistEntries);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderGetWhitelistEntries}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderGetWhitelistEntries}:\n{e}");
 			}
 
 			try
 			{
 				this.ProviderAddToWhitelist =
-					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
+					Service.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
 				this.ProviderAddToWhitelist.RegisterAction(api.AddToWhitelist);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToWhitelist}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToWhitelist}:\n{e}");
 			}
 
 			try
 			{
 				this.ProviderRemoveFromWhitelist =
-					VisibilityPlugin.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
+					Service.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
 				this.ProviderRemoveFromWhitelist.RegisterAction(api.RemoveFromWhitelist);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromWhitelist}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromWhitelist}:\n{e}");
 			}
 			
 			try
 			{
 				this.ProviderEnable =
-					VisibilityPlugin.PluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
+					Service.PluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
 				this.ProviderEnable.RegisterAction(api.Enable);
 				this.ProviderEnable?.SendMessage(true);
 			}
 			catch (Exception e)
 			{
-				PluginLog.Error($"Error registering IPC provider for {LabelProviderEnable}:\n{e}");
+				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderEnable}:\n{e}");
 			}
 		}
 

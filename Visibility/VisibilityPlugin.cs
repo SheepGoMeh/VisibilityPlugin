@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Dalamud.Data;
-using Dalamud.Game;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
 using Dalamud.Interface.Windowing;
-using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using Visibility.Api;
 using Visibility.Configuration;
@@ -37,46 +32,6 @@ namespace Visibility
 
 		private static string WhitelistTargetCommandName => "/whitelisttarget";
 
-		#region Plugin Services
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static DalamudPluginInterface PluginInterface { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static CommandManager CommandManager { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static ChatGui ChatGui { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static DataManager DataManager { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static GameGui GameGui { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static ClientState ClientState { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static Framework Framework { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static ObjectTable ObjectTable { get; set; } = null!;
-
-		[PluginService]
-		[RequiredVersion("1.0")]
-		public static Dalamud.Game.ClientState.Conditions.Condition Condition { get; set; } = null!;
-
-		#endregion
-
 		public readonly Localization PluginLocalization;
 		public readonly VisibilityConfiguration Configuration;
 
@@ -96,12 +51,14 @@ namespace Visibility
 		
 		public Windows.Configuration ConfigurationWindow { get; }
 
-		public VisibilityPlugin()
+		public VisibilityPlugin(DalamudPluginInterface pluginInterface)
 		{
 			Instance = this;
-			this.Configuration = PluginInterface.GetPluginConfig() as VisibilityConfiguration ??
+			
+			pluginInterface.Create<Service>();
+			this.Configuration = Service.PluginInterface.GetPluginConfig() as VisibilityConfiguration ??
 			                     new VisibilityConfiguration();
-			this.Configuration.Init(ClientState.TerritoryType);
+			this.Configuration.Init(Service.ClientState.TerritoryType);
 			this.PluginLocalization = new Localization(this.Configuration.Language);
 			this.ContextMenu = new ContextMenu();
 
@@ -110,7 +67,7 @@ namespace Visibility
 				this.ContextMenu.Toggle();
 			}
 
-			CommandManager.AddHandler(
+			Service.CommandManager.AddHandler(
 				PluginCommandName,
 				new CommandInfo(this.PluginCommand)
 				{
@@ -118,7 +75,7 @@ namespace Visibility
 					ShowInHelp = true
 				});
 
-			CommandManager.AddHandler(
+			Service.CommandManager.AddHandler(
 				VoidCommandName,
 				new CommandInfo(this.VoidPlayer)
 				{
@@ -126,7 +83,7 @@ namespace Visibility
 					ShowInHelp = true
 				});
 
-			CommandManager.AddHandler(
+			Service.CommandManager.AddHandler(
 				VoidTargetCommandName,
 				new CommandInfo(this.VoidTargetPlayer)
 				{
@@ -134,7 +91,7 @@ namespace Visibility
 					ShowInHelp = true
 				});
 
-			CommandManager.AddHandler(
+			Service.CommandManager.AddHandler(
 				WhitelistCommandName,
 				new CommandInfo(this.WhitelistPlayer)
 				{
@@ -142,7 +99,7 @@ namespace Visibility
 					ShowInHelp = true
 				});
 
-			CommandManager.AddHandler(
+			Service.CommandManager.AddHandler(
 				WhitelistTargetCommandName,
 				new CommandInfo(this.WhitelistTargetPlayer)
 				{
@@ -152,22 +109,22 @@ namespace Visibility
 
 			this.frameworkHandler = new FrameworkHandler();
 
-			Framework.Update += this.FrameworkOnOnUpdateEvent;
+			Service.Framework.Update += this.FrameworkOnOnUpdateEvent;
 
 			this.WindowSystem = new WindowSystem("VisibilityPlugin");
 			this.ConfigurationWindow = new Windows.Configuration();
 			this.WindowSystem.AddWindow(this.ConfigurationWindow);
 
-			PluginInterface.UiBuilder.Draw += this.BuildUi;
-			PluginInterface.UiBuilder.OpenConfigUi += this.OpenConfigUi;
-			ChatGui.ChatMessage += this.OnChatMessage;
-			ClientState.TerritoryChanged += this.ClientStateOnTerritoryChanged;
+			Service.PluginInterface.UiBuilder.Draw += this.BuildUi;
+			Service.PluginInterface.UiBuilder.OpenConfigUi += this.OpenConfigUi;
+			Service.ChatGui.ChatMessage += this.OnChatMessage;
+			Service.ClientState.TerritoryChanged += this.ClientStateOnTerritoryChanged;
 
 			this.Api = new VisibilityApi();
 			this.IpcProvider = new VisibilityProvider(this.Api);
 		}
 
-		private void ClientStateOnTerritoryChanged(object? sender, ushort e)
+		private void ClientStateOnTerritoryChanged(ushort e)
 		{
 			this.frameworkHandler.OnTerritoryChanged();
 
@@ -177,11 +134,11 @@ namespace Visibility
 			}
 
 			this.Configuration.Enabled = false;
-			this.Configuration.UpdateCurrentConfig(ClientState.TerritoryType);
+			this.Configuration.UpdateCurrentConfig(Service.ClientState.TerritoryType);
 			this.Configuration.Enabled = true;
 		}
 
-		private void FrameworkOnOnUpdateEvent(Framework framework)
+		private void FrameworkOnOnUpdateEvent(IFramework framework)
 		{
 			if (this.Disable)
 			{
@@ -196,7 +153,7 @@ namespace Visibility
 						{
 							await Task.Delay(250);
 							this.Configuration.Enabled = true;
-							ChatGui.Print(this.PluginLocalization.RefreshComplete);
+							Service.ChatGui.Print(this.PluginLocalization.RefreshComplete);
 						});
 				}
 
@@ -225,16 +182,16 @@ namespace Visibility
 			this.Api.Dispose();
 			this.ContextMenu.Dispose();
 
-			ClientState.TerritoryChanged -= this.ClientStateOnTerritoryChanged;
-			Framework.Update -= this.FrameworkOnOnUpdateEvent;
-			PluginInterface.UiBuilder.Draw -= this.BuildUi;
-			PluginInterface.UiBuilder.OpenConfigUi -= this.OpenConfigUi;
-			ChatGui.ChatMessage -= this.OnChatMessage;
-			CommandManager.RemoveHandler(PluginCommandName);
-			CommandManager.RemoveHandler(VoidCommandName);
-			CommandManager.RemoveHandler(VoidTargetCommandName);
-			CommandManager.RemoveHandler(WhitelistCommandName);
-			CommandManager.RemoveHandler(WhitelistTargetCommandName);
+			Service.ClientState.TerritoryChanged -= this.ClientStateOnTerritoryChanged;
+			Service.Framework.Update -= this.FrameworkOnOnUpdateEvent;
+			Service.PluginInterface.UiBuilder.Draw -= this.BuildUi;
+			Service.PluginInterface.UiBuilder.OpenConfigUi -= this.OpenConfigUi;
+			Service.ChatGui.ChatMessage -= this.OnChatMessage;
+			Service.CommandManager.RemoveHandler(PluginCommandName);
+			Service.CommandManager.RemoveHandler(VoidCommandName);
+			Service.CommandManager.RemoveHandler(VoidTargetCommandName);
+			Service.CommandManager.RemoveHandler(WhitelistCommandName);
+			Service.CommandManager.RemoveHandler(WhitelistTargetCommandName);
 
 			this.frameworkHandler.Dispose();
 		}
@@ -282,7 +239,7 @@ namespace Visibility
 
 		public void RemoveChecked(string name)
 		{
-			var gameObject = ObjectTable.SingleOrDefault(
+			var gameObject = Service.ObjectTable.SingleOrDefault(
 				x => x is PlayerCharacter character && character.Name.TextValue.Equals(
 					name,
 					StringComparison.InvariantCultureIgnoreCase));
@@ -295,7 +252,7 @@ namespace Visibility
 
 		public void ShowPlayer(string name)
 		{
-			var gameObject = ObjectTable.SingleOrDefault(
+			var gameObject = Service.ObjectTable.SingleOrDefault(
 				x => x is PlayerCharacter character && character.Name.TextValue.Equals(
 					name,
 					StringComparison.InvariantCultureIgnoreCase));
@@ -323,14 +280,14 @@ namespace Visibility
 
 				if (args[0].Equals("help", StringComparison.InvariantCultureIgnoreCase))
 				{
-					ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu1);
-					ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu2);
-					ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu3);
-					ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu4);
+					Service.ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu1);
+					Service.ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu2);
+					Service.ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu3);
+					Service.ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenu4);
 
 					foreach (var key in this.Configuration.SettingDictionary.Keys)
 					{
-						ChatGui.Print($"{key}");
+						Service.ChatGui.Print($"{key}");
 					}
 
 					return;
@@ -344,14 +301,14 @@ namespace Visibility
 
 				if (args.Length != 2)
 				{
-					ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuError);
+					Service.ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuError);
 					return;
 				}
 
 				if (!this.Configuration.SettingDictionary.Keys.Any(
 					    x => x.Equals(args[0], StringComparison.InvariantCultureIgnoreCase)))
 				{
-					ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[0]));
+					Service.ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[0]));
 					return;
 				}
 
@@ -376,7 +333,7 @@ namespace Visibility
 						toggle = true;
 						break;
 					default:
-						ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[1]));
+						Service.ChatGui.Print(this.PluginLocalization.PluginCommandHelpMenuInvalidValueError(args[1]));
 						return;
 				}
 
@@ -389,7 +346,7 @@ namespace Visibility
 		{
 			if (string.IsNullOrEmpty(arguments))
 			{
-				ChatGui.Print(this.PluginLocalization.NoArgumentsError(this.PluginLocalization.VoidListName));
+				Service.ChatGui.Print(this.PluginLocalization.NoArgumentsError(this.PluginLocalization.VoidListName));
 				return;
 			}
 
@@ -397,18 +354,18 @@ namespace Visibility
 
 			if (args.Length < 3)
 			{
-				ChatGui.Print(this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.VoidListName));
+				Service.ChatGui.Print(this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.VoidListName));
 				return;
 			}
 
-			var world = DataManager.GetExcelSheet<World>()?.SingleOrDefault(
+			var world = Service.DataManager.GetExcelSheet<World>()?.SingleOrDefault(
 				x =>
 					x.DataCenter.Value?.Region != 0 &&
 					x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 			if (world == default(World))
 			{
-				ChatGui.Print(
+				Service.ChatGui.Print(
 					this.PluginLocalization.InvalidWorldNameError(this.PluginLocalization.VoidListName, args[2]));
 				return;
 			}
@@ -416,7 +373,7 @@ namespace Visibility
 			var playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
 			VoidItem voidItem;
-			var gameObject = ObjectTable.SingleOrDefault(
+			var gameObject = Service.ObjectTable.SingleOrDefault(
 				x => x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
 				     character.Name.TextValue.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
 
@@ -451,22 +408,22 @@ namespace Visibility
 					this.RemoveChecked(gameObject.ObjectId);
 				}
 
-				ChatGui.Print(this.PluginLocalization.EntryAdded(this.PluginLocalization.VoidListName, playerString));
+				Service.ChatGui.Print(this.PluginLocalization.EntryAdded(this.PluginLocalization.VoidListName, playerString));
 			}
 			else
 			{
-				ChatGui.Print(
+				Service.ChatGui.Print(
 					this.PluginLocalization.EntryExistsError(this.PluginLocalization.VoidListName, playerString));
 			}
 		}
 
 		public void VoidTargetPlayer(string command, string arguments)
 		{
-			if (ObjectTable.SingleOrDefault(
+			if (Service.ObjectTable.SingleOrDefault(
 				    x => x is PlayerCharacter
 				         && x.ObjectId != 0
-				         && x.ObjectId != ClientState.LocalPlayer?.ObjectId
-				         && x.ObjectId == ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter
+				         && x.ObjectId != Service.ClientState.LocalPlayer?.ObjectId
+				         && x.ObjectId == Service.ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter
 			    actor)
 			{
 				var voidItem = new VoidItem(actor, arguments, false);
@@ -483,18 +440,18 @@ namespace Visibility
 					this.Configuration.VoidList.Add(voidItem);
 					this.Configuration.Save();
 					this.RemoveChecked(actor.ObjectId);
-					ChatGui.Print(
+					Service.ChatGui.Print(
 						this.PluginLocalization.EntryAdded(this.PluginLocalization.VoidListName, playerString));
 				}
 				else
 				{
-					ChatGui.Print(
+					Service.ChatGui.Print(
 						this.PluginLocalization.EntryExistsError(this.PluginLocalization.VoidListName, playerString));
 				}
 			}
 			else
 			{
-				ChatGui.Print(this.PluginLocalization.InvalidTargetError(this.PluginLocalization.VoidListName));
+				Service.ChatGui.Print(this.PluginLocalization.InvalidTargetError(this.PluginLocalization.VoidListName));
 			}
 		}
 
@@ -502,7 +459,7 @@ namespace Visibility
 		{
 			if (string.IsNullOrEmpty(arguments))
 			{
-				ChatGui.Print(this.PluginLocalization.NoArgumentsError(this.PluginLocalization.WhitelistName));
+				Service.ChatGui.Print(this.PluginLocalization.NoArgumentsError(this.PluginLocalization.WhitelistName));
 				return;
 			}
 
@@ -510,25 +467,25 @@ namespace Visibility
 
 			if (args.Length < 3)
 			{
-				ChatGui.Print(this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.WhitelistName));
+				Service.ChatGui.Print(this.PluginLocalization.NotEnoughArgumentsError(this.PluginLocalization.WhitelistName));
 				return;
 			}
 
-			var world = DataManager.GetExcelSheet<World>()?.SingleOrDefault(
+			var world = Service.DataManager.GetExcelSheet<World>()?.SingleOrDefault(
 				x =>
 					x.DataCenter.Value?.Region != 0 &&
 					x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 			if (world == default(World))
 			{
-				ChatGui.Print(
+				Service.ChatGui.Print(
 					this.PluginLocalization.InvalidWorldNameError(this.PluginLocalization.WhitelistName, args[2]));
 				return;
 			}
 
 			var playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
-			var actor = ObjectTable.SingleOrDefault(
+			var actor = Service.ObjectTable.SingleOrDefault(
 				x =>
 					x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
 					character.Name.TextValue.Equals(playerName, StringComparison.Ordinal)) as PlayerCharacter;
@@ -560,22 +517,22 @@ namespace Visibility
 					this.ShowPlayer(actor.ObjectId);
 				}
 
-				ChatGui.Print(this.PluginLocalization.EntryAdded(this.PluginLocalization.WhitelistName, playerString));
+				Service.ChatGui.Print(this.PluginLocalization.EntryAdded(this.PluginLocalization.WhitelistName, playerString));
 			}
 			else
 			{
-				ChatGui.Print(
+				Service.ChatGui.Print(
 					this.PluginLocalization.EntryExistsError(this.PluginLocalization.WhitelistName, playerString));
 			}
 		}
 
 		public void WhitelistTargetPlayer(string command, string arguments)
 		{
-			if (ObjectTable.SingleOrDefault(
+			if (Service.ObjectTable.SingleOrDefault(
 				    x => x is PlayerCharacter
 				         && x.ObjectId != 0
-				         && x.ObjectId != ClientState.LocalPlayer?.ObjectId
-				         && x.ObjectId == ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter
+				         && x.ObjectId != Service.ClientState.LocalPlayer?.ObjectId
+				         && x.ObjectId == Service.ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter
 			    actor)
 			{
 				var item = new VoidItem(actor, arguments, false);
@@ -593,18 +550,18 @@ namespace Visibility
 					this.Configuration.Save();
 					this.RemoveChecked(actor.ObjectId);
 					this.ShowPlayer(actor.ObjectId);
-					ChatGui.Print(
+					Service.ChatGui.Print(
 						this.PluginLocalization.EntryAdded(this.PluginLocalization.WhitelistName, playerString));
 				}
 				else
 				{
-					ChatGui.Print(
+					Service.ChatGui.Print(
 						this.PluginLocalization.EntryExistsError(this.PluginLocalization.WhitelistName, playerString));
 				}
 			}
 			else
 			{
-				ChatGui.Print(this.PluginLocalization.InvalidTargetError(this.PluginLocalization.WhitelistName));
+				Service.ChatGui.Print(this.PluginLocalization.InvalidTargetError(this.PluginLocalization.WhitelistName));
 			}
 		}
 

@@ -11,12 +11,7 @@ namespace Visibility
 	public class ContextMenu : IDisposable
 	{
 		private bool enabled;
-		private readonly DalamudContextMenu dalamudContextMenu;
-
-		public ContextMenu()
-		{
-			this.dalamudContextMenu = new DalamudContextMenu();
-		}
+		private readonly DalamudContextMenu dalamudContextMenu = new(Service.PluginInterface);
 
 		public void Toggle()
 		{
@@ -117,7 +112,7 @@ namespace Visibility
 
 		private static void AddToVoidList(GameObjectContextMenuItemSelectedArgs args)
 		{
-			var world = VisibilityPlugin.DataManager.GetExcelSheet<World>()?
+			var world = Service.DataManager.GetExcelSheet<World>()?
 				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
 
 			if (world == null)
@@ -157,12 +152,12 @@ namespace Visibility
 				VisibilityPlugin.Instance.RemoveChecked(entry.Name);
 				VisibilityPlugin.Instance.ShowPlayer(entry.Name);
 			}
-			VisibilityPlugin.ChatGui.Print(message);
+			Service.ChatGui.Print(message);
 		}
 
 		private static void AddToWhitelist(GameObjectContextMenuItemSelectedArgs args)
 		{
-			var world = VisibilityPlugin.DataManager.GetExcelSheet<World>()?
+			var world = Service.DataManager.GetExcelSheet<World>()?
 				.SingleOrDefault(x => x.RowId == args.ObjectWorld);
 
 			if (world == null)
@@ -200,7 +195,7 @@ namespace Visibility
 			{
 				VisibilityPlugin.Instance.RemoveChecked(entry.Name);
 			}
-			VisibilityPlugin.ChatGui.Print(message);
+			Service.ChatGui.Print(message);
 		}
 	}
 }

@@ -156,12 +156,12 @@ public class VoidItemList : Window
 
 		var manual = true;
 
-		if (VisibilityPlugin.ClientState.LocalPlayer?.TargetObjectId > 0
-		    && VisibilityPlugin.ObjectTable
+		if (Service.ClientState.LocalPlayer?.TargetObjectId > 0
+		    && Service.ObjectTable
 				    .SingleOrDefault(
 					    x => x is PlayerCharacter
 					         && x.ObjectKind != ObjectKind.Companion
-					         && x.ObjectId == VisibilityPlugin.ClientState.LocalPlayer
+					         && x.ObjectId == Service.ClientState.LocalPlayer
 						         ?.TargetObjectId) is
 			    PlayerCharacter actor)
 		{
