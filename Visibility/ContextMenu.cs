@@ -11,12 +11,7 @@ namespace Visibility
 	public class ContextMenu : IDisposable
 	{
 		private bool enabled;
-		private readonly DalamudContextMenu dalamudContextMenu;
-
-		public ContextMenu()
-		{
-			this.dalamudContextMenu = new DalamudContextMenu(Service.PluginInterface);
-		}
+		private readonly DalamudContextMenu dalamudContextMenu = new(Service.PluginInterface);
 
 		public void Toggle()
 		{
