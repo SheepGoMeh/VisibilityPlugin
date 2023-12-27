@@ -4,17 +4,21 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Windowing;
+
 using ImGuiNET;
+
+using Visibility.Configuration;
 using Visibility.Void;
 
 namespace Visibility.Windows;
 
-public class VoidItemList : Window
+public class VoidItemList: Window
 {
-	public VoidItemList(bool isWhitelist = false) : base($"{VisibilityPlugin.Instance.Name}: ", 0, true)
+	public VoidItemList(bool isWhitelist = false): base($"{VisibilityPlugin.Instance.Name}: ", 0, true)
 	{
 		this.WindowName += isWhitelist
 			? VisibilityPlugin.Instance.PluginLocalization.WhitelistName
@@ -31,13 +35,7 @@ public class VoidItemList : Window
 
 	private readonly bool isWhitelist;
 
-	private readonly byte[][] buffer =
-	{
-		new byte[16],
-		new byte[16],
-		new byte[128],
-		new byte[128],
-	};
+	private readonly byte[][] buffer = { new byte[16], new byte[16], new byte[128], new byte[128], };
 
 	public override void Draw()
 	{
@@ -62,12 +60,12 @@ public class VoidItemList : Window
 
 		VoidItem? itemToRemove = null;
 
-		var configuration = VisibilityPlugin.Instance.Configuration;
+		VisibilityConfiguration configuration = VisibilityPlugin.Instance.Configuration;
 
-		var container = this.isWhitelist ? configuration.Whitelist : configuration.VoidList;
+		List<VoidItem> container = this.isWhitelist ? configuration.Whitelist : configuration.VoidList;
 		this.sortedContainer ??= container;
 
-		var sortSpecs = ImGui.TableGetSortSpecs();
+		ImGuiTableSortSpecsPtr sortSpecs = ImGui.TableGetSortSpecs();
 
 		if (sortSpecs.SpecsDirty)
 		{
@@ -98,7 +96,7 @@ public class VoidItemList : Window
 			sortSpecs.SpecsDirty = false;
 		}
 
-		foreach (var item in this.sortedContainer)
+		foreach (VoidItem item in this.sortedContainer)
 		{
 			ImGui.TableNextColumn();
 			ImGui.TextUnformatted(item.Firstname);
@@ -154,7 +152,7 @@ public class VoidItemList : Window
 			}
 		}
 
-		var manual = true;
+		bool manual = true;
 
 		if (Service.ClientState.LocalPlayer?.TargetObjectId > 0
 		    && Service.ObjectTable
@@ -214,7 +212,7 @@ public class VoidItemList : Window
 					$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
 			}
 
-			foreach (var item in this.buffer)
+			foreach (byte[] item in this.buffer)
 			{
 				Array.Clear(item, 0, item.Length);
 			}

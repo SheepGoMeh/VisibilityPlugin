@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+
 using ImGuiNET;
 
 namespace Visibility.Utils;
@@ -15,7 +16,8 @@ public static class ImGuiElements
 			return;
 		}
 
-		if (!VisibilityPlugin.Instance.Configuration.SettingDictionary.TryGetValue(name, out var onValueChanged))
+		if (!VisibilityPlugin.Instance.Configuration.SettingDictionary.TryGetValue(name,
+			    out Action<bool, bool, bool>? onValueChanged))
 		{
 			return;
 		}
@@ -56,11 +58,11 @@ public static class ImGuiElements
 		string searchIcon = "",
 		ImFontPtr? fontPtr = null)
 	{
-		var previewValue = itemsDictionary.TryGetValue(currentItem, out var value) ? value : string.Empty;
-		
-		Dictionary<ushort, string> items = new ();
+		string previewValue = itemsDictionary.TryGetValue(currentItem, out string? value) ? value : string.Empty;
 
-		foreach (var (key, name) in itemsDictionary)
+		Dictionary<ushort, string> items = new();
+
+		foreach ((ushort key, string? name) in itemsDictionary)
 		{
 			if (name.Contains(
 				    Encoding.UTF8.GetString(textBuffer),
@@ -70,7 +72,7 @@ public static class ImGuiElements
 			}
 		}
 
-		var valueChanged = false;
+		bool valueChanged = false;
 
 		if (!ImGui.BeginCombo(label, previewValue))
 		{
@@ -102,7 +104,7 @@ public static class ImGuiElements
 
 		if (string.IsNullOrEmpty(searchIcon) == false)
 		{
-			var iconSize = ImGui.CalcTextSize(searchIcon, true);
+			Vector2 iconSize = ImGui.CalcTextSize(searchIcon, true);
 			ImGui.SameLine();
 			ImGui.SetCursorPosX(ImGui.GetCursorPosX() - iconSize.X - (ImGui.GetStyle().ItemInnerSpacing.X * 3));
 			ImGui.Text(searchIcon);
@@ -121,10 +123,10 @@ public static class ImGuiElements
 				    0,
 				    (ImGui.GetTextLineHeightWithSpacing() * maxItems) + (ImGui.GetStyle().FramePadding.Y * 2.0f))))
 		{
-			foreach (var (key, name) in items)
+			foreach ((ushort key, string? name) in items)
 			{
 				ImGui.PushID(key);
-				var itemSelected = key == currentItem;
+				bool itemSelected = key == currentItem;
 				if (ImGui.Selectable(name, itemSelected))
 				{
 					valueChanged = true;

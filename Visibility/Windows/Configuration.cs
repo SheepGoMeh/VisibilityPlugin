@@ -1,51 +1,55 @@
 using System.Linq;
 using System.Numerics;
+
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
+
 using ImGuiNET;
+
+using Visibility.Configuration;
 using Visibility.Utils;
 
 namespace Visibility.Windows;
 
-public class Configuration : Window
+public class Configuration: Window
 {
-	public Configuration() : base($"{VisibilityPlugin.Instance.Name} Config", ImGuiWindowFlags.NoResize, true)
+	public Configuration(): base($"{VisibilityPlugin.Instance.Name} Config", ImGuiWindowFlags.NoResize, true)
 	{
-		this.WhitelistWindow = new VoidItemList(isWhitelist: true);
-		this.VoidItemListWindow = new VoidItemList(isWhitelist: false);
+		this.whitelistWindow = new VoidItemList(isWhitelist: true);
+		this.voidItemListWindow = new VoidItemList(isWhitelist: false);
 
-		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.WhitelistWindow);
-		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.VoidItemListWindow);
+		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.whitelistWindow);
+		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.voidItemListWindow);
 
 		this.Size = new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0);
 		this.SizeCondition = ImGuiCond.Always;
 	}
 
-	private static readonly Vector4 VersionColor = new (.5f, .5f, .5f, 1f);
+	private static readonly Vector4 versionColor = new(.5f, .5f, .5f, 1f);
 
-	private static readonly string VersionString =
+	private static readonly string versionString =
 		System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 
 	private bool comboNewOpen;
 	private readonly byte[] buffer = new byte[128];
 
-	public VoidItemList WhitelistWindow;
-	public VoidItemList VoidItemListWindow;
+	private readonly VoidItemList whitelistWindow;
+	private readonly VoidItemList voidItemListWindow;
 
 	public override void Draw()
 	{
-		var configuration = VisibilityPlugin.Instance.Configuration;
+		VisibilityConfiguration configuration = VisibilityPlugin.Instance.Configuration;
 		ImGuiElements.Checkbox(configuration.Enabled, nameof(configuration.Enabled));
 
 		ImGui.SameLine();
 		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEnable);
-		var cursorY = ImGui.GetCursorPosY();
+		float cursorY = ImGui.GetCursorPosY();
 
 		ImGui.SameLine();
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 50);
 		if (configuration.AdvancedEnabled)
 		{
-			var territoryType = configuration.CurrentEditedConfig.TerritoryType;
+			ushort territoryType = configuration.CurrentEditedConfig.TerritoryType;
 
 			ImGui.SetNextItemWidth(250f);
 			if (ImGuiElements.ComboWithFilter(
@@ -72,10 +76,10 @@ public class Configuration : Window
 		}
 
 		ImGui.SameLine(
-			ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(VersionString).X -
+			ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(versionString).X -
 			ImGui.GetScrollX());
 		ImGui.SetCursorPosY(cursorY / 2);
-		ImGui.TextColored(VersionColor, VersionString);
+		ImGui.TextColored(versionColor, versionString);
 		ImGui.SetCursorPosY(cursorY);
 
 		if (ImGui.BeginTable("###cols", 6, ImGuiTableFlags.BordersOuterH))
@@ -205,7 +209,7 @@ public class Configuration : Window
 		}
 
 		ImGui.NextColumn();
-		var comboWidth =
+		float comboWidth =
 			(ImGui.CalcTextSize(
 					VisibilityPlugin.Instance.PluginLocalization.GetString(
 						"LanguageName",
@@ -220,10 +224,11 @@ public class Configuration : Window
 		ImGui.PushItemWidth(comboWidth);
 		if (ImGui.BeginCombo("###language", VisibilityPlugin.Instance.PluginLocalization.LanguageName))
 		{
-			foreach (var language in VisibilityPlugin.Instance.PluginLocalization.AvailableLanguages.Where(
-				         language =>
-					         ImGui.Selectable(
-						         VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", language))))
+			foreach (Localization.Language language in VisibilityPlugin.Instance.PluginLocalization.AvailableLanguages
+				         .Where(
+					         language =>
+						         ImGui.Selectable(
+							         VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", language))))
 			{
 				VisibilityPlugin.Instance.Configuration.Language = language;
 				VisibilityPlugin.Instance.PluginLocalization.CurrentLanguage = language;
@@ -262,7 +267,7 @@ public class Configuration : Window
 
 		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.WhitelistName))
 		{
-			this.WhitelistWindow.Toggle();
+			this.whitelistWindow.Toggle();
 		}
 
 		ImGui.SameLine(
@@ -272,7 +277,7 @@ public class Configuration : Window
 
 		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.VoidListName))
 		{
-			this.VoidItemListWindow.Toggle();
+			this.voidItemListWindow.Toggle();
 		}
 	}
 }
