@@ -1,136 +1,136 @@
 using System;
 using System.Collections.Generic;
-using Dalamud.Logging;
+
 using Dalamud.Plugin.Ipc;
+
 using Visibility.Api;
 
-namespace Visibility.Ipc
+namespace Visibility.Ipc;
+
+public class VisibilityProvider: IDisposable
 {
-	public class VisibilityProvider : IDisposable
+	public const string LabelProviderApiVersion = "Visibility.ApiVersion";
+	public const string LabelProviderGetVoidListEntries = "Visibility.GetVoidListEntries";
+	public const string LabelProviderAddToVoidList = "Visibility.AddToVoidList";
+	public const string LabelProviderRemoveFromVoidList = "Visibility.RemoveFromVoidList";
+	public const string LabelProviderGetWhitelistEntries = "Visibility.GetWhitelistEntries";
+	public const string LabelProviderAddToWhitelist = "Visibility.AddToWhitelist";
+	public const string LabelProviderRemoveFromWhitelist = "Visibility.RemoveFromWhitelist";
+	public const string LabelProviderEnable = "Visibility.Enable";
+
+	internal readonly ICallGateProvider<int>? providerApiVersion;
+	internal readonly ICallGateProvider<IEnumerable<string>>? providerGetVoidListEntries;
+	internal readonly ICallGateProvider<string, uint, string, object>? providerAddToVoidList;
+	internal readonly ICallGateProvider<string, uint, object>? providerRemoveFromVoidList;
+	internal readonly ICallGateProvider<IEnumerable<string>>? providerGetWhitelistEntries;
+	internal readonly ICallGateProvider<string, uint, string, object>? providerAddToWhitelist;
+	internal readonly ICallGateProvider<string, uint, object>? providerRemoveFromWhitelist;
+	internal readonly ICallGateProvider<bool, object>? providerEnable;
+
+	internal readonly IVisibilityApi api;
+
+	public VisibilityProvider(IVisibilityApi api)
 	{
-		public const string LabelProviderApiVersion = "Visibility.ApiVersion";
-		public const string LabelProviderGetVoidListEntries = "Visibility.GetVoidListEntries";
-		public const string LabelProviderAddToVoidList = "Visibility.AddToVoidList";
-		public const string LabelProviderRemoveFromVoidList = "Visibility.RemoveFromVoidList";
-		public const string LabelProviderGetWhitelistEntries = "Visibility.GetWhitelistEntries";
-		public const string LabelProviderAddToWhitelist = "Visibility.AddToWhitelist";
-		public const string LabelProviderRemoveFromWhitelist = "Visibility.RemoveFromWhitelist";
-		public const string LabelProviderEnable = "Visibility.Enable";
+		this.api = api;
 
-		internal ICallGateProvider<int>? ProviderApiVersion;
-		internal ICallGateProvider<IEnumerable<string>>? ProviderGetVoidListEntries;
-		internal ICallGateProvider<string, uint, string, object>? ProviderAddToVoidList;
-		internal ICallGateProvider<string, uint, object>? ProviderRemoveFromVoidList;
-		internal ICallGateProvider<IEnumerable<string>>? ProviderGetWhitelistEntries;
-		internal ICallGateProvider<string, uint, string, object>? ProviderAddToWhitelist;
-		internal ICallGateProvider<string, uint, object>? ProviderRemoveFromWhitelist;
-		internal ICallGateProvider<bool, object>? ProviderEnable;
-
-		internal readonly IVisibilityApi Api;
-
-		public VisibilityProvider(IVisibilityApi api)
+		try
 		{
-			this.Api = api;
-
-			try
-			{
-				this.ProviderApiVersion = Service.PluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
-				this.ProviderApiVersion.RegisterFunc(() => api.ApiVersion);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderApiVersion}:\n{e}");
-			}
-
-			try
-			{
-				this.ProviderGetVoidListEntries =
-					Service.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetVoidListEntries);
-				this.ProviderGetVoidListEntries.RegisterFunc(api.GetVoidListEntries);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderGetVoidListEntries}:\n{e}");
-			}
-
-			try
-			{
-				this.ProviderAddToVoidList =
-					Service.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToVoidList);
-				this.ProviderAddToVoidList.RegisterAction(api.AddToVoidList);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToVoidList}:\n{e}");
-			}
-
-			try
-			{
-				this.ProviderRemoveFromVoidList =
-					Service.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromVoidList);
-				this.ProviderRemoveFromVoidList.RegisterAction(api.RemoveFromVoidList);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromVoidList}:\n{e}");
-			}
-			
-			try
-			{
-				this.ProviderGetWhitelistEntries =
-					Service.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
-				this.ProviderGetWhitelistEntries.RegisterFunc(api.GetWhitelistEntries);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderGetWhitelistEntries}:\n{e}");
-			}
-
-			try
-			{
-				this.ProviderAddToWhitelist =
-					Service.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
-				this.ProviderAddToWhitelist.RegisterAction(api.AddToWhitelist);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToWhitelist}:\n{e}");
-			}
-
-			try
-			{
-				this.ProviderRemoveFromWhitelist =
-					Service.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
-				this.ProviderRemoveFromWhitelist.RegisterAction(api.RemoveFromWhitelist);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromWhitelist}:\n{e}");
-			}
-			
-			try
-			{
-				this.ProviderEnable =
-					Service.PluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
-				this.ProviderEnable.RegisterAction(api.Enable);
-				this.ProviderEnable?.SendMessage(true);
-			}
-			catch (Exception e)
-			{
-				Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderEnable}:\n{e}");
-			}
+			this.providerApiVersion = Service.PluginInterface.GetIpcProvider<int>(LabelProviderApiVersion);
+			this.providerApiVersion.RegisterFunc(() => api.ApiVersion);
+		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderApiVersion}:\n{e}");
 		}
 
-		public void Dispose()
+		try
 		{
-			this.ProviderApiVersion?.UnregisterFunc();
-			this.ProviderGetVoidListEntries?.UnregisterFunc();
-			this.ProviderAddToVoidList?.UnregisterAction();
-			this.ProviderRemoveFromVoidList?.UnregisterAction();
-			this.ProviderGetWhitelistEntries?.UnregisterFunc();
-			this.ProviderAddToWhitelist?.UnregisterAction();
-			this.ProviderRemoveFromWhitelist?.UnregisterAction();
-			this.ProviderEnable?.UnregisterAction();
+			this.providerGetVoidListEntries =
+				Service.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetVoidListEntries);
+			this.providerGetVoidListEntries.RegisterFunc(api.GetVoidListEntries);
 		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderGetVoidListEntries}:\n{e}");
+		}
+
+		try
+		{
+			this.providerAddToVoidList =
+				Service.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToVoidList);
+			this.providerAddToVoidList.RegisterAction(api.AddToVoidList);
+		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToVoidList}:\n{e}");
+		}
+
+		try
+		{
+			this.providerRemoveFromVoidList =
+				Service.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromVoidList);
+			this.providerRemoveFromVoidList.RegisterAction(api.RemoveFromVoidList);
+		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromVoidList}:\n{e}");
+		}
+
+		try
+		{
+			this.providerGetWhitelistEntries =
+				Service.PluginInterface.GetIpcProvider<IEnumerable<string>>(LabelProviderGetWhitelistEntries);
+			this.providerGetWhitelistEntries.RegisterFunc(api.GetWhitelistEntries);
+		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderGetWhitelistEntries}:\n{e}");
+		}
+
+		try
+		{
+			this.providerAddToWhitelist =
+				Service.PluginInterface.GetIpcProvider<string, uint, string, object>(LabelProviderAddToWhitelist);
+			this.providerAddToWhitelist.RegisterAction(api.AddToWhitelist);
+		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderAddToWhitelist}:\n{e}");
+		}
+
+		try
+		{
+			this.providerRemoveFromWhitelist =
+				Service.PluginInterface.GetIpcProvider<string, uint, object>(LabelProviderRemoveFromWhitelist);
+			this.providerRemoveFromWhitelist.RegisterAction(api.RemoveFromWhitelist);
+		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderRemoveFromWhitelist}:\n{e}");
+		}
+
+		try
+		{
+			this.providerEnable =
+				Service.PluginInterface.GetIpcProvider<bool, object>(LabelProviderEnable);
+			this.providerEnable.RegisterAction(api.Enable);
+			this.providerEnable?.SendMessage(true);
+		}
+		catch (Exception e)
+		{
+			Service.PluginLog.Error($"Error registering IPC provider for {LabelProviderEnable}:\n{e}");
+		}
+	}
+
+	public void Dispose()
+	{
+		this.providerApiVersion?.UnregisterFunc();
+		this.providerGetVoidListEntries?.UnregisterFunc();
+		this.providerAddToVoidList?.UnregisterAction();
+		this.providerRemoveFromVoidList?.UnregisterAction();
+		this.providerGetWhitelistEntries?.UnregisterFunc();
+		this.providerAddToWhitelist?.UnregisterAction();
+		this.providerRemoveFromWhitelist?.UnregisterAction();
+		this.providerEnable?.UnregisterAction();
 	}
 }

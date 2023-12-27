@@ -23,8 +23,5 @@ public class TerritoryConfig
 	public bool ShowFriendChocobo;
 	public bool ShowDeadPlayer;
 
-	public TerritoryConfig Clone()
-	{
-		return (TerritoryConfig)this.MemberwiseClone();
-	}
+	public TerritoryConfig Clone() => (TerritoryConfig)this.MemberwiseClone();
 }
