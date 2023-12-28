@@ -113,6 +113,7 @@ public class VisibilityPlugin: IDalamudPlugin
 		this.WindowSystem = new WindowSystem("VisibilityPlugin");
 		this.ConfigurationWindow = new Windows.Configuration();
 		this.WindowSystem.AddWindow(this.ConfigurationWindow);
+		this.WindowSystem.AddWindow(new Windows.ProximityRing());
 
 		Service.PluginInterface.UiBuilder.Draw += this.BuildUi;
 		Service.PluginInterface.UiBuilder.OpenConfigUi += this.OpenConfigUi;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -39,7 +40,8 @@ public class FrameworkHandler: IDisposable
 	private enum ObjectType
 	{
 		Character,
-		Companion
+		Companion,
+		Proximity
 	}
 
 	private readonly Dictionary<uint, long> hiddenObjectIds = new(capacity: 200);
@@ -48,6 +50,7 @@ public class FrameworkHandler: IDisposable
 	private readonly Dictionary<uint, long> checkedWhitelistedObjectIds = new(capacity: 1000);
 	private readonly Dictionary<uint, long> voidedObjectIds = new(capacity: 1000);
 	private readonly Dictionary<uint, long> whitelistedObjectIds = new(capacity: 1000);
+	private readonly Dictionary<uint, long> hiddenProximityObjectIds = new(capacity: 200);
 
 	private readonly Dictionary<UnitType, Dictionary<ContainerType, Dictionary<uint, long>>> containers = new()
 	{
@@ -92,6 +95,7 @@ public class FrameworkHandler: IDisposable
 	private readonly Dictionary<uint, long> hiddenMinionObjectIds = new(capacity: 200);
 	private readonly Dictionary<uint, long> minionObjectIdsToShow = new(capacity: 200);
 	private bool isChangingTerritory;
+	private bool isProximityThreshold;
 
 	private readonly HashSet<uint> idToDelete = new(capacity: 200);
 
@@ -115,6 +119,41 @@ public class FrameworkHandler: IDisposable
 		               || Service.Condition[ConditionFlag.DutyRecorderPlayback];
 
 		Character* localPlayer = (Character*)localPlayerGameObject;
+
+		if (VisibilityPlugin.Instance.Configuration.EnableProximity)
+		{
+			int proximityCounter = 0;
+
+			for (int i = 1; i != 200; ++i)
+			{
+				GameObject* gameObject = GameObjectManager.GetGameObjectByIndex(i);
+
+				if (gameObject == null || gameObject == localPlayerGameObject || !gameObject->IsCharacter())
+				{
+					continue;
+				}
+
+				if (Vector3.Distance(localPlayer->GameObject.Position, gameObject->Position) <
+				    VisibilityPlugin.Instance.Configuration.ProximityRadius)
+				{
+					proximityCounter++;
+				}
+
+				if (proximityCounter < VisibilityPlugin.Instance.Configuration.ProximityThreshold)
+				{
+					continue;
+				}
+
+				this.isProximityThreshold = true;
+				break;
+			}
+		}
+
+		if (!this.isProximityThreshold && this.hiddenProximityObjectIds.Count > 0)
+		{
+			this.hiddenProximityObjectIds.ToList().ForEach(x => this.objectIdsToShow[x.Key] = x.Value);
+			this.hiddenProximityObjectIds.Clear();
+		}
 
 		for (int i = 1; i != 200; ++i)
 		{
@@ -179,6 +218,8 @@ public class FrameworkHandler: IDisposable
 				this.idToDelete.Clear();
 			}
 		}
+
+		this.isProximityThreshold = false;
 	}
 
 	private unsafe void PlayerHandler(Character* characterPtr, Character* localPlayer, bool isBound)
@@ -267,7 +308,9 @@ public class FrameworkHandler: IDisposable
 		}
 
 		if (!VisibilityPlugin.Instance.Configuration.Enabled ||
-		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer ||
+		    !(VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer || (this.isProximityThreshold &&
+			    Vector3.Distance(localPlayer->GameObject.Position, characterPtr->GameObject.Position) <
+			    VisibilityPlugin.Instance.Configuration.ProximityRadius)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
 		     characterPtr->GameObject.IsDead()) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
@@ -303,7 +346,28 @@ public class FrameworkHandler: IDisposable
 			return;
 		}
 
-		this.HideGameObject(characterPtr);
+		ObjectType type = ObjectType.Character;
+
+		if (VisibilityPlugin.Instance.Configuration.EnableProximity &&
+		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer)
+		{
+			if (this.hiddenProximityObjectIds.ContainsKey(characterPtr->GameObject.ObjectID) &&
+			    Vector3.Distance(localPlayer->GameObject.Position, characterPtr->GameObject.Position) >
+			    VisibilityPlugin.Instance.Configuration.ProximityRadius)
+			{
+				this.objectIdsToShow[characterPtr->GameObject.ObjectID] = Environment.TickCount64;
+				return;
+			}
+
+			if (this.isProximityThreshold && !this.hiddenObjectIds.ContainsKey(characterPtr->GameObject.ObjectID) &&
+			    Vector3.Distance(localPlayer->GameObject.Position, characterPtr->GameObject.Position) <
+			    VisibilityPlugin.Instance.Configuration.ProximityRadius)
+			{
+				type = ObjectType.Proximity;
+			}
+		}
+
+		this.HideGameObject(characterPtr, type);
 	}
 
 	private unsafe void PetHandler(Character* characterPtr, Character* localPlayer, bool isBound)
@@ -495,6 +559,10 @@ public class FrameworkHandler: IDisposable
 				this.hiddenMinionObjectIds[thisPtr->CompanionOwnerID] = Environment.TickCount64;
 				thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
 				break;
+			case ObjectType.Proximity when !thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
+				this.hiddenProximityObjectIds[thisPtr->GameObject.ObjectID] = Environment.TickCount64;
+				thisPtr->GameObject.RenderFlags |= (int)VisibilityFlags.Invisible;
+				break;
 		}
 	}
 
@@ -506,6 +574,7 @@ public class FrameworkHandler: IDisposable
 			                               thisPtr->GameObject.RenderFlags.TestFlag(VisibilityFlags.Invisible):
 				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				this.objectIdsToShow.Remove(thisPtr->GameObject.ObjectID);
+				this.hiddenProximityObjectIds.Remove(thisPtr->GameObject.ObjectID);
 				thisPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
 				return true;
 			case ObjectType.Companion when this.minionObjectIdsToShow.ContainsKey(thisPtr->CompanionOwnerID) &&
@@ -603,6 +672,7 @@ public class FrameworkHandler: IDisposable
 		this.checkedWhitelistedObjectIds.Clear();
 		this.voidedObjectIds.Clear();
 		this.whitelistedObjectIds.Clear();
+		this.hiddenProximityObjectIds.Clear();
 
 		foreach ((UnitType _, Dictionary<ContainerType, Dictionary<uint, long>>? unitContainer) in this.containers)
 		{
@@ -646,7 +716,8 @@ public class FrameworkHandler: IDisposable
 			}
 			else
 			{
-				if (!this.hiddenObjectIds.ContainsKey(thisPtr->GameObject.ObjectID))
+				if (!this.hiddenObjectIds.ContainsKey(thisPtr->GameObject.ObjectID) ||
+				    !this.hiddenProximityObjectIds.ContainsKey(thisPtr->GameObject.ObjectID))
 				{
 					continue;
 				}
@@ -654,6 +725,7 @@ public class FrameworkHandler: IDisposable
 				this.RemoveChecked(thisPtr->GameObject.ObjectID);
 				this.objectIdsToShow[thisPtr->GameObject.ObjectID] = Environment.TickCount64;
 				this.hiddenObjectIds.Remove(thisPtr->GameObject.ObjectID);
+				this.hiddenProximityObjectIds.Remove(thisPtr->GameObject.ObjectID);
 			}
 		}
 	}

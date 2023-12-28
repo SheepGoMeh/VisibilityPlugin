@@ -247,6 +247,23 @@ public class Configuration: Window
 		{
 			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenuTip);
 		}
+		
+		ImGui.NextColumn();
+		ImGuiElements.Checkbox(configuration.EnableProximity, nameof(configuration.EnableProximity));
+		ImGui.SameLine();
+		ImGui.Text("Enable Proximity");
+		if (configuration.EnableProximity)
+		{
+			ImGui.NextColumn();
+			ImGuiElements.Checkbox(configuration.PreviewProximityRadius, nameof(configuration.PreviewProximityRadius));
+			ImGui.SameLine();
+			ImGui.Text("Preview radius");
+
+			ImGui.NextColumn();
+			ImGui.SliderFloat("Proximity radius", ref configuration.ProximityRadius, 1, 50);
+			ImGui.NextColumn();
+			ImGui.SliderInt("Proximity threshold", ref configuration.ProximityThreshold, 1, 50);
+		}
 
 		ImGui.NextColumn();
 		ImGui.Separator();

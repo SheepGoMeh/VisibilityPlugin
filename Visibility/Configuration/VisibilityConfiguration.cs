@@ -21,6 +21,11 @@ public class VisibilityConfiguration: IPluginConfiguration
 	public bool HideStar;
 	public bool AdvancedEnabled;
 	public bool EnableContextMenu;
+	public bool EnableProximity;
+	public float ProximityRadius;
+	public int ProximityThreshold;
+		
+	[NonSerialized] public bool PreviewProximityRadius = true;
 
 	public List<VoidItem> VoidList { get; } = [];
 
@@ -56,6 +61,8 @@ public class VisibilityConfiguration: IPluginConfiguration
 		this.SettingDictionary[nameof(this.HideStar)] = (val, toggle, _) => this.HideStar.ToggleBool(val, toggle);
 		this.SettingDictionary[nameof(this.AdvancedEnabled)] =
 			(val, toggle, _) => this.AdvancedEnabled.ToggleBool(val, toggle);
+		this.SettingDictionary[nameof(this.EnableProximity)] =
+			(val, toggle, _) => this.EnableProximity.ToggleBool(val, toggle);
 
 		this.SettingDictionary[nameof(this.EnableContextMenu)] = (val, toggle, _) =>
 		{
