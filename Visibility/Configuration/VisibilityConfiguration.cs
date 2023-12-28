@@ -27,16 +27,16 @@ public class VisibilityConfiguration: IPluginConfiguration
 		
 	[NonSerialized] public bool PreviewProximityRadius = true;
 
-	public List<VoidItem> VoidList { get; } = [];
+	public List<VoidItem> VoidList { get; } = new();
 
-	public List<VoidItem> Whitelist { get; } = [];
+	public List<VoidItem> Whitelist { get; } = new();
 
 	[NonSerialized] public readonly Dictionary<string, Action<bool, bool, bool>> SettingDictionary =
 		new(StringComparer.InvariantCultureIgnoreCase);
 
-	[NonSerialized] public readonly HashSet<ushort> TerritoryTypeWhitelist = [];
+	[NonSerialized] public readonly HashSet<ushort> TerritoryTypeWhitelist = new();
 
-	[NonSerialized] private readonly HashSet<ushort> allowedTerritory = [];
+	[NonSerialized] private readonly HashSet<ushort> allowedTerritory = new();
 
 	[NonSerialized]
 	public readonly Dictionary<ushort, string> TerritoryPlaceNameDictionary = new() { { 0, "Default" } };
