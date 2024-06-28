@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<OutputType>Library</OutputType>
 		<LangVersion>default</LangVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Nullable>enable</Nullable>
-		<AssemblyVersion>1.1.6.0</AssemblyVersion>
+		<AssemblyVersion>1.1.7.0</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<IsPackable>false</IsPackable>
 		<Authors>SheepGoMeh</Authors>

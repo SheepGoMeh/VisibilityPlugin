@@ -159,7 +159,7 @@ public class VoidItemList: Window
 				    .SingleOrDefault(
 					    x => x is PlayerCharacter
 					         && x.ObjectKind != ObjectKind.Companion
-					         && x.ObjectId == Service.ClientState.LocalPlayer
+					         && x.EntityId == Service.ClientState.LocalPlayer
 						         ?.TargetObjectId) is
 			    PlayerCharacter actor)
 		{
