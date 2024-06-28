@@ -109,7 +109,7 @@ public class FrameworkHandler: IDisposable
 		}
 
 		bool isBound = (Service.Condition[ConditionFlag.BoundByDuty] &&
-		                localPlayerGameObject->EventId.Id != (uint) EventHandlerType.TreasureHuntDirector)
+		                localPlayerGameObject->EventId.ContentId != EventHandlerType.TreasureHuntDirector)
 		               || Service.Condition[ConditionFlag.BetweenAreas]
 		               || Service.Condition[ConditionFlag.WatchingCutscene]
 		               || Service.Condition[ConditionFlag.DutyRecorderPlayback];
@@ -223,7 +223,7 @@ public class FrameworkHandler: IDisposable
 
 		if (localPlayer->FreeCompanyTag.Length > 0
 		    && localPlayer->CurrentWorld == localPlayer->HomeWorld
-		    && characterPtr->FreeCompanyTag.SequenceEqual(localPlayer->FreeCompanyTag))
+		    && UnsafeSpanEqual(characterPtr->FreeCompanyTag, localPlayer->FreeCompanyTag, 7))
 		{
 			this.containers[UnitType.Players][ContainerType.Company][characterPtr->GameObject.EntityId] =
 				Environment.TickCount64;
@@ -237,7 +237,7 @@ public class FrameworkHandler: IDisposable
 		if (!this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
 			VoidItem? voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
-				x => x.NameBytes.SequenceEqual(characterPtr->GameObject.Name.ToArray()) &&
+				x => UnsafeSpanEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
 				     x.HomeworldId == characterPtr->HomeWorld);
 
 			if (voidedPlayer != null)
@@ -286,7 +286,7 @@ public class FrameworkHandler: IDisposable
 		if (!this.checkedWhitelistedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
 			VoidItem? whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
-				x => x.NameBytes.SequenceEqual(characterPtr->GameObject.Name.ToArray()) &&
+				x => UnsafeSpanEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
 				     x.HomeworldId == characterPtr->HomeWorld);
 
 			if (whitelistedPlayer != null)
@@ -536,12 +536,12 @@ public class FrameworkHandler: IDisposable
 
 		foreach (CrossRealmGroup group in infoProxyCrossRealm->CrossRealmGroups)
 		{
-			if (group.GroupMemberCount == 0)
+			if (group.GroupMembers.Length == 0)
 			{
 				continue;
 			}
 
-			for (int i = 0; i < group.GroupMemberCount; ++i)
+			for (int i = 0; i < group.GroupMembers.Length; ++i)
 			{
 				if (group.GroupMembers[i].EntityId == objectId)
 				{
@@ -553,19 +553,11 @@ public class FrameworkHandler: IDisposable
 		return false;
 	}
 
-	private static unsafe bool UnsafeArrayEqual(byte* arr1, byte* arr2, int len)
+	private unsafe static bool UnsafeSpanEqual(Span<byte> span1, Span<byte> span2, int len)
 	{
-		ReadOnlySpan<byte> a1 = new(arr1, len);
-		ReadOnlySpan<byte> a2 = new(arr2, len);
+		ReadOnlySpan<byte> a1 = new(&span1, len);
+		ReadOnlySpan<byte> a2 = new(&span2, len);
 		return a1.SequenceEqual(a2);
-	}
-
-	private static unsafe bool UnsafeArrayEqual(byte[] arr1, byte* arr2, int len)
-	{
-		fixed (byte* a1 = arr1)
-		{
-			return UnsafeArrayEqual(a1, arr2, len);
-		}
 	}
 
 	public void Show(UnitType unitType, ContainerType containerType)
@@ -630,7 +622,7 @@ public class FrameworkHandler: IDisposable
 			return;
 		}
 
-		foreach (Dalamud.Game.ClientState.Objects.Types.GameObject? actor in Service.ObjectTable)
+		foreach (Dalamud.Game.ClientState.Objects.Types.IGameObject? actor in Service.ObjectTable)
 		{
 			Character* thisPtr = (Character*)actor.Address;
 

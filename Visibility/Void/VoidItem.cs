@@ -48,7 +48,7 @@ public class VoidItem
 		this.ObjectId = 0;
 	}
 
-	public VoidItem(PlayerCharacter actor, string reason, bool manual): this()
+	public VoidItem(IPlayerCharacter actor, string reason, bool manual): this()
 	{
 		this.Name = actor.Name.TextValue;
 		this.Time = DateTime.Now;

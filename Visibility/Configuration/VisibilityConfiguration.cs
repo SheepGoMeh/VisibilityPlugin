@@ -61,7 +61,8 @@ public class VisibilityConfiguration: IPluginConfiguration
 		{
 			this.EnableContextMenu.ToggleBool(val, toggle);
 
-			VisibilityPlugin.Instance.ContextMenu.Toggle(val, toggle);
+			// TODO: Switch to dalamud service
+			// VisibilityPlugin.Instance.ContextMenu.Toggle(val, toggle);
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.HidePet)] = (val, toggle, edit) =>
