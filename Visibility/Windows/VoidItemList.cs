@@ -157,11 +157,11 @@ public class VoidItemList: Window
 		if (Service.ClientState.LocalPlayer?.TargetObjectId > 0
 		    && Service.ObjectTable
 				    .SingleOrDefault(
-					    x => x is PlayerCharacter
+					    x => x is IPlayerCharacter
 					         && x.ObjectKind != ObjectKind.Companion
-					         && x.ObjectId == Service.ClientState.LocalPlayer
+					         && x.EntityId == Service.ClientState.LocalPlayer
 						         ?.TargetObjectId) is
-			    PlayerCharacter actor)
+			    IPlayerCharacter actor)
 		{
 			Array.Clear(this.buffer[0], 0, this.buffer[0].Length);
 			Array.Clear(this.buffer[1], 0, this.buffer[1].Length);

@@ -39,7 +39,8 @@ public class VisibilityPlugin: IDalamudPlugin
 	public readonly Localization PluginLocalization;
 	public readonly VisibilityConfiguration Configuration;
 
-	public readonly ContextMenu ContextMenu;
+	// TODO: Switch to dalamud service
+	// public readonly ContextMenu ContextMenu;
 
 	public static VisibilityPlugin Instance { get; private set; } = null!;
 
@@ -64,12 +65,14 @@ public class VisibilityPlugin: IDalamudPlugin
 		                     new VisibilityConfiguration();
 		this.Configuration.Init(Service.ClientState.TerritoryType);
 		this.PluginLocalization = new Localization(this.Configuration.Language);
-		this.ContextMenu = new ContextMenu();
 
-		if (this.Configuration.EnableContextMenu)
-		{
-			this.ContextMenu.Toggle();
-		}
+		// TODO: Switch to dalamud service
+		// this.ContextMenu = new ContextMenu();
+		//
+		// if (this.Configuration.EnableContextMenu)
+		// {
+		// 	this.ContextMenu.Toggle();
+		// }
 
 		Service.CommandManager.AddHandler(
 			PluginCommandName,
@@ -179,7 +182,9 @@ public class VisibilityPlugin: IDalamudPlugin
 		this.WindowSystem.RemoveAllWindows();
 		this.IpcProvider.Dispose();
 		this.Api.Dispose();
-		this.ContextMenu.Dispose();
+
+		// TODO: Switch to dalamud service
+		// this.ContextMenu.Dispose();
 
 		Service.ClientState.TerritoryChanged -= this.ClientStateOnTerritoryChanged;
 		Service.Framework.Update -= this.FrameworkOnOnUpdateEvent;
@@ -218,27 +223,27 @@ public class VisibilityPlugin: IDalamudPlugin
 
 	public void RemoveChecked(string name)
 	{
-		GameObject? gameObject = Service.ObjectTable.SingleOrDefault(
-			x => x is PlayerCharacter character && character.Name.TextValue.Equals(
+		IGameObject? gameObject = Service.ObjectTable.SingleOrDefault(
+			x => x is IPlayerCharacter character && character.Name.TextValue.Equals(
 				name,
 				StringComparison.InvariantCultureIgnoreCase));
 
 		if (gameObject != null)
 		{
-			this.frameworkHandler.RemoveChecked(gameObject.ObjectId);
+			this.frameworkHandler.RemoveChecked(gameObject.EntityId);
 		}
 	}
 
 	public void ShowPlayer(string name)
 	{
-		GameObject? gameObject = Service.ObjectTable.SingleOrDefault(
-			x => x is PlayerCharacter character && character.Name.TextValue.Equals(
+		IGameObject? gameObject = Service.ObjectTable.SingleOrDefault(
+			x => x is IPlayerCharacter character && character.Name.TextValue.Equals(
 				name,
 				StringComparison.InvariantCultureIgnoreCase));
 
 		if (gameObject != null)
 		{
-			this.frameworkHandler.ShowPlayer(gameObject.ObjectId);
+			this.frameworkHandler.ShowPlayer(gameObject.EntityId);
 		}
 	}
 
@@ -353,11 +358,11 @@ public class VisibilityPlugin: IDalamudPlugin
 		string playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
 		VoidItem voidItem;
-		GameObject? gameObject = Service.ObjectTable.SingleOrDefault(
-			x => x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
+		IGameObject? gameObject = Service.ObjectTable.SingleOrDefault(
+			x => x is IPlayerCharacter character && character.HomeWorld.Id == world.RowId &&
 			     character.Name.TextValue.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
 
-		if (gameObject is PlayerCharacter actor)
+		if (gameObject is IPlayerCharacter actor)
 		{
 			voidItem = new VoidItem(actor, args.Length == 3 ? string.Empty : args[3], command == "VoidUIManual");
 		}
@@ -385,7 +390,7 @@ public class VisibilityPlugin: IDalamudPlugin
 
 			if (gameObject != null)
 			{
-				this.RemoveChecked(gameObject.ObjectId);
+				this.RemoveChecked(gameObject.EntityId);
 			}
 
 			Service.ChatGui.Print(
@@ -401,10 +406,10 @@ public class VisibilityPlugin: IDalamudPlugin
 	public void VoidTargetPlayer(string command, string arguments)
 	{
 		if (Service.ObjectTable.SingleOrDefault(
-			    x => x is PlayerCharacter
-			         && x.ObjectId != 0
-			         && x.ObjectId != Service.ClientState.LocalPlayer?.ObjectId
-			         && x.ObjectId == Service.ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter
+			    x => x is IPlayerCharacter
+			         && x.EntityId != 0
+			         && x.EntityId != Service.ClientState.LocalPlayer?.EntityId
+			         && x.EntityId == Service.ClientState.LocalPlayer?.TargetObjectId) is IPlayerCharacter
 		    actor)
 		{
 			VoidItem voidItem = new(actor, arguments, false);
@@ -420,7 +425,7 @@ public class VisibilityPlugin: IDalamudPlugin
 			{
 				this.Configuration.VoidList.Add(voidItem);
 				this.Configuration.Save();
-				this.RemoveChecked(actor.ObjectId);
+				this.RemoveChecked(actor.EntityId);
 				Service.ChatGui.Print(
 					this.PluginLocalization.EntryAdded(this.PluginLocalization.VoidListName, playerString));
 			}
@@ -467,10 +472,10 @@ public class VisibilityPlugin: IDalamudPlugin
 
 		string playerName = $"{args[0].ToUppercase()} {args[1].ToUppercase()}";
 
-		PlayerCharacter? actor = Service.ObjectTable.SingleOrDefault(
+		IPlayerCharacter? actor = Service.ObjectTable.SingleOrDefault(
 			x =>
-				x is PlayerCharacter character && character.HomeWorld.Id == world.RowId &&
-				character.Name.TextValue.Equals(playerName, StringComparison.Ordinal)) as PlayerCharacter;
+				x is IPlayerCharacter character && character.HomeWorld.Id == world.RowId &&
+				character.Name.TextValue.Equals(playerName, StringComparison.Ordinal)) as IPlayerCharacter;
 
 		VoidItem item = actor == null
 			? new VoidItem(
@@ -495,8 +500,8 @@ public class VisibilityPlugin: IDalamudPlugin
 
 			if (actor != null)
 			{
-				this.RemoveChecked(actor.ObjectId);
-				this.ShowPlayer(actor.ObjectId);
+				this.RemoveChecked(actor.EntityId);
+				this.ShowPlayer(actor.EntityId);
 			}
 
 			Service.ChatGui.Print(
@@ -512,10 +517,10 @@ public class VisibilityPlugin: IDalamudPlugin
 	public void WhitelistTargetPlayer(string command, string arguments)
 	{
 		if (Service.ObjectTable.SingleOrDefault(
-			    x => x is PlayerCharacter
-			         && x.ObjectId != 0
-			         && x.ObjectId != Service.ClientState.LocalPlayer?.ObjectId
-			         && x.ObjectId == Service.ClientState.LocalPlayer?.TargetObjectId) is PlayerCharacter
+			    x => x is IPlayerCharacter
+			         && x.EntityId != 0
+			         && x.EntityId != Service.ClientState.LocalPlayer?.EntityId
+			         && x.EntityId == Service.ClientState.LocalPlayer?.TargetObjectId) is IPlayerCharacter
 		    actor)
 		{
 			VoidItem item = new(actor, arguments, false);
@@ -531,8 +536,8 @@ public class VisibilityPlugin: IDalamudPlugin
 			{
 				this.Configuration.Whitelist.Add(item);
 				this.Configuration.Save();
-				this.RemoveChecked(actor.ObjectId);
-				this.ShowPlayer(actor.ObjectId);
+				this.RemoveChecked(actor.EntityId);
+				this.ShowPlayer(actor.EntityId);
 				Service.ChatGui.Print(
 					this.PluginLocalization.EntryAdded(this.PluginLocalization.WhitelistName, playerString));
 			}
@@ -554,7 +559,7 @@ public class VisibilityPlugin: IDalamudPlugin
 
 	private void OnChatMessage(
 		XivChatType type,
-		uint senderId,
+		int _,
 		ref SeString sender,
 		ref SeString message,
 		ref bool isHandled)
