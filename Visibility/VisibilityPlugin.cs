@@ -56,7 +56,7 @@ public class VisibilityPlugin: IDalamudPlugin
 
 	public Windows.Configuration ConfigurationWindow { get; }
 
-	public VisibilityPlugin(DalamudPluginInterface pluginInterface)
+	public VisibilityPlugin(IDalamudPluginInterface pluginInterface)
 	{
 		Instance = this;
 

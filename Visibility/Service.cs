@@ -6,7 +6,7 @@ namespace Visibility;
 
 public class Service
 {
-	[PluginService] public static DalamudPluginInterface PluginInterface { get; set; } = null!;
+	[PluginService] public static IDalamudPluginInterface PluginInterface { get; set; } = null!;
 
 	[PluginService] public static ICommandManager CommandManager { get; set; } = null!;
 
