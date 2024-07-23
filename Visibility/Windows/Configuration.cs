@@ -2,6 +2,7 @@ using System.Linq;
 using System.Numerics;
 
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 
 using ImGuiNET;
@@ -258,26 +259,7 @@ public class Configuration: Window
 			VisibilityPlugin.Instance.RefreshActors();
 		}
 
-		ImGui.SameLine(
-			ImGui.GetContentRegionMax().X -
-			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.WhitelistName).X -
-			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
-			(4 * ImGui.GetStyle().FramePadding.X) -
-			(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale));
-
-		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.WhitelistName))
-		{
-			this.whitelistWindow.Toggle();
-		}
-
-		ImGui.SameLine(
-			ImGui.GetContentRegionMax().X -
-			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
-			(2 * ImGui.GetStyle().FramePadding.X));
-
-		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.VoidListName))
-		{
-			this.voidItemListWindow.Toggle();
-		}
+		ImGuiHelpers.ScaledRelativeSameLine(100f);
+		ImGui.Text("VoidList has been removed. Please use the newly enhanced built-in blacklist feature instead.");
 	}
 }
