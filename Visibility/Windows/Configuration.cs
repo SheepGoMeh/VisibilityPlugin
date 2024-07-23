@@ -241,13 +241,13 @@ public class Configuration: Window
 
 		ImGui.PopItemWidth();
 		ImGui.NextColumn();
-		ImGuiElements.Checkbox(configuration.EnableContextMenu, nameof(configuration.EnableContextMenu));
-		ImGui.SameLine();
-		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenu);
-		if (ImGui.IsItemHovered())
-		{
-			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenuTip);
-		}
+		// ImGuiElements.Checkbox(configuration.EnableContextMenu, nameof(configuration.EnableContextMenu));
+		// ImGui.SameLine();
+		// ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenu);
+		// if (ImGui.IsItemHovered())
+		// {
+		// 	ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenuTip);
+		// }
 
 		ImGui.NextColumn();
 		ImGui.Separator();
