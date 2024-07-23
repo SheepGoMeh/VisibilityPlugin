@@ -14,9 +14,7 @@ using Dalamud.Plugin.Services;
 
 using Lumina.Excel.GeneratedSheets;
 
-using Visibility.Api;
 using Visibility.Configuration;
-using Visibility.Ipc;
 using Visibility.Utils;
 using Visibility.Void;
 
@@ -47,10 +45,6 @@ public class VisibilityPlugin: IDalamudPlugin
 	private bool refresh;
 	public bool Disable;
 	private readonly FrameworkHandler frameworkHandler;
-
-	public VisibilityApi Api { get; }
-
-	public VisibilityProvider IpcProvider { get; }
 
 	public WindowSystem WindowSystem { get; }
 
@@ -121,9 +115,6 @@ public class VisibilityPlugin: IDalamudPlugin
 		Service.PluginInterface.UiBuilder.OpenConfigUi += this.OpenConfigUi;
 		Service.ChatGui.ChatMessage += this.OnChatMessage;
 		Service.ClientState.TerritoryChanged += this.ClientStateOnTerritoryChanged;
-
-		this.Api = new VisibilityApi();
-		this.IpcProvider = new VisibilityProvider(this.Api);
 	}
 
 	private void ClientStateOnTerritoryChanged(ushort e)
@@ -180,8 +171,6 @@ public class VisibilityPlugin: IDalamudPlugin
 		}
 
 		this.WindowSystem.RemoveAllWindows();
-		this.IpcProvider.Dispose();
-		this.Api.Dispose();
 
 		// TODO: Switch to dalamud service
 		// this.ContextMenu.Dispose();
