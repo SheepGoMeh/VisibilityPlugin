@@ -223,7 +223,7 @@ public class FrameworkHandler: IDisposable
 
 		if (localPlayer->FreeCompanyTag.Length > 0
 		    && localPlayer->CurrentWorld == localPlayer->HomeWorld
-		    && UnsafeSpanEqual(characterPtr->FreeCompanyTag, localPlayer->FreeCompanyTag, 7))
+		    && characterPtr->FreeCompanyTag.SequenceEqual(localPlayer->FreeCompanyTag))
 		{
 			this.containers[UnitType.Players][ContainerType.Company][characterPtr->GameObject.EntityId] =
 				Environment.TickCount64;
@@ -237,7 +237,7 @@ public class FrameworkHandler: IDisposable
 		if (!this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
 			VoidItem? voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
-				x => UnsafeSpanEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
+				x => characterPtr->GameObject.Name.SequenceEqual(x.NameBytes) &&
 				     x.HomeworldId == characterPtr->HomeWorld);
 
 			if (voidedPlayer != null)
@@ -286,7 +286,7 @@ public class FrameworkHandler: IDisposable
 		if (!this.checkedWhitelistedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
 			VoidItem? whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
-				x => UnsafeSpanEqual(x.NameBytes, characterPtr->GameObject.Name, x.NameBytes.Length) &&
+				x => characterPtr->GameObject.Name.SequenceEqual(x.NameBytes) &&
 				     x.HomeworldId == characterPtr->HomeWorld);
 
 			if (whitelistedPlayer != null)
@@ -551,13 +551,6 @@ public class FrameworkHandler: IDisposable
 		}
 
 		return false;
-	}
-
-	private unsafe static bool UnsafeSpanEqual(Span<byte> span1, Span<byte> span2, int len)
-	{
-		ReadOnlySpan<byte> a1 = new(&span1, len);
-		ReadOnlySpan<byte> a2 = new(&span2, len);
-		return a1.SequenceEqual(a2);
 	}
 
 	public void Show(UnitType unitType, ContainerType containerType)
