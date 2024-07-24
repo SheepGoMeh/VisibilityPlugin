@@ -221,7 +221,7 @@ public class FrameworkHandler: IDisposable
 			return;
 		}
 
-		if (localPlayer->FreeCompanyTag.Length > 0
+		if (localPlayer->FreeCompanyTag[0] != 0
 		    && localPlayer->CurrentWorld == localPlayer->HomeWorld
 		    && characterPtr->FreeCompanyTag.SequenceEqual(localPlayer->FreeCompanyTag))
 		{
