@@ -1,5 +1,5 @@
 {
-  "Author": "Dragon",
+  "Author": "SheepGoMeh",
   "Name": "Visibility",
   "InternalName": "Visibility",
   "Description": "Allows you to hide players, pets, chocobos and minions.\nIncludes VoidList, which is a better blacklist.\nAccessible via /pvis\nMore information available via /xlhelp",

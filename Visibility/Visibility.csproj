@@ -5,7 +5,7 @@
 		<LangVersion>default</LangVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Nullable>enable</Nullable>
-		<AssemblyVersion>1.1.7.1</AssemblyVersion>
+		<AssemblyVersion>1.1.7.2</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<IsPackable>false</IsPackable>
 		<Authors>SheepGoMeh</Authors>
