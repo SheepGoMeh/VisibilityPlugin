@@ -237,7 +237,7 @@ public class FrameworkHandler: IDisposable
 		if (!this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
 			VoidItem? voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
-				x => characterPtr->GameObject.Name.SequenceEqual(x.NameBytes) &&
+				x => characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
 				     x.HomeworldId == characterPtr->HomeWorld);
 
 			if (voidedPlayer != null)
@@ -286,7 +286,7 @@ public class FrameworkHandler: IDisposable
 		if (!this.checkedWhitelistedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
 			VoidItem? whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
-				x => characterPtr->GameObject.Name.SequenceEqual(x.NameBytes) &&
+				x => characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
 				     x.HomeworldId == characterPtr->HomeWorld);
 
 			if (whitelistedPlayer != null)
