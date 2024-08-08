@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "Nascondi le stelle terrestri non appartenenti ai giocatori del tuo gruppo (funziona solo in combattimento)",
   "OptionContextMenu": "Abilita il menu contestuale",
   "OptionContextMenuTip": "Abilita il menu contestuale (menu con clic destro) su un nome del giocatore nella chat",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "Aggiorna",
   "OptionAddPlayer": "Aggiungi giocatore",
   "OptionRemovePlayer": "Rimuovi",

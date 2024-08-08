@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "Blendet Irdischer Stern von anderen Spielern, die nicht zu deiner Gruppe gehören aus. (Funktioniert nur im Kampf)",
   "OptionContextMenu": "Kontextmenü aktivieren",
   "OptionContextMenuTip": "Aktiviert das Kontextmenü (Rechtsklick Menü) auf einen Spielernamen im Chat",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "Aktualisieren",
   "OptionAddPlayer": "Spieler hinzufügen",
   "OptionRemovePlayer": "Entfernen",
