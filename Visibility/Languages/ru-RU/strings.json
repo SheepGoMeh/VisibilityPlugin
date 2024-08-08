@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "Скрывает Earthly Star, не принадлежащую игрокам вашей группы (работает только в бою)",
   "OptionContextMenu": "Включить контекстное меню",
   "OptionContextMenuTip": "Включить контекстное меню (ПКМ меню) на имени игрока в чате",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "Обновить",
   "OptionAddPlayer": "Добавить игрока",
   "OptionRemovePlayer": "Удалить",
