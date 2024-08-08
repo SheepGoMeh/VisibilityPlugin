@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "Döljer Earthly Star som inte tillhör spelare i din grupp (Fungerar bara i strid)",
   "OptionContextMenu": "Aktivera Kontextmeny",
   "OptionContextMenuTip": "Aktiverar kontextmeny (Högerklicksmeny) på ett spelarnamn i chatten",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "Uppdatera",
   "OptionAddPlayer": "Lägg till spelare",
   "OptionRemovePlayer": "Ta bort",
