@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "Oculta los Earthly Star que no hayan sido creados por jugadores de tu party (sólo funciona en combate)",
   "OptionContextMenu": "Habilitar Menú Contextual",
   "OptionContextMenuTip": "Habilita el menú contextual (al hacer click derecho) sobre el nombre de un jugador en el chat",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "Recargar",
   "OptionAddPlayer": "Añadir jugador",
   "OptionRemovePlayer": "Eliminar",
