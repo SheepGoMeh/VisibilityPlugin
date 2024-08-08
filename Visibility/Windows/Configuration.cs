@@ -249,6 +249,15 @@ public class Configuration: Window
 		}
 
 		ImGui.NextColumn();
+		
+		ImGuiElements.Checkbox(configuration.ShowTargetOfTarget, nameof(configuration.ShowTargetOfTarget));
+		ImGui.SameLine();
+		ImGui.Text("Show target of target");
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.SetTooltip("Disables hiding target of your current target if it is hidden by your settings.");
+		}
+		ImGui.NextColumn();
 		ImGui.Separator();
 
 		ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);

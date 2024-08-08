@@ -6,6 +6,7 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
@@ -181,6 +182,23 @@ public class FrameworkHandler: IDisposable
 		}
 	}
 
+	private static unsafe bool CheckTargetOfTarget(Character* ptr)
+	{
+		if (!VisibilityPlugin.Instance.Configuration.ShowTargetOfTarget)
+		{
+			return false;
+		}
+
+		Character* target = (Character*)TargetSystem.Instance()->Target;
+
+		if (target == null || !target->IsCharacter())
+		{
+			return false;
+		}
+
+		return CharacterManager.Instance()->LookupBattleCharaByEntityId(target->TargetId.ObjectId) == ptr;
+	}
+
 	private unsafe void PlayerHandler(Character* characterPtr, Character* localPlayer, bool isBound)
 	{
 		if (characterPtr->GameObject.EntityId == 0xE0000000 ||
@@ -258,7 +276,8 @@ public class FrameworkHandler: IDisposable
 		if (((VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
 		      characterPtr->GameObject.IsDead()) ||
 		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer && isObjectIdInParty) ||
-		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer && characterPtr->IsFriend)) &&
+		     (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer && characterPtr->IsFriend) ||
+		     CheckTargetOfTarget(characterPtr)) &&
 		    this.hiddenObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
 			characterPtr->GameObject.RenderFlags &= ~(int)VisibilityFlags.Invisible;
@@ -278,7 +297,8 @@ public class FrameworkHandler: IDisposable
 			     .ContainsKey(characterPtr->GameObject.EntityId)) ||
 		    (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer &&
 		     this.containers[UnitType.Players][ContainerType.Party]
-			     .ContainsKey(characterPtr->GameObject.EntityId)))
+			     .ContainsKey(characterPtr->GameObject.EntityId)) ||
+		    CheckTargetOfTarget(characterPtr))
 		{
 			return;
 		}
