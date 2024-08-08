@@ -252,10 +252,10 @@ public class Configuration: Window
 		
 		ImGuiElements.Checkbox(configuration.ShowTargetOfTarget, nameof(configuration.ShowTargetOfTarget));
 		ImGui.SameLine();
-		ImGui.Text("Show target of target");
+		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionShowTargetOfTarget);
 		if (ImGui.IsItemHovered())
 		{
-			ImGui.SetTooltip("Disables hiding target of your current target if it is hidden by your settings.");
+			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionShowTargetOfTargetTip);
 		}
 		ImGui.NextColumn();
 		ImGui.Separator();

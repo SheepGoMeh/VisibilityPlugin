@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "Cache les Étoiles Terrestres des joueurs n'appartenant pas à votre équipe (ne fonctionne qu'en combat)",
   "OptionContextMenu": "Activer le Menu Contextuel",
   "OptionContextMenuTip": "Active les options du Menu Contextuel (via clic droit) sur le nom d'un joueur dans le chat",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "Rafraîchir",
   "OptionAddPlayer": "Ajouter un joueur",
   "OptionRemovePlayer": "Retirer",

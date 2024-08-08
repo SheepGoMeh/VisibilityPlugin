@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "パーティーではないプレイヤーのアーサリースターを隠します(戦闘でのみ有効です)",
   "OptionContextMenu": "コンテキストメニューを有効にする",
   "OptionContextMenuTip": "チャットでプレイヤー名のコンテキストメニュー(右クリックメニュー) を有効にする",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "更新",
   "OptionAddPlayer": "プレイヤーを追加",
   "OptionRemovePlayer": "削除",

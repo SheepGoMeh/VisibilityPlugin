@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "隱藏非小隊隊員的地星(戰鬥中起效)",
   "OptionContextMenu": "使用右鍵菜單",
   "OptionContextMenuTip": "在聊天框中使用右鍵菜單(右鍵點撃任意角色的角色名)",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "刷新",
   "OptionAddPlayer": "添加角色",
   "OptionRemovePlayer": "刪除",

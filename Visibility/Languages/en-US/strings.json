@@ -35,6 +35,8 @@
   "OptionEarthlyStarTip": "Hides Earthly Star not belonging to players in your party (Only works in combat)",
   "OptionContextMenu": "Enable Context Menu",
   "OptionContextMenuTip": "Enables context menu (Right-Click menu) on a player name in chat",
+  "OptionShowTargetOfTarget": "Show target of target",
+  "OptionShowTargetOfTargetTip": "Disables hiding the target of your current target if it is hidden by your settings (Does not affect voided targets)",
   "OptionRefresh": "Refresh",
   "OptionAddPlayer": "Add player",
   "OptionRemovePlayer": "Remove",
