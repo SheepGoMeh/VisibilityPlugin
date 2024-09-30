@@ -30,6 +30,8 @@ public class VoidItem
 	[JsonIgnore]
 	public uint ObjectId { get; set; } // Do not serialize because object id can be inconsistent between server restarts
 
+	public ulong Id { get; set; }
+
 	public string Firstname { get; set; }
 	public string Lastname { get; set; }
 	public string HomeworldName { get; set; }
@@ -46,6 +48,7 @@ public class VoidItem
 		this.HomeworldName = string.Empty;
 		this.Reason = string.Empty;
 		this.ObjectId = 0;
+		this.Id = 0;
 	}
 
 	public VoidItem(IPlayerCharacter actor, string reason, bool manual): this()
@@ -70,6 +73,7 @@ public class VoidItem
 
 	[JsonConstructor]
 	public VoidItem(
+		ulong id,
 		string firstname,
 		string lastname,
 		string homeworldName,
@@ -78,6 +82,7 @@ public class VoidItem
 		string reason,
 		bool manual): this()
 	{
+		this.Id = id;
 		this.Name = $"{firstname} {lastname}";
 		this.HomeworldName = homeworldName;
 		this.Time = time;
