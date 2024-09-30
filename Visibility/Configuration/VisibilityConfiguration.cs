@@ -27,6 +27,9 @@ public class VisibilityConfiguration: IPluginConfiguration
 
 	public List<VoidItem> Whitelist { get; } = [];
 
+	[NonSerialized] public Dictionary<ulong, VoidItem> VoidDictionary = null!;
+	[NonSerialized] public Dictionary<ulong, VoidItem> WhitelistDictionary = null!;
+
 	[NonSerialized] public readonly Dictionary<string, Action<bool, bool, bool>> SettingDictionary =
 		new(StringComparer.InvariantCultureIgnoreCase);
 
@@ -44,6 +47,9 @@ public class VisibilityConfiguration: IPluginConfiguration
 
 	public void Init(ushort territoryType)
 	{
+		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).ToDictionary(x => x.Id, x => x);
+		this.WhitelistDictionary = this.Whitelist.Where(x => x.Id != 0).ToDictionary(x => x.Id, x => x);
+
 		this.SettingDictionary[nameof(this.Enabled)] = (val, toggle, _) =>
 		{
 			this.Enabled.ToggleBool(val, toggle);

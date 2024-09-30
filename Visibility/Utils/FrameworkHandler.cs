@@ -254,12 +254,23 @@ public class FrameworkHandler: IDisposable
 
 		if (!this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
-			VoidItem? voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
-				x => characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
-				     x.HomeworldId == characterPtr->HomeWorld);
+			if (!VisibilityPlugin.Instance.Configuration.VoidDictionary.TryGetValue(characterPtr->AccountId,
+					out VoidItem? voidedPlayer))
+			{
+				voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
+					x => characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
+						 x.HomeworldId == characterPtr->HomeWorld);
+			}
 
 			if (voidedPlayer != null)
 			{
+				if (voidedPlayer.Id == 0)
+				{
+					voidedPlayer.Id = characterPtr->AccountId;
+					VisibilityPlugin.Instance.Configuration.Save();
+					VisibilityPlugin.Instance.Configuration.VoidDictionary[characterPtr->AccountId] = voidedPlayer;
+				}
+
 				voidedPlayer.ObjectId = characterPtr->GameObject.EntityId;
 				this.voidedObjectIds[characterPtr->GameObject.EntityId] = Environment.TickCount64;
 			}
@@ -305,12 +316,23 @@ public class FrameworkHandler: IDisposable
 
 		if (!this.checkedWhitelistedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
-			VoidItem? whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
-				x => characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
-				     x.HomeworldId == characterPtr->HomeWorld);
+			if (!VisibilityPlugin.Instance.Configuration.WhitelistDictionary.TryGetValue(characterPtr->ContentId,
+				out VoidItem? whitelistedPlayer))
+			{
+				whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(
+					x => characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
+						 x.HomeworldId == characterPtr->HomeWorld);
+			}
 
 			if (whitelistedPlayer != null)
 			{
+				if (whitelistedPlayer.Id == 0)
+				{
+					whitelistedPlayer.Id = characterPtr->ContentId;
+					VisibilityPlugin.Instance.Configuration.Save();
+					VisibilityPlugin.Instance.Configuration.WhitelistDictionary[characterPtr->ContentId] = whitelistedPlayer;
+				}
+
 				whitelistedPlayer.ObjectId = characterPtr->GameObject.EntityId;
 				this.whitelistedObjectIds[characterPtr->GameObject.EntityId] = Environment.TickCount64;
 			}
