@@ -6,7 +6,6 @@ using Dalamud.Configuration;
 
 using Lumina.Excel.GeneratedSheets;
 
-using Visibility.Utils;
 using Visibility.Void;
 
 namespace Visibility.Configuration;
@@ -85,7 +84,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.HidePet.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPets(ContainerType.All);
+			VisibilityPlugin.Instance.ShowAllPets();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.HidePlayer)] = (val, toggle, edit) =>
@@ -99,7 +98,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.HidePlayer.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPlayers(ContainerType.All);
+			VisibilityPlugin.Instance.ShowAllPlayers();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.HideChocobo)] = (val, toggle, edit) =>
@@ -113,7 +112,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.HideChocobo.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowChocobos(ContainerType.All);
+			VisibilityPlugin.Instance.ShowAllChocobos();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.HideMinion)] = (val, toggle, edit) =>
@@ -127,7 +126,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.HideMinion.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowMinions(ContainerType.All);
+			VisibilityPlugin.Instance.ShowAllCompanions();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyPet)] = (val, toggle, edit) =>
@@ -141,7 +140,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowCompanyPet.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPets(ContainerType.Company);
+			VisibilityPlugin.Instance.ShowCompanyPets();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyPlayer)] = (val, toggle, edit) =>
@@ -155,7 +154,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowCompanyPlayer.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPlayers(ContainerType.Company);
+			VisibilityPlugin.Instance.ShowCompanyPlayers();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyChocobo)] = (val, toggle, edit) =>
@@ -169,7 +168,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowCompanyChocobo.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowChocobos(ContainerType.Company);
+			VisibilityPlugin.Instance.ShowCompanyChocobos();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowCompanyMinion)] = (val, toggle, edit) =>
@@ -183,7 +182,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowCompanyMinion.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowMinions(ContainerType.Company);
+			VisibilityPlugin.Instance.ShowCompanyCompanions();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowPartyPet)] = (val, toggle, edit) =>
@@ -197,7 +196,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowPartyPet.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPets(ContainerType.Party);
+			VisibilityPlugin.Instance.ShowPartyPets();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowPartyPlayer)] = (val, toggle, edit) =>
@@ -211,7 +210,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowPartyPlayer.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPlayers(ContainerType.Party);
+			VisibilityPlugin.Instance.ShowPartyPlayers();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowPartyChocobo)] = (val, toggle, edit) =>
@@ -225,7 +224,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowPartyChocobo.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowChocobos(ContainerType.Party);
+			VisibilityPlugin.Instance.ShowPartyChocobos();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowPartyMinion)] = (val, toggle, edit) =>
@@ -239,7 +238,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowPartyMinion.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowMinions(ContainerType.Party);
+			VisibilityPlugin.Instance.ShowPartyCompanions();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowFriendPet)] = (val, toggle, edit) =>
@@ -253,7 +252,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowFriendPet.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPets(ContainerType.Friend);
+			VisibilityPlugin.Instance.ShowFriendPets();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowFriendPlayer)] = (val, toggle, edit) =>
@@ -267,7 +266,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowFriendPlayer.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowPlayers(ContainerType.Friend);
+			VisibilityPlugin.Instance.ShowFriendPlayers();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowFriendChocobo)] = (val, toggle, edit) =>
@@ -281,7 +280,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowFriendChocobo.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowChocobos(ContainerType.Friend);
+			VisibilityPlugin.Instance.ShowFriendChocobos();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowFriendMinion)] = (val, toggle, edit) =>
@@ -295,7 +294,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 				this.CurrentConfig.ShowFriendMinion.ToggleBool(val, toggle);
 			}
 
-			VisibilityPlugin.Instance.ShowMinions(ContainerType.Friend);
+			VisibilityPlugin.Instance.ShowFriendCompanions();
 		};
 
 		this.SettingDictionary[nameof(TerritoryConfig.ShowDeadPlayer)] = (val, toggle, edit) =>

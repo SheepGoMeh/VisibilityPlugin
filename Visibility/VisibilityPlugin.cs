@@ -20,7 +20,6 @@ using Visibility.Ipc;
 using Visibility.Utils;
 using Visibility.Void;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
 namespace Visibility;
 
@@ -207,17 +206,26 @@ public class VisibilityPlugin: IDalamudPlugin
 		this.Dispose(true);
 		GC.SuppressFinalize(this);
 	}
+	
+	public void ShowAllPlayers() => this.frameworkHandler.ShowAllPlayers();
+	public void ShowFriendPlayers() => this.frameworkHandler.ShowFriendPlayers();
+	public void ShowPartyPlayers() => this.frameworkHandler.ShowPartyPlayers();
+	public void ShowCompanyPlayers() => this.frameworkHandler.ShowCompanyPlayers();
+	
+	public void ShowAllPets() => this.frameworkHandler.ShowAllPets();
+	public void ShowFriendPets() => this.frameworkHandler.ShowFriendPets();
+	public void ShowPartyPets() => this.frameworkHandler.ShowPartyPets();
+	public void ShowCompanyPets() => this.frameworkHandler.ShowCompanyPets();
 
-	public void Show(UnitType unitType, ContainerType containerType) =>
-		this.frameworkHandler.Show(unitType, containerType);
+	public void ShowAllChocobos() => this.frameworkHandler.ShowAllChocobos();
+	public void ShowFriendChocobos() => this.frameworkHandler.ShowFriendChocobos();
+	public void ShowPartyChocobos() => this.frameworkHandler.ShowPartyChocobos();
+	public void ShowCompanyChocobos() => this.frameworkHandler.ShowCompanyChocobos();
 
-	public void ShowPlayers(ContainerType type) => this.frameworkHandler.ShowPlayers(type);
-
-	public void ShowPets(ContainerType type) => this.frameworkHandler.ShowPets(type);
-
-	public void ShowMinions(ContainerType type) => this.frameworkHandler.ShowMinions(type);
-
-	public void ShowChocobos(ContainerType type) => this.frameworkHandler.ShowChocobos(type);
+	public void ShowAllCompanions() => this.frameworkHandler.ShowAllCompanions();
+	public void ShowFriendCompanions() => this.frameworkHandler.ShowFriendCompanions();
+	public void ShowPartyCompanions() => this.frameworkHandler.ShowPartyCompanions();
+	public void ShowCompanyCompanions() => this.frameworkHandler.ShowCompanyCompanions();
 
 	public void ShowPlayer(uint id) => this.frameworkHandler.ShowPlayer(id);
 
