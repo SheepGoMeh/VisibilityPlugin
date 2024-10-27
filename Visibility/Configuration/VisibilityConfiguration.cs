@@ -47,8 +47,8 @@ public class VisibilityConfiguration: IPluginConfiguration
 
 	public void Init(ushort territoryType)
 	{
-		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).ToDictionary(x => x.Id, x => x);
-		this.WhitelistDictionary = this.Whitelist.Where(x => x.Id != 0).ToDictionary(x => x.Id, x => x);
+		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
+		this.WhitelistDictionary = this.Whitelist.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
 
 		this.SettingDictionary[nameof(this.Enabled)] = (val, toggle, _) =>
 		{
