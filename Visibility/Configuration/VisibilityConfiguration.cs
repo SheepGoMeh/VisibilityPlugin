@@ -4,7 +4,8 @@ using System.Linq;
 
 using Dalamud.Configuration;
 
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
+using Lumina.Text.ReadOnly;
 
 using Visibility.Utils;
 using Visibility.Void;
@@ -310,20 +311,20 @@ public class VisibilityConfiguration: IPluginConfiguration
 			}
 		};
 
-		IEnumerable<(ushort, string)>? valueTuples = Service.DataManager.GameData.Excel.GetSheet<TerritoryType>()?
+		IEnumerable<(ushort, ReadOnlySeString)>? valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()?
 			.Where(
-				x => (x.TerritoryIntendedUse is 0 or 1 or 13 or 19 or 21 or 23 or 44 or 46 or 47 ||
-				      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !string.IsNullOrEmpty(x.Name) &&
+				x => (x.TerritoryIntendedUse.RowId is 0 or 1 or 13 or 19 or 21 or 23 or 44 or 46 or 47 ||
+				      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !x.Name.IsEmpty &&
 				     x.RowId != 136)
-			.Select(x => ((ushort)x.RowId, x.PlaceName?.Value?.Name ?? "Unknown Place"));
+			.Select(x => ((ushort)x.RowId, x.PlaceName.ValueNullable?.Name ?? "Unknown Place"));
 
 		if (valueTuples != null)
 		{
-			foreach ((ushort rowId, string? placeName) in valueTuples)
+			foreach ((ushort rowId, ReadOnlySeString placeName) in valueTuples)
 			{
 				this.allowedTerritory.Add(rowId);
 				this.TerritoryTypeWhitelist.Add(rowId);
-				this.TerritoryPlaceNameDictionary[rowId] = placeName;
+				this.TerritoryPlaceNameDictionary[rowId] = placeName.ToString();
 			}
 		}
 
