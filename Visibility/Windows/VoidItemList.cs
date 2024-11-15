@@ -169,7 +169,7 @@ public class VoidItemList: Window
 
 			Encoding.Default.GetBytes(actor.GetFirstname()).CopyTo(this.buffer[0], 0);
 			Encoding.Default.GetBytes(actor.GetLastname()).CopyTo(this.buffer[1], 0);
-			Encoding.Default.GetBytes(actor.HomeWorld.GameData!.Name).CopyTo(this.buffer[2], 0);
+			Encoding.Default.GetBytes(actor.HomeWorld.Value.Name.ToString()).CopyTo(this.buffer[2], 0);
 
 			manual = false;
 		}
