@@ -110,7 +110,7 @@ public class FrameworkHandler: IDisposable
 		}
 
 		bool isBound = (Service.Condition[ConditionFlag.BoundByDuty] &&
-		                localPlayerGameObject->EventId.ContentId != EventHandlerType.TreasureHuntDirector)
+		                localPlayerGameObject->EventId.ContentId != EventHandlerContent.TreasureHuntDirector)
 		               || Service.Condition[ConditionFlag.BetweenAreas]
 		               || Service.Condition[ConditionFlag.WatchingCutscene]
 		               || Service.Condition[ConditionFlag.DutyRecorderPlayback];
