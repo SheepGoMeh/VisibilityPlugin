@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 using Visibility.Void;
 
@@ -40,14 +40,14 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 	{
 		this.CheckInitialised();
 
-		World? world = Service.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+		World? world = Service.DataManager.GetExcelSheet<World>().SingleOrDefault(x => x.RowId == worldId);
 
 		if (world == null)
 		{
 			throw new Exception($"Invalid worldId ({worldId}).");
 		}
 
-		VisibilityPlugin.Instance.VoidPlayer("", $"{name} {world.Name} {reason}");
+		VisibilityPlugin.Instance.VoidPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
 	}
 
 	public void RemoveFromVoidList(string name, uint worldId)
@@ -92,14 +92,14 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 	{
 		this.CheckInitialised();
 
-		World? world = Service.DataManager.GetExcelSheet<World>()?.SingleOrDefault(x => x.RowId == worldId);
+		World? world = Service.DataManager.GetExcelSheet<World>().SingleOrDefault(x => x.RowId == worldId);
 
 		if (world == null)
 		{
 			throw new Exception($"Invalid worldId ({worldId}).");
 		}
 
-		VisibilityPlugin.Instance.WhitelistPlayer("", $"{name} {world.Name} {reason}");
+		VisibilityPlugin.Instance.WhitelistPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
 	}
 
 	public void RemoveFromWhitelist(string name, uint worldId)

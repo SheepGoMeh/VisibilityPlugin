@@ -249,6 +249,15 @@ public class Configuration: Window
 		}
 
 		ImGui.NextColumn();
+		
+		ImGuiElements.Checkbox(configuration.ShowTargetOfTarget, nameof(configuration.ShowTargetOfTarget));
+		ImGui.SameLine();
+		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionShowTargetOfTarget);
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionShowTargetOfTargetTip);
+		}
+		ImGui.NextColumn();
 		ImGui.Separator();
 
 		ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);

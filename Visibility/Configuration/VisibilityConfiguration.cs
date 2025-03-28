@@ -4,7 +4,8 @@ using System.Linq;
 
 using Dalamud.Configuration;
 
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
+using Lumina.Text.ReadOnly;
 
 using Visibility.Utils;
 using Visibility.Void;
@@ -21,10 +22,14 @@ public class VisibilityConfiguration: IPluginConfiguration
 	public bool HideStar;
 	public bool AdvancedEnabled;
 	public bool EnableContextMenu;
+	public bool ShowTargetOfTarget;
 
 	public List<VoidItem> VoidList { get; } = [];
 
 	public List<VoidItem> Whitelist { get; } = [];
+
+	[NonSerialized] public Dictionary<ulong, VoidItem> VoidDictionary = null!;
+	[NonSerialized] public Dictionary<ulong, VoidItem> WhitelistDictionary = null!;
 
 	[NonSerialized] public readonly Dictionary<string, Action<bool, bool, bool>> SettingDictionary =
 		new(StringComparer.InvariantCultureIgnoreCase);
@@ -43,6 +48,9 @@ public class VisibilityConfiguration: IPluginConfiguration
 
 	public void Init(ushort territoryType)
 	{
+		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
+		this.WhitelistDictionary = this.Whitelist.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
+
 		this.SettingDictionary[nameof(this.Enabled)] = (val, toggle, _) =>
 		{
 			this.Enabled.ToggleBool(val, toggle);
@@ -61,8 +69,11 @@ public class VisibilityConfiguration: IPluginConfiguration
 		{
 			this.EnableContextMenu.ToggleBool(val, toggle);
 
-			VisibilityPlugin.Instance.ContextMenu.Toggle(val, toggle);
+			// TODO: Switch to dalamud service
+			// VisibilityPlugin.Instance.ContextMenu.Toggle(val, toggle);
 		};
+
+		this.SettingDictionary[nameof(this.ShowTargetOfTarget)] = (val, toggle, _) => this.ShowTargetOfTarget.ToggleBool(val, toggle);
 
 		this.SettingDictionary[nameof(TerritoryConfig.HidePet)] = (val, toggle, edit) =>
 		{
@@ -300,20 +311,20 @@ public class VisibilityConfiguration: IPluginConfiguration
 			}
 		};
 
-		IEnumerable<(ushort, string)>? valueTuples = Service.DataManager.GameData.Excel.GetSheet<TerritoryType>()?
+		IEnumerable<(ushort, ReadOnlySeString)>? valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()?
 			.Where(
-				x => (x.TerritoryIntendedUse is 0 or 1 or 13 or 19 or 21 or 23 or 44 or 46 or 47 ||
-				      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !string.IsNullOrEmpty(x.Name) &&
+				x => (x.TerritoryIntendedUse.RowId is 0 or 1 or 13 or 19 or 21 or 23 or 44 or 46 or 47 ||
+				      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !x.Name.IsEmpty &&
 				     x.RowId != 136)
-			.Select(x => ((ushort)x.RowId, x.PlaceName?.Value?.Name ?? "Unknown Place"));
+			.Select(x => ((ushort)x.RowId, x.PlaceName.ValueNullable?.Name ?? "Unknown Place"));
 
 		if (valueTuples != null)
 		{
-			foreach ((ushort rowId, string? placeName) in valueTuples)
+			foreach ((ushort rowId, ReadOnlySeString placeName) in valueTuples)
 			{
 				this.allowedTerritory.Add(rowId);
 				this.TerritoryTypeWhitelist.Add(rowId);
-				this.TerritoryPlaceNameDictionary[rowId] = placeName;
+				this.TerritoryPlaceNameDictionary[rowId] = placeName.ToString();
 			}
 		}
 
