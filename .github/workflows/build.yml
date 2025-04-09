@@ -119,5 +119,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT }}
-          repository: ${{ github.repository_owner }}/VisibilityPlugin
+          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}
           event-type: new-release
