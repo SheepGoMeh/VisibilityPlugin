@@ -1,21 +1,123 @@
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Build Plugin
 
-name: Build
+env:
+  plugin_name: Visibility
 
-on: 
-  workflow_dispatch:
+on:
   push:
+    paths-ignore:
+      - .editorconfig
+      - .gitattributes
+      - .github/**
+      - .gitignore
+      - CHANGELOG.md
+      - LICENSE
+      - README.md
     branches:
-    - master
+      - dev
+  workflow_dispatch:
+    inputs:
+      dalamud_branch:
+        description: 'Dalamud Branch'
+        required: true
+        default: 'master'
+        type: choice
+        options:
+          - master
+          - stg
 
 jobs:
-  pull_request:
+  build:
+    name: Build
     runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
     steps:
-    - name: Creates pull request
-      uses: daemitus/DalamudPluginPR2@master
-      with: 
-        token: ${{ secrets.PAT }}
-        plugin_name: Visibility
-        project_path: Visibility
-        plugin_owners: SheepGoMeh
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          cache: true
+          cache-dependency-path: ${{ env.plugin_name }}/packages.lock.json
+          dotnet-version: 9.0.x
+
+      - name: Determine Dalamud Branch
+        id: branch
+        run: |
+          COMMIT_MSG='${{ github.event.head_commit.message }}'
+          if [[ -n "${{ github.event.inputs.dalamud_branch }}" ]]; then
+            echo "branch=${{ github.event.inputs.dalamud_branch }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.ref }}" == "refs/heads/stg" ]] || [[ "$COMMIT_MSG" == "[stg]"* ]]; then
+            echo "branch=stg" >> $GITHUB_OUTPUT
+          else
+            echo "branch=master" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download Dalamud
+        env:
+          DALAMUD_URL: >
+            ${{ fromJson('{
+              "master": "https://goatcorp.github.io/dalamud-distrib/latest.zip",
+              "stg": "https://goatcorp.github.io/dalamud-distrib/stg/latest.zip",
+            }')[steps.branch.outputs.branch] }}
+        run: |
+          curl -o latest.zip ${{ env.DALAMUD_URL }}
+          mkdir -p ~/.xlcore/dalamud/Hooks/dev/
+          unzip latest.zip -d ~/.xlcore/dalamud/Hooks/dev/
+
+      - name: Restore dependencies
+        run: dotnet restore --locked-mode
+
+      - name: Build
+        run: dotnet build --no-restore -c Release -clp:NoSummary
+
+      - name: Get project path
+        id: project_path
+        run: |
+          PROJECT_FILE=$(dotnet sln list | grep -i "${{ env.plugin_name }}")
+          PROJECT_PATH=$(dirname "$PROJECT_FILE")
+          echo "project_path=$PROJECT_PATH" >> $GITHUB_OUTPUT
+
+      - name: Rename manifest
+        if: github.event_name != 'pull_request'
+        run: mv ${{ steps.project_path.outputs.project_path }}/bin/Release/${{ env.plugin_name }}/${{ env.plugin_name }}.json ${{ steps.project_path.outputs.project_path }}/bin/Release/${{ env.plugin_name }}/manifest.json
+
+      - name: Upload Build Artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ steps.project_path.outputs.project_path }}/bin/Release/${{ env.plugin_name }}/*
+
+  release:
+    name: Release
+    needs: build
+    if: success() && startsWith(github.ref, 'refs/tags/v') && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+
+      - name: Extract release notes
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v2
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ env.plugin_name }} ${{ github.ref_name }}
+          body: ${{ steps.extract-release-notes.outputs.release_notes }}
+          files: artifact/*
+
+      - name: Trigger Repo Update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: ${{ github.repository_owner }}/VisibilityPlugin
+          event-type: new-release
