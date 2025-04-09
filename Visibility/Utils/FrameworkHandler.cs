@@ -254,7 +254,7 @@ public class FrameworkHandler: IDisposable
 
 		if (!this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 		{
-			if (!VisibilityPlugin.Instance.Configuration.VoidDictionary.TryGetValue(characterPtr->AccountId,
+			if (!VisibilityPlugin.Instance.Configuration.VoidDictionary.TryGetValue(characterPtr->ContentId,
 					out VoidItem? voidedPlayer))
 			{
 				voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(
@@ -266,9 +266,9 @@ public class FrameworkHandler: IDisposable
 			{
 				if (voidedPlayer.Id == 0)
 				{
-					voidedPlayer.Id = characterPtr->AccountId;
+					voidedPlayer.Id = characterPtr->ContentId;
 					VisibilityPlugin.Instance.Configuration.Save();
-					VisibilityPlugin.Instance.Configuration.VoidDictionary[characterPtr->AccountId] = voidedPlayer;
+					VisibilityPlugin.Instance.Configuration.VoidDictionary[characterPtr->ContentId] = voidedPlayer;
 				}
 
 				voidedPlayer.ObjectId = characterPtr->GameObject.EntityId;

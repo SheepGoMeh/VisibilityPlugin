@@ -329,6 +329,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 		}
 
 		this.UpdateCurrentConfig(territoryType);
+		this.HandleVersionChanges();
 	}
 
 	public void UpdateCurrentConfig(ushort territoryType, bool edit = false)
@@ -357,6 +358,27 @@ public class VisibilityConfiguration: IPluginConfiguration
 			this.CurrentConfig.TerritoryType = territoryType;
 			this.CurrentEditedConfig = this.CurrentConfig;
 		}
+	}
+
+	private void HandleVersionChanges()
+	{
+		if (!this.VoidList.Any(x => x.Version < 1)) return;
+
+		// Due to recent changes, the id property needs to be reset.
+		// Changes will be tracked using a version property.
+		this.VoidList.ForEach(x =>
+		{
+			if (x.Version >= 1) return;
+			x.Id = 0;
+			x.Version = 1;
+		});
+
+		// Save the changes
+		this.Save();
+
+		// Recreate the dictionary
+		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).DistinctBy(x => x.Id)
+			.ToDictionary(x => x.Id, x => x);
 	}
 
 	public void Save() => Service.PluginInterface.SavePluginConfig(this);

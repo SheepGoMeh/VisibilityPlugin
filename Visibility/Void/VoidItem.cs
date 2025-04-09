@@ -30,6 +30,8 @@ public class VoidItem()
 	// Do not serialize this property, because object id can be inconsistent between server restarts
 	public uint ObjectId { get; set; } = 0;
 
+	public int Version { get; set; } = 0;
+
 	public ulong Id { get; set; }
 
 	public string Firstname { get; set; } = string.Empty;
@@ -42,6 +44,7 @@ public class VoidItem()
 
 	[JsonConstructor]
 	public VoidItem(
+		int version,
 		ulong id,
 		string firstname,
 		string lastname,
@@ -51,6 +54,7 @@ public class VoidItem()
 		string reason,
 		bool manual): this()
 	{
+		this.Version = version;
 		this.Id = id;
 		this.Name = $"{firstname} {lastname}";
 		this.HomeworldName = homeworldName;
