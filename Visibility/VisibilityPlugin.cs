@@ -369,7 +369,7 @@ public class VisibilityPlugin: IDalamudPlugin
 				Character* character = (Character*)playerCharacter.Address;
 				voidItem = new VoidItem
 				{
-					Id = character->AccountId,
+					Id = character->ContentId,
 					Name = character->NameString,
 					HomeworldId = world.Value.RowId,
 					HomeworldName = world.Value.Name.ToString(),
@@ -433,7 +433,7 @@ public class VisibilityPlugin: IDalamudPlugin
 				Character* character = (Character*)playerCharacter.Address;
 				voidItem = new VoidItem
 				{
-					Id = character->AccountId,
+					Id = character->ContentId,
 					Name = character->NameString,
 					HomeworldId = character->HomeWorld,
 					HomeworldName = playerCharacter.HomeWorld.Value.Name.ToString(),
