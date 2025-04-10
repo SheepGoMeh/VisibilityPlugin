@@ -13,13 +13,13 @@ namespace Visibility.Windows;
 
 public class Configuration: Window
 {
-	public Configuration(): base($"{VisibilityPlugin.Instance.Name} Config", ImGuiWindowFlags.NoResize, true)
+	public Configuration(WindowSystem windowSystem): base($"{VisibilityPlugin.Instance.Name} Config", ImGuiWindowFlags.NoResize, true)
 	{
 		this.whitelistWindow = new VoidItemList(isWhitelist: true);
 		this.voidItemListWindow = new VoidItemList(isWhitelist: false);
 
-		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.whitelistWindow);
-		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.voidItemListWindow);
+		windowSystem.AddWindow(this.whitelistWindow);
+		windowSystem.AddWindow(this.voidItemListWindow);
 
 		this.Size = new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0);
 		this.SizeCondition = ImGuiCond.Always;
