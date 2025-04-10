@@ -201,13 +201,13 @@ public class VoidItemList: Window
 		{
 			if (this.isWhitelist)
 			{
-				VisibilityPlugin.Instance.WhitelistPlayer(
+				VisibilityPlugin.Instance.CommandManagerHandler.WhitelistPlayer(
 					manual ? "WhitelistUIManual" : string.Empty,
 					$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
 			}
 			else
 			{
-				VisibilityPlugin.Instance.VoidPlayer(
+				VisibilityPlugin.Instance.CommandManagerHandler.VoidPlayer(
 					manual ? "VoidUIManual" : string.Empty,
 					$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
 			}
