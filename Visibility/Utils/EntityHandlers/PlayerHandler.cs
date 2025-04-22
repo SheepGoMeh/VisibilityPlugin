@@ -1,0 +1,139 @@
+using System;
+
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
+
+namespace Visibility.Utils.EntityHandlers;
+
+/// <summary>
+/// Handles visibility logic for player entities
+/// </summary>
+public class PlayerHandler
+{
+	private readonly ContainerManager containerManager;
+	private readonly VoidListManager voidListManager;
+	private readonly ObjectVisibilityManager visibilityManager;
+
+	public PlayerHandler(
+		ContainerManager containerManager,
+		VoidListManager voidListManager,
+		ObjectVisibilityManager visibilityManager)
+	{
+		this.containerManager = containerManager;
+		this.voidListManager = voidListManager;
+		this.visibilityManager = visibilityManager;
+	}
+
+	/// <summary>
+	/// Process a player entity and determine its visibility
+	/// </summary>
+	public unsafe void ProcessPlayer(Character* characterPtr, Character* localPlayer, bool isBound)
+	{
+		if (characterPtr->GameObject.EntityId == 0xE0000000 ||
+		    this.visibilityManager.ShowGameObject(characterPtr)) return;
+
+		// Add to containers
+		this.UpdateContainers(characterPtr, localPlayer);
+
+		// Check territory whitelist
+		if (isBound && !VisibilityPlugin.Instance.Configuration.TerritoryTypeWhitelist.Contains(
+			    Service.ClientState.TerritoryType))
+			return;
+
+		// Check void list
+		if (this.voidListManager.CheckAndProcessVoidList(characterPtr))
+		{
+			this.visibilityManager.HideGameObject(characterPtr);
+			return;
+		}
+
+		// Check visibility conditions
+		if (this.ShouldShowPlayer(characterPtr)) return;
+
+		// Check whitelist
+		if (this.voidListManager.CheckAndProcessWhitelist(characterPtr)) return;
+
+		this.visibilityManager.HideGameObject(characterPtr);
+	}
+
+	/// <summary>
+	/// Update container memberships for the player
+	/// </summary>
+	private unsafe void UpdateContainers(Character* characterPtr, Character* localPlayer)
+	{
+		// All players container
+		this.containerManager.AddToContainer(UnitType.Players, ContainerType.All, characterPtr->GameObject.EntityId);
+
+		// Friend container
+		if (characterPtr->IsFriend)
+		{
+			this.containerManager.AddToContainer(UnitType.Players, ContainerType.Friend,
+				characterPtr->GameObject.EntityId);
+		}
+		else
+		{
+			this.containerManager.RemoveFromContainer(UnitType.Players, ContainerType.Friend,
+				characterPtr->GameObject.EntityId);
+		}
+
+		// Party container
+		bool isObjectIdInParty = FrameworkHandler.IsObjectIdInParty(characterPtr->GameObject.EntityId);
+		if (isObjectIdInParty)
+		{
+			this.containerManager.AddToContainer(UnitType.Players, ContainerType.Party,
+				characterPtr->GameObject.EntityId);
+		}
+		else
+		{
+			this.containerManager.RemoveFromContainer(UnitType.Players, ContainerType.Party,
+				characterPtr->GameObject.EntityId);
+		}
+
+		// Company container
+		if (localPlayer->FreeCompanyTag[0] != 0
+		    && localPlayer->CurrentWorld == localPlayer->HomeWorld
+		    && characterPtr->FreeCompanyTag.SequenceEqual(localPlayer->FreeCompanyTag))
+		{
+			this.containerManager.AddToContainer(UnitType.Players, ContainerType.Company,
+				characterPtr->GameObject.EntityId);
+		}
+		else
+		{
+			this.containerManager.RemoveFromContainer(UnitType.Players, ContainerType.Company,
+				characterPtr->GameObject.EntityId);
+		}
+	}
+
+	/// <summary>
+	/// Determine if a player should be shown based on configuration settings
+	/// </summary>
+	private unsafe bool ShouldShowPlayer(Character* characterPtr)
+	{
+		// Check if plugin is disabled or player hiding is disabled
+		if (!VisibilityPlugin.Instance.Configuration.Enabled ||
+		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer)
+			return true;
+
+		// Check if player is dead and show dead players is enabled
+		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
+		    characterPtr->GameObject.IsDead())
+			return true;
+
+		// Check if player is a friend and show friends is enabled
+		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
+		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Friend,
+			    characterPtr->GameObject.EntityId)) return true;
+
+		// Check if player is in the same company and show company members is enabled
+		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyPlayer &&
+		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Company,
+			    characterPtr->GameObject.EntityId)) return true;
+
+		// Check if player is in the party and show party members is enabled
+		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer &&
+		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
+			    characterPtr->GameObject.EntityId)) return true;
+
+		// Check if player is the target of the target
+		return FrameworkHandler.CheckTargetOfTarget(characterPtr);
+	}
+}
