@@ -311,25 +311,31 @@ public class VisibilityConfiguration: IPluginConfiguration
 			}
 		};
 
-		IEnumerable<(ushort, ReadOnlySeString)>? valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()?
-			.Where(
-				x => (x.TerritoryIntendedUse.RowId is 0 or 1 or 13 or 19 or 21 or 23 or 44 or 46 or 47 ||
-				      this.TerritoryTypeWhitelist.Contains((ushort)x.RowId)) && !x.Name.IsEmpty &&
-				     x.RowId != 136)
+		IEnumerable<(ushort, ReadOnlySeString)> valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()
+			.Where(this.IsAllowedTerritory)
 			.Select(x => ((ushort)x.RowId, x.PlaceName.ValueNullable?.Name ?? "Unknown Place"));
 
-		if (valueTuples != null)
+		foreach ((ushort rowId, ReadOnlySeString placeName) in valueTuples)
 		{
-			foreach ((ushort rowId, ReadOnlySeString placeName) in valueTuples)
-			{
-				this.allowedTerritory.Add(rowId);
-				this.TerritoryTypeWhitelist.Add(rowId);
-				this.TerritoryPlaceNameDictionary[rowId] = placeName.ToString();
-			}
+			this.allowedTerritory.Add(rowId);
+			this.TerritoryTypeWhitelist.Add(rowId);
+			this.TerritoryPlaceNameDictionary[rowId] = placeName.ToString();
 		}
 
 		this.UpdateCurrentConfig(territoryType);
 		this.HandleVersionChanges();
+	}
+
+	// Allowed territory intended use IDs
+	private static readonly HashSet<uint> allowedTerritoryIntendedUses = [0, 1, 13, 19, 21, 23, 44, 46, 47];
+
+	// Helper method to determine if a territory is allowed
+	private bool IsAllowedTerritory(TerritoryType territory)
+	{
+		return (allowedTerritoryIntendedUses.Contains(territory.TerritoryIntendedUse.RowId) ||
+		        this.TerritoryTypeWhitelist.Contains((ushort)territory.RowId)) &&
+		       !territory.Name.IsEmpty &&
+		       territory.RowId != 136;
 	}
 
 	public void UpdateCurrentConfig(ushort territoryType, bool edit = false)
