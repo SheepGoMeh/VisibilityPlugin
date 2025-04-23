@@ -12,7 +12,7 @@ using Visibility.Void;
 
 namespace Visibility.Configuration;
 
-public class VisibilityConfiguration: IPluginConfiguration
+public partial class VisibilityConfiguration: IPluginConfiguration
 {
 	public int Version { get; set; }
 
@@ -319,7 +319,7 @@ public class VisibilityConfiguration: IPluginConfiguration
 		{
 			this.allowedTerritory.Add(rowId);
 			this.TerritoryTypeWhitelist.Add(rowId);
-			this.TerritoryPlaceNameDictionary[rowId] = placeName.ToString();
+			this.TerritoryPlaceNameDictionary[rowId] = ItalicRegex().Replace(placeName.ToString(), "");
 		}
 
 		this.UpdateCurrentConfig(territoryType);
@@ -388,4 +388,6 @@ public class VisibilityConfiguration: IPluginConfiguration
 	}
 
 	public void Save() => Service.PluginInterface.SavePluginConfig(this);
+	[System.Text.RegularExpressions.GeneratedRegex("<italic\\(\\d+\\)>")]
+	private static partial System.Text.RegularExpressions.Regex ItalicRegex();
 }
