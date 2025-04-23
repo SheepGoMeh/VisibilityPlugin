@@ -327,7 +327,7 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	}
 
 	// Allowed territory intended use IDs
-	private static readonly HashSet<uint> allowedTerritoryIntendedUses = [0, 1, 13, 19, 21, 23, 44, 46, 47];
+	private static readonly HashSet<uint> allowedTerritoryIntendedUses = [0, 1, 13, 19, 21, 23, 44, 46, 47, 60];
 
 	// Helper method to determine if a territory is allowed
 	private bool IsAllowedTerritory(TerritoryType territory)
