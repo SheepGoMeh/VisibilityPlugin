@@ -327,7 +327,18 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	}
 
 	// Allowed territory intended use IDs
-	private static readonly HashSet<uint> allowedTerritoryIntendedUses = [0, 1, 13, 19, 21, 23, 44, 46, 47, 60];
+	private static readonly HashSet<uint> allowedTerritoryIntendedUses = [
+		0, // Hub Cities
+		1, // Overworld
+		13, // Residential Area
+		19,
+		21, // The Firmament
+		23, // Gold Saucer
+		44, // Leap of Faith
+		46, // Ocean Fishing
+		47, // The Diadem
+		60, // Stellar Exploration
+	];
 
 	// Helper method to determine if a territory is allowed
 	private bool IsAllowedTerritory(TerritoryType territory)
@@ -335,7 +346,7 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 		return (allowedTerritoryIntendedUses.Contains(territory.TerritoryIntendedUse.RowId) ||
 		        this.TerritoryTypeWhitelist.Contains((ushort)territory.RowId)) &&
 		       !territory.Name.IsEmpty &&
-		       territory.RowId != 136;
+		       territory.RowId != 136; // Exclude test map
 	}
 
 	public void UpdateCurrentConfig(ushort territoryType, bool edit = false)
