@@ -118,7 +118,7 @@ public class CommandManagerHandler: IDisposable
 				Service.ChatGui.Print(this.pluginLocalization.PluginCommandHelpMenu3);
 				Service.ChatGui.Print(this.pluginLocalization.PluginCommandHelpMenu4);
 
-				foreach (string? key in this.configuration.SettingDictionary.Keys)
+				foreach (string? key in this.configuration.SettingsHandler.GetKeys())
 				{
 					Service.ChatGui.Print($"{key}");
 				}
@@ -138,8 +138,7 @@ public class CommandManagerHandler: IDisposable
 				return;
 			}
 
-			if (!this.configuration.SettingDictionary.Keys.Any(
-				    x => x.Equals(args[0], StringComparison.InvariantCultureIgnoreCase)))
+			if (!this.configuration.SettingsHandler.ContainsKey(args[0]))
 			{
 				Service.ChatGui.Print(this.pluginLocalization.PluginCommandHelpMenuInvalidValueError(args[0]));
 				return;
@@ -170,7 +169,7 @@ public class CommandManagerHandler: IDisposable
 					return;
 			}
 
-			this.configuration.SettingDictionary[args[0]].Invoke(value, toggle, false);
+			this.configuration.SettingsHandler.Invoke(args[0], value, toggle, false);
 			this.configuration.Save();
 		}
 	}

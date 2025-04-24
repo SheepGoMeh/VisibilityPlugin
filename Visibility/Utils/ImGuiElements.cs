@@ -16,8 +16,10 @@ public static class ImGuiElements
 			return;
 		}
 
-		if (!VisibilityPlugin.Instance.Configuration.SettingDictionary.TryGetValue(name,
-			    out Action<bool, bool, bool>? onValueChanged))
+		Action<bool, bool, bool>? onValueChanged =
+			VisibilityPlugin.Instance.Configuration.SettingsHandler.GetAction(name);
+
+		if (onValueChanged == null)
 		{
 			return;
 		}
