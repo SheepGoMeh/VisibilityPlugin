@@ -105,7 +105,11 @@ public class SettingsHandler
 
 		this.settingActions[nameof(this.configurationInstance.AdvancedEnabled)] =
 			this.CreateDirectToggleAction((v, t) =>
-				this.configurationInstance.AdvancedEnabled.ToggleBool(v, t)
+				this.configurationInstance.AdvancedEnabled.ToggleBool(v, t),
+				() =>
+				{
+					this.configurationInstance.UpdateCurrentConfig(Service.ClientState.TerritoryType);
+				}
 			);
 
 		this.settingActions[nameof(this.configurationInstance.EnableContextMenu)] =
