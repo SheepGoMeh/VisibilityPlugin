@@ -46,11 +46,11 @@ public class PlayerHandler
 			return;
 		}
 
-		// Check visibility conditions
-		if (this.ShouldShowPlayer(characterPtr)) return;
-
 		// Check whitelist
 		if (this.voidListManager.CheckAndProcessWhitelist(characterPtr)) return;
+
+		// Check visibility conditions
+		if (this.ShouldShowPlayer(characterPtr)) return;
 
 		this.visibilityManager.HideGameObject(characterPtr);
 	}
