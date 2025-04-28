@@ -52,7 +52,11 @@ public class PlayerHandler
 		if (this.voidListManager.CheckAndProcessWhitelist(characterPtr)) return;
 
 		// Check visibility conditions
-		if (this.ShouldShowPlayer(characterPtr)) return;
+		if (this.ShouldShowPlayer(characterPtr))
+		{
+			this.visibilityManager.MarkObjectToShow(characterPtr->GameObject.EntityId);
+			return;
+		}
 
 		this.visibilityManager.HideGameObject(characterPtr);
 	}

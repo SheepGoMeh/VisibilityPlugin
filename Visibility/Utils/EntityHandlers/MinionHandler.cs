@@ -38,7 +38,11 @@ public class MinionHandler
 		this.UpdateContainers(characterPtr);
 
 		// Check visibility conditions
-		if (this.ShouldShowMinion(characterPtr)) return;
+		if (this.ShouldShowMinion(characterPtr))
+		{
+			this.visibilityManager.MarkObjectToShow(characterPtr->GameObject.EntityId);
+			return;
+		}
 
 		this.visibilityManager.HideGameObject(characterPtr, ObjectVisibilityManager.ObjectType.Companion);
 	}

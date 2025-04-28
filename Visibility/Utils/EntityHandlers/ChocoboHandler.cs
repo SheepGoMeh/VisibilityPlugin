@@ -43,7 +43,11 @@ public class ChocoboHandler
 		}
 
 		// Check visibility conditions
-		if (this.ShouldShowChocobo(characterPtr)) return;
+		if (this.ShouldShowChocobo(characterPtr))
+		{
+			this.visibilityManager.MarkObjectToShow(characterPtr->GameObject.EntityId);
+			return;
+		}
 
 		this.visibilityManager.HideGameObject(characterPtr);
 	}

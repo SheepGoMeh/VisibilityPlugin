@@ -46,7 +46,11 @@ public class PetHandler
 		}
 
 		// Check visibility conditions
-		if (this.ShouldShowPet(characterPtr)) return;
+		if (this.ShouldShowPet(characterPtr))
+		{
+			this.visibilityManager.MarkObjectToShow(characterPtr->GameObject.EntityId);
+			return;
+		}
 
 		this.visibilityManager.HideGameObject(characterPtr);
 	}
