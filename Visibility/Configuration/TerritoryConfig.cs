@@ -9,6 +9,10 @@ public class TerritoryConfig
 	public bool HidePlayer;
 	public bool HideMinion;
 	public bool HideChocobo;
+	public bool HidePetInCombat;
+	public bool HidePlayerInCombat;
+	public bool HideMinionInCombat;
+	public bool HideChocoboInCombat;
 	public bool ShowCompanyPet;
 	public bool ShowCompanyPlayer;
 	public bool ShowCompanyMinion;

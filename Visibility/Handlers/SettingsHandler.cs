@@ -146,6 +146,26 @@ public class SettingsHandler
 			() => VisibilityPlugin.Instance.ShowMinions(ContainerType.All)
 		);
 
+		this.settingActions[nameof(TerritoryConfig.HidePetInCombat)] = this.CreateToggleAction(
+			(config, v, t) => config.HidePetInCombat.ToggleBool(v, t),
+			() => VisibilityPlugin.Instance.ShowPets(ContainerType.All)
+		);
+
+		this.settingActions[nameof(TerritoryConfig.HidePlayerInCombat)] = this.CreateToggleAction(
+			(config, v, t) => config.HidePlayerInCombat.ToggleBool(v, t),
+			() => VisibilityPlugin.Instance.ShowPlayers(ContainerType.All)
+		);
+
+		this.settingActions[nameof(TerritoryConfig.HideChocoboInCombat)] = this.CreateToggleAction(
+			(config, v, t) => config.HideChocoboInCombat.ToggleBool(v, t),
+			() => VisibilityPlugin.Instance.ShowChocobos(ContainerType.All)
+		);
+
+		this.settingActions[nameof(TerritoryConfig.HideMinionInCombat)] = this.CreateToggleAction(
+			(config, v, t) => config.HideMinionInCombat.ToggleBool(v, t),
+			() => VisibilityPlugin.Instance.ShowMinions(ContainerType.All)
+		);
+
 		// Show Company Section
 		this.settingActions[nameof(TerritoryConfig.ShowCompanyPet)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowCompanyPet.ToggleBool(v, t),

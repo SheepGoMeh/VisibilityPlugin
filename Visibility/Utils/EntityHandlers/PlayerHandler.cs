@@ -1,5 +1,7 @@
 using System;
 
+using Dalamud.Game.ClientState.Conditions;
+
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Visibility.Utils.EntityHandlers;
@@ -134,6 +136,11 @@ public class PlayerHandler
 			    characterPtr->GameObject.EntityId)) return true;
 
 		// Check if player is the target of the target
-		return FrameworkHandler.CheckTargetOfTarget(characterPtr);
+		if (FrameworkHandler.CheckTargetOfTarget(characterPtr))
+			return true;
+
+		// Check if local player is in combat and hide players in combat is enabled
+		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayerInCombat &&
+		       !Service.Condition[ConditionFlag.InCombat];
 	}
 }

@@ -1,3 +1,5 @@
+using Dalamud.Game.ClientState.Conditions;
+
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Visibility.Utils.EntityHandlers;
@@ -105,6 +107,11 @@ public class ChocoboHandler
 			    characterPtr->GameObject.OwnerId)) return true;
 
 		// Check if chocobo's owner is whitelisted
-		return this.voidListManager.IsObjectWhitelisted(characterPtr->GameObject.OwnerId);
+		if (this.voidListManager.IsObjectWhitelisted(characterPtr->GameObject.OwnerId))
+			return true;
+
+		// Check if local player is in combat and hide chocobos in combat is enabled
+		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePetInCombat &&
+		       !Service.Condition[ConditionFlag.InCombat];
 	}
 }

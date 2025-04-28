@@ -107,7 +107,12 @@ public class PetHandler
 			    characterPtr->GameObject.OwnerId)) return true;
 
 		// Check if pet's owner is whitelisted
-		return this.voidListManager.IsObjectWhitelisted(characterPtr->GameObject.OwnerId);
+		if (this.voidListManager.IsObjectWhitelisted(characterPtr->GameObject.OwnerId))
+			return true;
+
+		// Check if local player is in combat and hide pets in combat is enabled
+		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePetInCombat &&
+		       !Service.Condition[ConditionFlag.InCombat];
 	}
 
 	/// <summary>

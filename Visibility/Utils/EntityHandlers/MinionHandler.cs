@@ -1,3 +1,5 @@
+using Dalamud.Game.ClientState.Conditions;
+
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Visibility.Utils.EntityHandlers;
@@ -85,8 +87,13 @@ public class MinionHandler
 			    characterPtr->CompanionOwnerId)) return true;
 
 		// Check if minion's owner is in the party and show party members' minions is enabled
-		return VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyMinion &&
-		       this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
-			       characterPtr->CompanionOwnerId);
+		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyMinion &&
+		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
+			    characterPtr->CompanionOwnerId))
+			return true;
+
+		// Check if local player is in combat and hide minions in combat is enabled
+		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HideMinionInCombat &&
+		       !Service.Condition[ConditionFlag.InCombat];
 	}
 }
