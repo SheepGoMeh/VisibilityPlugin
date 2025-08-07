@@ -4,6 +4,8 @@ using Dalamud.Game.ClientState.Conditions;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
+using Visibility.Configuration;
+
 namespace Visibility.Utils.EntityHandlers;
 
 /// <summary>
@@ -14,6 +16,9 @@ public class PlayerHandler
 	private readonly ContainerManager containerManager;
 	private readonly VoidListManager voidListManager;
 	private readonly ObjectVisibilityManager visibilityManager;
+
+	private static VisibilityConfiguration Configuration => VisibilityPlugin.Instance.Configuration;
+	private static TerritoryConfig CurrentConfig => VisibilityPlugin.Instance.Configuration.CurrentConfig;
 
 	public PlayerHandler(
 		ContainerManager containerManager,
@@ -37,7 +42,7 @@ public class PlayerHandler
 		this.UpdateContainers(characterPtr, localPlayer);
 
 		// Check territory whitelist
-		if (isBound && !VisibilityPlugin.Instance.Configuration.TerritoryTypeWhitelist.Contains(
+		if (isBound && !Configuration.TerritoryTypeWhitelist.Contains(
 			    Service.ClientState.TerritoryType))
 			return;
 
@@ -115,27 +120,27 @@ public class PlayerHandler
 	private unsafe bool ShouldShowPlayer(Character* characterPtr)
 	{
 		// Check if plugin is disabled or player hiding is disabled
-		if (!VisibilityPlugin.Instance.Configuration.Enabled ||
-		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayer)
+		if (!Configuration.Enabled ||
+		    !CurrentConfig.HidePlayer)
 			return true;
 
 		// Check if player is dead and show dead players is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowDeadPlayer &&
+		if (CurrentConfig.ShowDeadPlayer &&
 		    characterPtr->GameObject.IsDead())
 			return true;
 
 		// Check if player is a friend and show friends is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPlayer &&
+		if (CurrentConfig.ShowFriendPlayer &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Friend,
 			    characterPtr->GameObject.EntityId)) return true;
 
 		// Check if player is in the same company and show company members is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyPlayer &&
+		if (CurrentConfig.ShowCompanyPlayer &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Company,
 			    characterPtr->GameObject.EntityId)) return true;
 
 		// Check if player is in the party and show party members is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPlayer &&
+		if (CurrentConfig.ShowPartyPlayer &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
 			    characterPtr->GameObject.EntityId)) return true;
 
@@ -144,7 +149,7 @@ public class PlayerHandler
 			return true;
 
 		// Check if local player is in combat and hide players in combat is enabled
-		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePlayerInCombat &&
+		return CurrentConfig.HidePlayerInCombat &&
 		       !Service.Condition[ConditionFlag.InCombat];
 	}
 }

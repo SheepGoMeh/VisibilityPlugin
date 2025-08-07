@@ -2,6 +2,8 @@ using Dalamud.Game.ClientState.Conditions;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
+using Visibility.Configuration;
+
 namespace Visibility.Utils.EntityHandlers;
 
 /// <summary>
@@ -11,6 +13,9 @@ public class MinionHandler
 {
 	private readonly ContainerManager containerManager;
 	private readonly ObjectVisibilityManager visibilityManager;
+
+	private static VisibilityConfiguration Configuration => VisibilityPlugin.Instance.Configuration;
+	private static TerritoryConfig CurrentConfig => VisibilityPlugin.Instance.Configuration.CurrentConfig;
 
 	public MinionHandler(
 		ContainerManager containerManager,
@@ -30,8 +35,8 @@ public class MinionHandler
 		    this.visibilityManager.ShowGameObject(characterPtr, ObjectVisibilityManager.ObjectType.Companion))
 			return;
 
-		if (!VisibilityPlugin.Instance.Configuration.Enabled ||
-		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HideMinion)
+		if (!Configuration.Enabled ||
+		    !CurrentConfig.HideMinion)
 			return;
 
 		// Add to containers
@@ -81,23 +86,23 @@ public class MinionHandler
 	private unsafe bool ShouldShowMinion(Character* characterPtr)
 	{
 		// Check if minion's owner is a friend and show friends' minions is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendMinion &&
+		if (CurrentConfig.ShowFriendMinion &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Friend, characterPtr->CompanionOwnerId))
 			return true;
 
 		// Check if minion's owner is in the same company and show company members' minions is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyMinion &&
+		if (CurrentConfig.ShowCompanyMinion &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Company,
 			    characterPtr->CompanionOwnerId)) return true;
 
 		// Check if minion's owner is in the party and show party members' minions is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyMinion &&
+		if (CurrentConfig.ShowPartyMinion &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
 			    characterPtr->CompanionOwnerId))
 			return true;
 
 		// Check if local player is in combat and hide minions in combat is enabled
-		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HideMinionInCombat &&
+		return CurrentConfig is { HideMinionInCombat: true, HideMinion: false } &&
 		       !Service.Condition[ConditionFlag.InCombat];
 	}
 }

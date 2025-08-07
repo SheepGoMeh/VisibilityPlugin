@@ -2,6 +2,8 @@ using Dalamud.Game.ClientState.Conditions;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
+using Visibility.Configuration;
+
 namespace Visibility.Utils.EntityHandlers;
 
 /// <summary>
@@ -12,6 +14,9 @@ public class PetHandler
 	private readonly ContainerManager containerManager;
 	private readonly VoidListManager voidListManager;
 	private readonly ObjectVisibilityManager visibilityManager;
+
+	private static VisibilityConfiguration Configuration => VisibilityPlugin.Instance.Configuration;
+	private static TerritoryConfig CurrentConfig => VisibilityPlugin.Instance.Configuration.CurrentConfig;
 
 	public PetHandler(
 		ContainerManager containerManager,
@@ -91,22 +96,22 @@ public class PetHandler
 	private unsafe bool ShouldShowPet(Character* characterPtr)
 	{
 		// Check if plugin is disabled or pet hiding is disabled
-		if (!VisibilityPlugin.Instance.Configuration.Enabled ||
-		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePet)
+		if (!Configuration.Enabled ||
+		    !CurrentConfig.HidePet)
 			return true;
 
 		// Check if pet's owner is a friend and show friends' pets is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendPet &&
+		if (CurrentConfig.ShowFriendPet &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Friend,
 			    characterPtr->GameObject.OwnerId)) return true;
 
 		// Check if pet's owner is in the same company and show company members' pets is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyPet &&
+		if (CurrentConfig.ShowCompanyPet &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Company,
 			    characterPtr->GameObject.OwnerId)) return true;
 
 		// Check if pet's owner is in the party and show party members' pets is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyPet &&
+		if (CurrentConfig.ShowPartyPet &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
 			    characterPtr->GameObject.OwnerId)) return true;
 
@@ -115,7 +120,7 @@ public class PetHandler
 			return true;
 
 		// Check if local player is in combat and hide pets in combat is enabled
-		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePetInCombat &&
+		return CurrentConfig is { HidePetInCombat: true, HidePet: false } &&
 		       !Service.Condition[ConditionFlag.InCombat];
 	}
 
@@ -124,7 +129,7 @@ public class PetHandler
 	/// </summary>
 	public unsafe void ProcessEarthlyStar(Character* characterPtr, Character* localPlayer)
 	{
-		if (VisibilityPlugin.Instance.Configuration is { Enabled: true, HideStar: true }
+		if (Configuration is { Enabled: true, HideStar: true }
 		    && Service.Condition[ConditionFlag.InCombat]
 		    && characterPtr->GameObject.OwnerId != localPlayer->GameObject.EntityId
 		    && !this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,

@@ -2,6 +2,8 @@ using Dalamud.Game.ClientState.Conditions;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
+using Visibility.Configuration;
+
 namespace Visibility.Utils.EntityHandlers;
 
 /// <summary>
@@ -12,6 +14,9 @@ public class ChocoboHandler
 	private readonly ContainerManager containerManager;
 	private readonly VoidListManager voidListManager;
 	private readonly ObjectVisibilityManager visibilityManager;
+
+	private static VisibilityConfiguration Configuration => VisibilityPlugin.Instance.Configuration;
+	private static TerritoryConfig CurrentConfig => VisibilityPlugin.Instance.Configuration.CurrentConfig;
 
 	public ChocoboHandler(
 		ContainerManager containerManager,
@@ -91,22 +96,22 @@ public class ChocoboHandler
 	private unsafe bool ShouldShowChocobo(Character* characterPtr)
 	{
 		// Check if plugin is disabled or chocobo hiding is disabled
-		if (!VisibilityPlugin.Instance.Configuration.Enabled ||
-		    !VisibilityPlugin.Instance.Configuration.CurrentConfig.HideChocobo)
+		if (!Configuration.Enabled ||
+		    !CurrentConfig.HideChocobo)
 			return true;
 
 		// Check if chocobo's owner is a friend and show friends' chocobos is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowFriendChocobo &&
+		if (CurrentConfig.ShowFriendChocobo &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Friend,
 			    characterPtr->GameObject.OwnerId)) return true;
 
 		// Check if chocobo's owner is in the same company and show company members' chocobos is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowCompanyChocobo &&
+		if (CurrentConfig.ShowCompanyChocobo &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Company,
 			    characterPtr->GameObject.OwnerId)) return true;
 
 		// Check if chocobo's owner is in the party and show party members' chocobos is enabled
-		if (VisibilityPlugin.Instance.Configuration.CurrentConfig.ShowPartyChocobo &&
+		if (CurrentConfig.ShowPartyChocobo &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
 			    characterPtr->GameObject.OwnerId)) return true;
 
@@ -115,7 +120,7 @@ public class ChocoboHandler
 			return true;
 
 		// Check if local player is in combat and hide chocobos in combat is enabled
-		return VisibilityPlugin.Instance.Configuration.CurrentConfig.HidePetInCombat &&
+		return CurrentConfig is { HideChocoboInCombat: true, HideChocobo: false } &&
 		       !Service.Condition[ConditionFlag.InCombat];
 	}
 }
