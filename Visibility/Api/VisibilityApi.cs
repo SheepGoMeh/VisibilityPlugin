@@ -47,7 +47,7 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 			throw new Exception($"Invalid worldId ({worldId}).");
 		}
 
-		VisibilityPlugin.Instance.VoidPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
+		VisibilityPlugin.Instance.CommandManagerHandler.VoidPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
 	}
 
 	public void RemoveFromVoidList(string name, uint worldId)
@@ -99,7 +99,7 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 			throw new Exception($"Invalid worldId ({worldId}).");
 		}
 
-		VisibilityPlugin.Instance.WhitelistPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
+		VisibilityPlugin.Instance.CommandManagerHandler.WhitelistPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
 	}
 
 	public void RemoveFromWhitelist(string name, uint worldId)
@@ -119,8 +119,8 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 	}
 
 	public void Enable(bool state) =>
-		VisibilityPlugin.Instance.Configuration
-			.SettingDictionary[nameof(VisibilityPlugin.Instance.Configuration.Enabled)].Invoke(state, false, false);
+		VisibilityPlugin.Instance.Configuration.SettingsHandler
+			.Invoke(nameof(VisibilityPlugin.Instance.Configuration.Enabled), state, false, false);
 
 	public void Dispose() => this.initialised = false;
 }

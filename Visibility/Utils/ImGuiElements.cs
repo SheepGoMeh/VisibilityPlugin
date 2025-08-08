@@ -3,37 +3,40 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Visibility.Utils;
 
 public static class ImGuiElements
 {
-	public static void Checkbox(bool value, string name)
+	public static bool Checkbox(bool value, string name)
 	{
 		if (!ImGui.Checkbox($"###{name}", ref value))
 		{
-			return;
+			return false;
 		}
 
-		if (!VisibilityPlugin.Instance.Configuration.SettingDictionary.TryGetValue(name,
-			    out Action<bool, bool, bool>? onValueChanged))
+		Action<bool, bool, bool>? onValueChanged =
+			VisibilityPlugin.Instance.Configuration.SettingsHandler.GetAction(name);
+
+		if (onValueChanged == null)
 		{
-			return;
+			return false;
 		}
 
 		onValueChanged(value, false, true);
 		VisibilityPlugin.Instance.Configuration.Save();
+		return true;
 	}
 
-	public static void CenteredCheckbox(bool value, string name)
+	public static bool CenteredCheckbox(bool value, string name)
 	{
 		ImGui.SetCursorPosX(
 			ImGui.GetCursorPosX() +
 			((ImGui.GetColumnWidth() + (2 * ImGui.GetStyle().FramePadding.X)) / 2) -
 			(2 * ImGui.GetStyle().ItemSpacing.X) - (2 * ImGui.GetStyle().CellPadding.X));
 
-		Checkbox(value, name);
+		return Checkbox(value, name);
 	}
 
 	/// <summary>
@@ -95,7 +98,7 @@ public static class ImGuiElements
 			comboNewOpen = true;
 		}
 
-		ImGui.InputText("##ComboWithFilter_inputText", textBuffer, (uint)textBuffer.Length);
+		ImGui.InputText("##ComboWithFilter_inputText", textBuffer);
 
 		if (fontPtr.HasValue)
 		{

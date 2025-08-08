@@ -4,7 +4,7 @@ using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 using Visibility.Configuration;
 using Visibility.Utils;
@@ -13,13 +13,13 @@ namespace Visibility.Windows;
 
 public class Configuration: Window
 {
-	public Configuration(): base($"{VisibilityPlugin.Instance.Name} Config", ImGuiWindowFlags.NoResize, true)
+	public Configuration(WindowSystem windowSystem): base($"{VisibilityPlugin.Instance.Name} Config", ImGuiWindowFlags.NoResize, true)
 	{
 		this.whitelistWindow = new VoidItemList(isWhitelist: true);
 		this.voidItemListWindow = new VoidItemList(isWhitelist: false);
 
-		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.whitelistWindow);
-		VisibilityPlugin.Instance.WindowSystem.AddWindow(this.voidItemListWindow);
+		windowSystem.AddWindow(this.whitelistWindow);
+		windowSystem.AddWindow(this.voidItemListWindow);
 
 		this.Size = new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0);
 		this.SizeCondition = ImGuiCond.Always;
@@ -82,13 +82,16 @@ public class Configuration: Window
 		ImGui.TextColored(versionColor, versionString);
 		ImGui.SetCursorPosY(cursorY);
 
-		if (ImGui.BeginTable("###cols", 6, ImGuiTableFlags.BordersOuterH))
+		if (ImGui.BeginTable("###cols", 7, ImGuiTableFlags.BordersOuterH))
 		{
 			ImGui.TableSetupColumn(
 				string.Empty,
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
 				VisibilityPlugin.Instance.PluginLocalization.OptionHideAll,
+				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
+			ImGui.TableSetupColumn(
+				"Hide in combat",
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
 				VisibilityPlugin.Instance.PluginLocalization.OptionShowParty,
@@ -110,6 +113,10 @@ public class Configuration: Window
 			ImGuiElements.CenteredCheckbox(
 				configuration.CurrentEditedConfig.HidePlayer,
 				nameof(configuration.CurrentEditedConfig.HidePlayer));
+			ImGui.TableNextColumn();
+			ImGuiElements.CenteredCheckbox(
+				configuration.CurrentEditedConfig.HidePlayerInCombat,
+				nameof(configuration.CurrentEditedConfig.HidePlayerInCombat));
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
 				configuration.CurrentEditedConfig.ShowPartyPlayer,
@@ -136,6 +143,10 @@ public class Configuration: Window
 				nameof(configuration.CurrentEditedConfig.HidePet));
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
+				configuration.CurrentEditedConfig.HidePetInCombat,
+				nameof(configuration.CurrentEditedConfig.HidePetInCombat));
+			ImGui.TableNextColumn();
+			ImGuiElements.CenteredCheckbox(
 				configuration.CurrentEditedConfig.ShowPartyPet,
 				nameof(configuration.CurrentEditedConfig.ShowPartyPet));
 			ImGui.TableNextColumn();
@@ -156,6 +167,10 @@ public class Configuration: Window
 				nameof(configuration.CurrentEditedConfig.HideChocobo));
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
+				configuration.CurrentEditedConfig.HideChocoboInCombat,
+				nameof(configuration.CurrentEditedConfig.HideChocoboInCombat));
+			ImGui.TableNextColumn();
+			ImGuiElements.CenteredCheckbox(
 				configuration.CurrentEditedConfig.ShowPartyChocobo,
 				nameof(configuration.CurrentEditedConfig.ShowPartyChocobo));
 			ImGui.TableNextColumn();
@@ -174,6 +189,10 @@ public class Configuration: Window
 			ImGuiElements.CenteredCheckbox(
 				configuration.CurrentEditedConfig.HideMinion,
 				nameof(configuration.CurrentEditedConfig.HideMinion));
+			ImGui.TableNextColumn();
+			ImGuiElements.CenteredCheckbox(
+				configuration.CurrentEditedConfig.HideMinionInCombat,
+				nameof(configuration.CurrentEditedConfig.HideMinionInCombat));
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
 				configuration.CurrentEditedConfig.ShowPartyMinion,
