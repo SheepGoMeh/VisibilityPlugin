@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Creates pull request
-      uses: daemitus/DalamudPluginPR2@master
+      uses: SheepGoMeh/DalamudPluginPR2@master
       with: 
         token: ${{ secrets.PAT }}
         plugin_name: Visibility
