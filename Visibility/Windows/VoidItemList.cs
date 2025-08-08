@@ -9,7 +9,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Windowing;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 using Visibility.Configuration;
 using Visibility.Void;
@@ -178,23 +178,20 @@ public class VoidItemList: Window
 		ImGui.InputText(
 			"###playerFirstName",
 			this.buffer[0],
-			(uint)this.buffer[0].Length,
 			ImGuiInputTextFlags.CharsNoBlank);
 		ImGui.TableNextColumn();
 		ImGui.InputText(
 			"###playerLastName",
 			this.buffer[1],
-			(uint)this.buffer[1].Length,
 			ImGuiInputTextFlags.CharsNoBlank);
 		ImGui.TableNextColumn();
 		ImGui.InputText(
 			"###homeworldName",
 			this.buffer[2],
-			(uint)this.buffer[2].Length,
 			ImGuiInputTextFlags.CharsNoBlank);
 		ImGui.TableNextColumn();
 		ImGui.TableNextColumn();
-		ImGui.InputText("###reason", this.buffer[3], (uint)this.buffer[3].Length);
+		ImGui.InputText("###reason", this.buffer[3]);
 		ImGui.TableNextColumn();
 
 		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.OptionAddPlayer))

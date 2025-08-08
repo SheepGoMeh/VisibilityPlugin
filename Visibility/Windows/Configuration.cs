@@ -4,7 +4,7 @@ using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 using Visibility.Configuration;
 using Visibility.Utils;

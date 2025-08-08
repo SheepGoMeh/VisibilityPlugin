@@ -156,7 +156,7 @@ public class FrameworkHandler: IDisposable
 		if (groupManager->MainGroup.MemberCount > 0 && groupManager->MainGroup.IsEntityIdInParty(objectId)) return true;
 
 		// Check cross-realm party
-		if (infoProxyCrossRealm->IsInCrossRealmParty == 0) return false;
+		if (!infoProxyCrossRealm->IsInCrossRealmParty) return false;
 
 		foreach (CrossRealmGroup group in infoProxyCrossRealm->CrossRealmGroups)
 		{
