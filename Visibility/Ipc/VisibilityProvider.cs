@@ -127,7 +127,7 @@ public class VisibilityProvider: IDisposable
 		{
 			this.providerIsEnable =
 				Service.PluginInterface.GetIpcProvider<bool>(LabelProviderIsEnable);
-			this.providerEnable.RegisterFunc(api.Enable);
+			this.providerEnable.RegisterFunc(api.IsEnable);
 		}
 		catch (Exception e)
 		{
