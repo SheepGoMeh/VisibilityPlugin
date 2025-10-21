@@ -122,5 +122,11 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 		VisibilityPlugin.Instance.Configuration.SettingsHandler
 			.Invoke(nameof(VisibilityPlugin.Instance.Configuration.Enabled), state, false, false);
 
+			
+	public bool IsEnable() => VisibilityPlugin
+			.Instance
+			.Configuration
+			.Enabled;
+
 	public void Dispose() => this.initialised = false;
 }

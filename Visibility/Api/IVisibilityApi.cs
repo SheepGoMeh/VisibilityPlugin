@@ -53,4 +53,9 @@ public interface IVisibilityApi
 	/// </summary>
 	/// <param name="state">Enabled = true</param>
 	public void Enable(bool state);
+
+	/// <summary>
+	/// Returns enable state of Visibility
+	/// </summary>
+	public bool IsEnable();
 }
