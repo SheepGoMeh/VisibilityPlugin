@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using Dalamud.Configuration;
 
@@ -8,7 +9,6 @@ using Lumina.Excel.Sheets;
 using Lumina.Text.ReadOnly;
 
 using Visibility.Handlers;
-using Visibility.Utils;
 using Visibility.Void;
 
 namespace Visibility.Configuration;
@@ -28,6 +28,8 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	public List<VoidItem> VoidList { get; } = [];
 
 	public List<VoidItem> Whitelist { get; } = [];
+
+	public List<VoidPattern> VoidPatterns { get; } = [];
 
 	[NonSerialized] public Dictionary<ulong, VoidItem> VoidDictionary = null!;
 	[NonSerialized] public Dictionary<ulong, VoidItem> WhitelistDictionary = null!;
@@ -49,7 +51,8 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	public void Init(ushort territoryType)
 	{
 		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
-		this.WhitelistDictionary = this.Whitelist.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
+		this.WhitelistDictionary =
+			this.Whitelist.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
 		this.SettingsHandler = new SettingsHandler(this);
 
 		IEnumerable<(ushort, ReadOnlySeString)> valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()
@@ -68,7 +71,8 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	}
 
 	// Allowed territory intended use IDs
-	private static readonly HashSet<uint> allowedTerritoryIntendedUses = [
+	private static readonly HashSet<uint> allowedTerritoryIntendedUses =
+	[
 		0, // Hub Cities
 		1, // Overworld
 		13, // Residential Area
@@ -140,6 +144,7 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	}
 
 	public void Save() => Service.PluginInterface.SavePluginConfig(this);
-	[System.Text.RegularExpressions.GeneratedRegex("<italic\\(\\d+\\)>")]
-	private static partial System.Text.RegularExpressions.Regex ItalicRegex();
+
+	[GeneratedRegex("<italic\\(\\d+\\)>")]
+	private static partial Regex ItalicRegex();
 }

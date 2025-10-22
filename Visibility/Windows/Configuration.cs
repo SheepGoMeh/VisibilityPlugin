@@ -17,9 +17,11 @@ public class Configuration: Window
 	{
 		this.whitelistWindow = new VoidItemList(isWhitelist: true);
 		this.voidItemListWindow = new VoidItemList(isWhitelist: false);
+		this.voidPatternWindow = new VoidPatternList();
 
 		windowSystem.AddWindow(this.whitelistWindow);
 		windowSystem.AddWindow(this.voidItemListWindow);
+		windowSystem.AddWindow(this.voidPatternWindow);
 
 		this.Size = new Vector2(700 * ImGui.GetIO().FontGlobalScale, 0);
 		this.SizeCondition = ImGuiCond.Always;
@@ -35,6 +37,7 @@ public class Configuration: Window
 
 	private readonly VoidItemList whitelistWindow;
 	private readonly VoidItemList voidItemListWindow;
+	private readonly VoidPatternList voidPatternWindow;
 
 	public override void Draw()
 	{
@@ -290,7 +293,8 @@ public class Configuration: Window
 			ImGui.GetContentRegionMax().X -
 			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.WhitelistName).X -
 			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
-			(4 * ImGui.GetStyle().FramePadding.X) -
+			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.PatternListName).X -
+			(8 * ImGui.GetStyle().FramePadding.X) -
 			(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale));
 
 		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.WhitelistName))
@@ -301,11 +305,22 @@ public class Configuration: Window
 		ImGui.SameLine(
 			ImGui.GetContentRegionMax().X -
 			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
-			(2 * ImGui.GetStyle().FramePadding.X));
+			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.PatternListName).X -
+			(6 * ImGui.GetStyle().FramePadding.X));
 
 		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.VoidListName))
 		{
 			this.voidItemListWindow.Toggle();
+		}
+		
+		ImGui.SameLine(
+			ImGui.GetContentRegionMax().X -
+			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.PatternListName).X -
+			(2 * ImGui.GetStyle().FramePadding.X));
+
+		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.PatternListName))
+		{
+			this.voidPatternWindow.Toggle();
 		}
 	}
 }
