@@ -80,17 +80,17 @@ public class FrameworkHandler: IDisposable
 
 		// Early exit conditions
 		if (namePlateWidget == nint.Zero ||
-		    (!((AtkUnitBase*)namePlateWidget)->IsVisible && !Service.Condition[ConditionFlag.Performing]) ||
-		    localPlayerGameObject == null || localPlayerGameObject->EntityId == 0xE0000000 ||
-		    VisibilityPlugin.Instance.Disable || this.isChangingTerritory)
+			(!((AtkUnitBase*)namePlateWidget)->IsVisible && !Service.Condition[ConditionFlag.Performing]) ||
+			localPlayerGameObject == null || localPlayerGameObject->EntityId == 0xE0000000 ||
+			VisibilityPlugin.Instance.Disable || this.isChangingTerritory)
 			return;
 
 		// Check if player is in a duty or other special area
 		bool isBound = (Service.Condition[ConditionFlag.BoundByDuty] &&
-		                localPlayerGameObject->EventId.ContentId != EventHandlerContent.TreasureHuntDirector)
-		               || Service.Condition[ConditionFlag.BetweenAreas]
-		               || Service.Condition[ConditionFlag.WatchingCutscene]
-		               || Service.Condition[ConditionFlag.DutyRecorderPlayback];
+						localPlayerGameObject->EventId.ContentId != EventHandlerContent.TreasureHuntDirector)
+					   || Service.Condition[ConditionFlag.BetweenAreas]
+					   || Service.Condition[ConditionFlag.WatchingCutscene]
+					   || Service.Condition[ConditionFlag.DutyRecorderPlayback];
 
 		Character* localPlayer = (Character*)localPlayerGameObject;
 
@@ -100,7 +100,8 @@ public class FrameworkHandler: IDisposable
 			GameObject* gameObject = GameObjectManager.Instance()->Objects.IndexSorted[i];
 			Character* characterPtr = (Character*)gameObject;
 
-			if (gameObject == null || gameObject == localPlayerGameObject || !gameObject->IsCharacter()) continue;
+			if (gameObject == null || gameObject == localPlayerGameObject || !gameObject->IsCharacter())
+				continue;
 
 			// Process different types of entities
 			switch ((ObjectKind)characterPtr->GameObject.ObjectKind)
@@ -108,16 +109,16 @@ public class FrameworkHandler: IDisposable
 				case ObjectKind.Player:
 					this.playerHandler.ProcessPlayer(characterPtr, localPlayer, isBound);
 					break;
-				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet &&
-				                               characterPtr->NameId != 6565:
+				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)FFXIVClientStructs.FFXIV.Client.Game.Object.BattleNpcSubKind.Pet &&
+											   characterPtr->NameId != 6565:
 					this.petHandler.ProcessPet(characterPtr, localPlayer, isBound);
 					break;
 				case ObjectKind.BattleNpc
-					when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet && characterPtr->NameId == 6565:
+					when characterPtr->GameObject.SubKind == (byte)FFXIVClientStructs.FFXIV.Client.Game.Object.BattleNpcSubKind.Pet && characterPtr->NameId == 6565:
 					// Earthly Star
 					this.petHandler.ProcessEarthlyStar(characterPtr, localPlayer);
 					break;
-				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Chocobo:
+				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)FFXIVClientStructs.FFXIV.Client.Game.Object.BattleNpcSubKind.Buddy:
 					this.chocoboHandler.ProcessChocobo(characterPtr, localPlayer);
 					break;
 				case ObjectKind.Companion:
@@ -135,11 +136,13 @@ public class FrameworkHandler: IDisposable
 	/// </summary>
 	public static unsafe bool CheckTargetOfTarget(Character* ptr)
 	{
-		if (!VisibilityPlugin.Instance.Configuration.ShowTargetOfTarget) return false;
+		if (!VisibilityPlugin.Instance.Configuration.ShowTargetOfTarget)
+			return false;
 
 		Character* target = (Character*)TargetSystem.Instance()->Target;
 
-		if (target == null || !target->IsCharacter()) return false;
+		if (target == null || !target->IsCharacter())
+			return false;
 
 		return CharacterManager.Instance()->LookupBattleCharaByEntityId(target->TargetId.ObjectId) == ptr;
 	}
@@ -153,14 +156,17 @@ public class FrameworkHandler: IDisposable
 		InfoProxyCrossRealm* infoProxyCrossRealm = InfoProxyCrossRealm.Instance();
 
 		// Check regular party
-		if (groupManager->MainGroup.MemberCount > 0 && groupManager->MainGroup.IsEntityIdInParty(objectId)) return true;
+		if (groupManager->MainGroup.MemberCount > 0 && groupManager->MainGroup.IsEntityIdInParty(objectId))
+			return true;
 
 		// Check cross-realm party
-		if (!infoProxyCrossRealm->IsInCrossRealmParty) return false;
+		if (!infoProxyCrossRealm->IsInCrossRealmParty)
+			return false;
 
 		foreach (CrossRealmGroup group in infoProxyCrossRealm->CrossRealmGroups)
 		{
-			if (group.GroupMembers.Length == 0) continue;
+			if (group.GroupMembers.Length == 0)
+				continue;
 
 			for (int i = 0; i < group.GroupMembers.Length; ++i)
 			{
@@ -237,7 +243,8 @@ public class FrameworkHandler: IDisposable
 	/// </summary>
 	public unsafe void ShowAll()
 	{
-		if (Service.ClientState.LocalPlayer == null) return;
+		if (Service.ClientState.LocalPlayer == null)
+			return;
 
 		// Process all game objects in the object table
 		foreach (Dalamud.Game.ClientState.Objects.Types.IGameObject gameObject in Service.ObjectTable)
@@ -249,7 +256,8 @@ public class FrameworkHandler: IDisposable
 			{
 				// Skip if not hidden
 				if (!this.visibilityManager.IsObjectHidden(thisPtr->CompanionOwnerId,
-					    ObjectVisibilityManager.ObjectType.Companion)) continue;
+						ObjectVisibilityManager.ObjectType.Companion))
+					continue;
 
 				// Mark to show
 				this.visibilityManager.MarkObjectToShow(thisPtr->CompanionOwnerId,
@@ -258,7 +266,8 @@ public class FrameworkHandler: IDisposable
 			else // Handle characters (players, pets, chocobos)
 			{
 				// Skip if not hidden
-				if (!this.visibilityManager.IsObjectHidden(thisPtr->GameObject.EntityId)) continue;
+				if (!this.visibilityManager.IsObjectHidden(thisPtr->GameObject.EntityId))
+					continue;
 
 				// Remove from void and whitelist checks
 				this.voidListManager.RemoveChecked(thisPtr->GameObject.EntityId);
@@ -282,7 +291,8 @@ public class FrameworkHandler: IDisposable
 	/// </summary>
 	public void ShowPlayer(uint id)
 	{
-		if (!this.visibilityManager.IsObjectHidden(id)) return;
+		if (!this.visibilityManager.IsObjectHidden(id))
+			return;
 
 		this.visibilityManager.MarkObjectToShow(id);
 	}

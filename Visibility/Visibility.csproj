@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/13.0.0">
 	<PropertyGroup>
-		<AssemblyVersion>1.1.9.1</AssemblyVersion>
+		<AssemblyVersion>1.1.9.2</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<IsPackable>false</IsPackable>
 		<Authors>SheepGoMeh</Authors>
@@ -11,6 +11,7 @@
 		<SignAssembly>false</SignAssembly>
 		<RepositoryUrl>https://github.com/SheepGoMeh/VisibilityPlugin</RepositoryUrl>
 		<RepositoryType>GitHub</RepositoryType>
+		<TargetFramework>net10.0-windows7.0</TargetFramework>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Include="Properties\Resources.Designer.cs">
@@ -24,8 +25,12 @@
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="..\res\icon.png" Link="images\icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false"/>
-		<Content Include="..\res\visibility.png" Link="images\image1.png" CopyToOutputDirectory="PreserveNewest" Visible="false"/>
-		<Content Include="..\res\voidlist.png" Link="images\image2.png" CopyToOutputDirectory="PreserveNewest" Visible="false"/>
+		<Content Include="..\res\icon.png" Link="images\icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+		<Content Include="..\res\visibility.png" Link="images\image1.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+		<Content Include="..\res\voidlist.png" Link="images\image2.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Update="DalamudPackager" Version="14.0.1" />
+		<PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
 	</ItemGroup>
 </Project>

@@ -3,7 +3,7 @@
 namespace Visibility;
 
 [Flags]
-public enum VisibilityFlags
+public enum VisibilityFlags: int
 {
 	None = 0,
 	Unknown0 = 1 << 0,
