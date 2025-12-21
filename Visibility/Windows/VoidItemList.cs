@@ -154,12 +154,12 @@ public class VoidItemList: Window
 
 		bool manual = true;
 
-		if (Service.ClientState.LocalPlayer?.TargetObjectId > 0
+		if (Service.ObjectTable.LocalPlayer?.TargetObjectId > 0
 		    && Service.ObjectTable
 				    .SingleOrDefault(
 					    x => x is IPlayerCharacter
 					         && x.ObjectKind != ObjectKind.Companion
-					         && x.EntityId == Service.ClientState.LocalPlayer
+					         && x.EntityId == Service.ObjectTable.LocalPlayer
 						         ?.TargetObjectId) is
 			    IPlayerCharacter actor)
 		{
