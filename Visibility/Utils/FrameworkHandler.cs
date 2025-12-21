@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects.Enums;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
@@ -15,6 +14,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using Visibility.Utils.EntityHandlers;
 
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
+using BattleNpcSubKind = Dalamud.Game.ClientState.Objects.Enums.BattleNpcSubKind;
 
 namespace Visibility.Utils;
 
@@ -237,7 +237,7 @@ public class FrameworkHandler: IDisposable
 	/// </summary>
 	public unsafe void ShowAll()
 	{
-		if (Service.ClientState.LocalPlayer == null) return;
+		if (Service.ObjectTable.LocalPlayer == null) return;
 
 		// Process all game objects in the object table
 		foreach (Dalamud.Game.ClientState.Objects.Types.IGameObject gameObject in Service.ObjectTable)

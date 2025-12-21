@@ -458,7 +458,7 @@ public class CommandManagerHandler: IDisposable
 		return Service.ObjectTable.SingleOrDefault(
 			x => x is IPlayerCharacter
 			     && x.EntityId != 0
-			     && x.EntityId != Service.ClientState.LocalPlayer?.EntityId
-			     && x.EntityId == Service.ClientState.LocalPlayer?.TargetObjectId) as IPlayerCharacter;
+			     && x.EntityId != Service.ObjectTable.LocalPlayer?.EntityId
+			     && x.EntityId == Service.ObjectTable.LocalPlayer?.TargetObjectId) as IPlayerCharacter;
 	}
 }

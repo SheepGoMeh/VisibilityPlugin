@@ -44,5 +44,5 @@ public static class Extensions
 		return new string(arr);
 	}
 
-	public static bool TestFlag(this int value, VisibilityFlags flag) => (value & (byte)flag) != 0;
+	// public static bool TestFlag(this int value, VisibilityFlags flag) => (value & (byte)flag) != 0;
 }
