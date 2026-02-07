@@ -14,6 +14,8 @@ public class FrameworkUpdateHandler: IDisposable
 	private readonly VisibilityConfiguration configuration;
 	private readonly Localization pluginLocalization;
 
+	private CommandManagerHandler? commandManagerHandler;
+
 	private bool refresh;
 	public bool Disable { get; set; }
 
@@ -25,6 +27,8 @@ public class FrameworkUpdateHandler: IDisposable
 
 		Service.Framework.Update += this.FrameworkOnOnUpdateEvent;
 	}
+
+	public void SetCommandManagerHandler(CommandManagerHandler handler) => this.commandManagerHandler = handler;
 
 	public void Dispose()
 	{
@@ -41,6 +45,8 @@ public class FrameworkUpdateHandler: IDisposable
 
 	private void FrameworkOnOnUpdateEvent(IFramework framework)
 	{
+		this.commandManagerHandler?.ProcessQueue();
+
 		if (this.Disable)
 		{
 			this.frameworkHandler.ShowAll();

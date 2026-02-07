@@ -56,6 +56,7 @@ public class VisibilityPlugin: IDalamudPlugin
 			new FrameworkUpdateHandler(this.FrameworkHandler, this.Configuration, this.PluginLocalization);
 		this.CommandManagerHandler = new CommandManagerHandler(this.Configuration, this.PluginLocalization,
 			this.FrameworkHandler, this.uiManager, this.frameworkUpdateHandler);
+		this.frameworkUpdateHandler.SetCommandManagerHandler(this.CommandManagerHandler);
 		this.chatHandler = new ChatHandler(this.Configuration);
 		this.territoryChangeHandler = new TerritoryChangeHandler(this.FrameworkHandler, this.Configuration);
 
