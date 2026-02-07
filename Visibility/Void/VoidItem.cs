@@ -37,7 +37,7 @@ public class VoidItem()
 	public string Firstname { get; set; } = string.Empty;
 	public string Lastname { get; set; } = string.Empty;
 	public string HomeworldName { get; set; } = string.Empty;
-	public DateTime Time { get; set; }
+	public DateTime Time { get; set; } = DateTime.Now;
 	public uint HomeworldId { get; set; }
 	public string Reason { get; set; } = string.Empty;
 	public bool Manual { get; set; }
