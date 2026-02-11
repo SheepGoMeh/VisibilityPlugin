@@ -16,7 +16,6 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 using Lumina.Excel.Sheets;
 
-using Visibility.Managers;
 
 namespace Visibility.Handlers;
 
@@ -27,8 +26,9 @@ public class CommandManagerHandler: IDisposable
 	private readonly VisibilityConfiguration configuration;
 	private readonly Localization pluginLocalization;
 	private readonly FrameworkHandler frameworkHandler;
-	private readonly UiManager uiManager;
 	private readonly FrameworkUpdateHandler frameworkUpdateHandler;
+
+	private System.Action? openConfigUi;
 
 	private static string PluginCommandName => "/pvis";
 	private static string VoidCommandName => "/void";
@@ -40,17 +40,17 @@ public class CommandManagerHandler: IDisposable
 		VisibilityConfiguration config,
 		Localization localization,
 		FrameworkHandler framework,
-		UiManager uiManager,
 		FrameworkUpdateHandler frameworkUpdateHandler)
 	{
 		this.configuration = config;
 		this.pluginLocalization = localization;
 		this.frameworkHandler = framework;
-		this.uiManager = uiManager;
 		this.frameworkUpdateHandler = frameworkUpdateHandler;
 
 		this.RegisterCommands();
 	}
+
+	public void SetOpenConfigUi(System.Action action) => this.openConfigUi = action;
 
 	private void RegisterCommands()
 	{
@@ -127,7 +127,7 @@ public class CommandManagerHandler: IDisposable
 
 		if (string.IsNullOrEmpty(arguments))
 		{
-			this.uiManager.OpenConfigUi();
+			this.openConfigUi?.Invoke();
 		}
 		else
 		{

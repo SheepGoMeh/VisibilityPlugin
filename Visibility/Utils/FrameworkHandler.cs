@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
@@ -11,6 +14,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
+using Visibility.Configuration;
 using Visibility.Utils.EntityHandlers;
 
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
@@ -50,24 +54,27 @@ public class FrameworkHandler: IDisposable
 	private readonly ChocoboHandler chocoboHandler;
 	private readonly MinionHandler minionHandler;
 
+	private Func<bool>? isDisabled;
 	private bool isChangingTerritory;
 
 	/// <summary>
 	/// Constructor for FrameworkHandler
 	/// </summary>
-	public FrameworkHandler()
+	public FrameworkHandler(VisibilityConfiguration configuration)
 	{
 		// Initialize managers
 		this.containerManager = new ContainerManager();
-		this.voidListManager = new VoidListManager();
+		this.voidListManager = new VoidListManager(configuration);
 		this.visibilityManager = new ObjectVisibilityManager();
 
 		// Initialize entity handlers
-		this.playerHandler = new PlayerHandler(this.containerManager, this.voidListManager, this.visibilityManager);
-		this.petHandler = new PetHandler(this.containerManager, this.voidListManager, this.visibilityManager);
-		this.chocoboHandler = new ChocoboHandler(this.containerManager, this.voidListManager, this.visibilityManager);
-		this.minionHandler = new MinionHandler(this.containerManager, this.visibilityManager);
+		this.playerHandler = new PlayerHandler(this.containerManager, this.voidListManager, this.visibilityManager, configuration);
+		this.petHandler = new PetHandler(this.containerManager, this.voidListManager, this.visibilityManager, configuration);
+		this.chocoboHandler = new ChocoboHandler(this.containerManager, this.voidListManager, this.visibilityManager, configuration);
+		this.minionHandler = new MinionHandler(this.containerManager, this.visibilityManager, configuration);
 	}
+
+	public void SetDisableCheck(Func<bool> check) => this.isDisabled = check;
 
 	/// <summary>
 	/// Main update method called by the framework
@@ -82,7 +89,7 @@ public class FrameworkHandler: IDisposable
 		if (namePlateWidget == nint.Zero ||
 		    (!((AtkUnitBase*)namePlateWidget)->IsVisible && !Service.Condition[ConditionFlag.Performing]) ||
 		    localPlayerGameObject == null || localPlayerGameObject->EntityId == 0xE0000000 ||
-		    VisibilityPlugin.Instance.Disable || this.isChangingTerritory)
+		    (this.isDisabled?.Invoke() ?? false) || this.isChangingTerritory)
 			return;
 
 		// Check if player is in a duty or other special area
@@ -133,9 +140,9 @@ public class FrameworkHandler: IDisposable
 	/// <summary>
 	/// Check if a character is the target of the current target
 	/// </summary>
-	public static unsafe bool CheckTargetOfTarget(Character* ptr)
+	public static unsafe bool CheckTargetOfTarget(Character* ptr, bool showTargetOfTarget)
 	{
-		if (!VisibilityPlugin.Instance.Configuration.ShowTargetOfTarget) return false;
+		if (!showTargetOfTarget) return false;
 
 		Character* target = (Character*)TargetSystem.Instance()->Target;
 
@@ -285,6 +292,38 @@ public class FrameworkHandler: IDisposable
 		if (!this.visibilityManager.IsObjectHidden(id)) return;
 
 		this.visibilityManager.MarkObjectToShow(id);
+	}
+
+	/// <summary>
+	/// Remove a player from the checked lists by name
+	/// </summary>
+	public void RemoveChecked(string name)
+	{
+		IGameObject? gameObject = Service.ObjectTable.SingleOrDefault(
+			x => x is IPlayerCharacter character && character.Name.TextValue.Equals(
+				name,
+				StringComparison.InvariantCultureIgnoreCase));
+
+		if (gameObject != null)
+		{
+			this.RemoveChecked(gameObject.EntityId);
+		}
+	}
+
+	/// <summary>
+	/// Show a specific player by name
+	/// </summary>
+	public void ShowPlayer(string name)
+	{
+		IGameObject? gameObject = Service.ObjectTable.SingleOrDefault(
+			x => x is IPlayerCharacter character && character.Name.TextValue.Equals(
+				name,
+				StringComparison.InvariantCultureIgnoreCase));
+
+		if (gameObject != null)
+		{
+			this.ShowPlayer(gameObject.EntityId);
+		}
 	}
 
 	/// <summary>

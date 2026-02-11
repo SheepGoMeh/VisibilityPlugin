@@ -7,16 +7,36 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Bindings.ImGui;
 
 using Visibility.Configuration;
+using Visibility.Handlers;
 using Visibility.Utils;
 
 namespace Visibility.Windows;
 
 public class Configuration: Window
 {
-	public Configuration(WindowSystem windowSystem): base($"{VisibilityPlugin.Instance.Name} Config", ImGuiWindowFlags.NoResize, true)
+	private readonly VisibilityConfiguration configuration;
+	private readonly Localization pluginLocalization;
+	private readonly FrameworkUpdateHandler frameworkUpdateHandler;
+
+	private readonly VoidItemList whitelistWindow;
+	private readonly VoidItemList voidItemListWindow;
+
+	public Configuration(
+		WindowSystem windowSystem,
+		VisibilityConfiguration configuration,
+		Localization pluginLocalization,
+		CommandManagerHandler commandManagerHandler,
+		FrameworkHandler frameworkHandler,
+		FrameworkUpdateHandler frameworkUpdateHandler): base("Visibility Config", ImGuiWindowFlags.NoResize, true)
 	{
-		this.whitelistWindow = new VoidItemList(isWhitelist: true);
-		this.voidItemListWindow = new VoidItemList(isWhitelist: false);
+		this.configuration = configuration;
+		this.pluginLocalization = pluginLocalization;
+		this.frameworkUpdateHandler = frameworkUpdateHandler;
+
+		this.whitelistWindow = new VoidItemList(
+			isWhitelist: true, configuration, pluginLocalization, commandManagerHandler, frameworkHandler);
+		this.voidItemListWindow = new VoidItemList(
+			isWhitelist: false, configuration, pluginLocalization, commandManagerHandler, frameworkHandler);
 
 		windowSystem.AddWindow(this.whitelistWindow);
 		windowSystem.AddWindow(this.voidItemListWindow);
@@ -33,44 +53,40 @@ public class Configuration: Window
 	private bool comboNewOpen;
 	private readonly byte[] buffer = new byte[128];
 
-	private readonly VoidItemList whitelistWindow;
-	private readonly VoidItemList voidItemListWindow;
-
 	public override void Draw()
 	{
-		VisibilityConfiguration configuration = VisibilityPlugin.Instance.Configuration;
-		ImGuiElements.Checkbox(configuration.Enabled, nameof(configuration.Enabled));
+		ImGuiElements.Checkbox(this.configuration.Enabled, nameof(this.configuration.Enabled), this.configuration);
 
 		ImGui.SameLine();
-		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEnable);
+		ImGui.Text(this.pluginLocalization.OptionEnable);
 		float cursorY = ImGui.GetCursorPosY();
 
 		ImGui.SameLine();
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 50);
-		if (configuration.AdvancedEnabled)
+		if (this.configuration.AdvancedEnabled)
 		{
-			ushort territoryType = configuration.CurrentEditedConfig.TerritoryType;
+			ushort territoryType = this.configuration.CurrentEditedConfig.TerritoryType;
 
 			ImGui.SetNextItemWidth(250f);
 			if (ImGuiElements.ComboWithFilter(
 				    "##currentConfig",
 				    ref territoryType,
 				    ref this.comboNewOpen,
-				    configuration.TerritoryPlaceNameDictionary,
+				    this.configuration.TerritoryPlaceNameDictionary,
 				    this.buffer,
 				    5,
 				    FontAwesomeIcon.Search.ToIconString(),
 				    UiBuilder.IconFont))
 			{
-				configuration.UpdateCurrentConfig(territoryType, true);
+				this.configuration.UpdateCurrentConfig(territoryType, true);
 			}
 
 			ImGui.SameLine();
-			if (configuration.CurrentConfig != configuration.CurrentEditedConfig)
+			if (this.configuration.CurrentConfig != this.configuration.CurrentEditedConfig)
 			{
-				if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.ResetToCurrentArea))
+				if (ImGui.Button(this.pluginLocalization.ResetToCurrentArea))
 				{
-					configuration.CurrentEditedConfig = configuration.CurrentConfig;
+					this.configuration.CurrentEditedConfig = this.configuration.CurrentConfig;
 				}
 			}
 		}
@@ -88,170 +104,191 @@ public class Configuration: Window
 				string.Empty,
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
-				VisibilityPlugin.Instance.PluginLocalization.OptionHideAll,
+				this.pluginLocalization.OptionHideAll,
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
 				"Hide in combat",
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
-				VisibilityPlugin.Instance.PluginLocalization.OptionShowParty,
+				this.pluginLocalization.OptionShowParty,
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
-				VisibilityPlugin.Instance.PluginLocalization.OptionShowFriends,
+				this.pluginLocalization.OptionShowFriends,
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
-				VisibilityPlugin.Instance.PluginLocalization.OptionShowFc,
+				this.pluginLocalization.OptionShowFc,
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableSetupColumn(
-				VisibilityPlugin.Instance.PluginLocalization.OptionShowDead,
+				this.pluginLocalization.OptionShowDead,
 				ImGuiTableColumnFlags.NoSort | ImGuiTableColumnFlags.WidthStretch);
 			ImGui.TableHeadersRow();
 
 			ImGui.TableNextColumn();
-			ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPlayers);
+			ImGui.Text(this.pluginLocalization.OptionPlayers);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HidePlayer,
-				nameof(configuration.CurrentEditedConfig.HidePlayer));
+				this.configuration.CurrentEditedConfig.HidePlayer,
+				nameof(this.configuration.CurrentEditedConfig.HidePlayer),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HidePlayerInCombat,
-				nameof(configuration.CurrentEditedConfig.HidePlayerInCombat));
+				this.configuration.CurrentEditedConfig.HidePlayerInCombat,
+				nameof(this.configuration.CurrentEditedConfig.HidePlayerInCombat),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowPartyPlayer,
-				nameof(configuration.CurrentEditedConfig.ShowPartyPlayer));
+				this.configuration.CurrentEditedConfig.ShowPartyPlayer,
+				nameof(this.configuration.CurrentEditedConfig.ShowPartyPlayer),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowFriendPlayer,
-				nameof(configuration.CurrentEditedConfig.ShowFriendPlayer));
+				this.configuration.CurrentEditedConfig.ShowFriendPlayer,
+				nameof(this.configuration.CurrentEditedConfig.ShowFriendPlayer),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowCompanyPlayer,
-				nameof(configuration.CurrentEditedConfig.ShowCompanyPlayer));
+				this.configuration.CurrentEditedConfig.ShowCompanyPlayer,
+				nameof(this.configuration.CurrentEditedConfig.ShowCompanyPlayer),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowDeadPlayer,
-				nameof(configuration.CurrentEditedConfig.ShowDeadPlayer));
+				this.configuration.CurrentEditedConfig.ShowDeadPlayer,
+				nameof(this.configuration.CurrentEditedConfig.ShowDeadPlayer),
+				this.configuration);
 			ImGui.TableNextRow();
 
 			ImGui.TableNextColumn();
-			ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionPets);
+			ImGui.Text(this.pluginLocalization.OptionPets);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HidePet,
-				nameof(configuration.CurrentEditedConfig.HidePet));
+				this.configuration.CurrentEditedConfig.HidePet,
+				nameof(this.configuration.CurrentEditedConfig.HidePet),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HidePetInCombat,
-				nameof(configuration.CurrentEditedConfig.HidePetInCombat));
+				this.configuration.CurrentEditedConfig.HidePetInCombat,
+				nameof(this.configuration.CurrentEditedConfig.HidePetInCombat),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowPartyPet,
-				nameof(configuration.CurrentEditedConfig.ShowPartyPet));
+				this.configuration.CurrentEditedConfig.ShowPartyPet,
+				nameof(this.configuration.CurrentEditedConfig.ShowPartyPet),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowFriendPet,
-				nameof(configuration.CurrentEditedConfig.ShowFriendPet));
+				this.configuration.CurrentEditedConfig.ShowFriendPet,
+				nameof(this.configuration.CurrentEditedConfig.ShowFriendPet),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowCompanyPet,
-				nameof(configuration.CurrentEditedConfig.ShowCompanyPet));
+				this.configuration.CurrentEditedConfig.ShowCompanyPet,
+				nameof(this.configuration.CurrentEditedConfig.ShowCompanyPet),
+				this.configuration);
 			ImGui.TableNextRow();
 
 			ImGui.TableNextColumn();
-			ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionChocobos);
+			ImGui.Text(this.pluginLocalization.OptionChocobos);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HideChocobo,
-				nameof(configuration.CurrentEditedConfig.HideChocobo));
+				this.configuration.CurrentEditedConfig.HideChocobo,
+				nameof(this.configuration.CurrentEditedConfig.HideChocobo),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HideChocoboInCombat,
-				nameof(configuration.CurrentEditedConfig.HideChocoboInCombat));
+				this.configuration.CurrentEditedConfig.HideChocoboInCombat,
+				nameof(this.configuration.CurrentEditedConfig.HideChocoboInCombat),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowPartyChocobo,
-				nameof(configuration.CurrentEditedConfig.ShowPartyChocobo));
+				this.configuration.CurrentEditedConfig.ShowPartyChocobo,
+				nameof(this.configuration.CurrentEditedConfig.ShowPartyChocobo),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowFriendChocobo,
-				nameof(configuration.CurrentEditedConfig.ShowFriendChocobo));
+				this.configuration.CurrentEditedConfig.ShowFriendChocobo,
+				nameof(this.configuration.CurrentEditedConfig.ShowFriendChocobo),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowCompanyChocobo,
-				nameof(configuration.CurrentEditedConfig.ShowCompanyChocobo));
+				this.configuration.CurrentEditedConfig.ShowCompanyChocobo,
+				nameof(this.configuration.CurrentEditedConfig.ShowCompanyChocobo),
+				this.configuration);
 			ImGui.TableNextRow();
 
 			ImGui.TableNextColumn();
-			ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionMinions);
+			ImGui.Text(this.pluginLocalization.OptionMinions);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HideMinion,
-				nameof(configuration.CurrentEditedConfig.HideMinion));
+				this.configuration.CurrentEditedConfig.HideMinion,
+				nameof(this.configuration.CurrentEditedConfig.HideMinion),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.HideMinionInCombat,
-				nameof(configuration.CurrentEditedConfig.HideMinionInCombat));
+				this.configuration.CurrentEditedConfig.HideMinionInCombat,
+				nameof(this.configuration.CurrentEditedConfig.HideMinionInCombat),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowPartyMinion,
-				nameof(configuration.CurrentEditedConfig.ShowPartyMinion));
+				this.configuration.CurrentEditedConfig.ShowPartyMinion,
+				nameof(this.configuration.CurrentEditedConfig.ShowPartyMinion),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowFriendMinion,
-				nameof(configuration.CurrentEditedConfig.ShowFriendMinion));
+				this.configuration.CurrentEditedConfig.ShowFriendMinion,
+				nameof(this.configuration.CurrentEditedConfig.ShowFriendMinion),
+				this.configuration);
 			ImGui.TableNextColumn();
 			ImGuiElements.CenteredCheckbox(
-				configuration.CurrentEditedConfig.ShowCompanyMinion,
-				nameof(configuration.CurrentEditedConfig.ShowCompanyMinion));
+				this.configuration.CurrentEditedConfig.ShowCompanyMinion,
+				nameof(this.configuration.CurrentEditedConfig.ShowCompanyMinion),
+				this.configuration);
 			ImGui.TableNextRow();
 
 			ImGui.EndTable();
 		}
 
-		ImGuiElements.Checkbox(configuration.HideStar, nameof(configuration.HideStar));
+		ImGuiElements.Checkbox(this.configuration.HideStar, nameof(this.configuration.HideStar), this.configuration);
 		ImGui.SameLine();
-		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionEarthlyStar);
+		ImGui.Text(this.pluginLocalization.OptionEarthlyStar);
 		if (ImGui.IsItemHovered())
 		{
-			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionEarthlyStarTip);
+			ImGui.SetTooltip(this.pluginLocalization.OptionEarthlyStarTip);
 		}
 
 		ImGui.NextColumn();
-		ImGuiElements.Checkbox(configuration.AdvancedEnabled, nameof(configuration.AdvancedEnabled));
+		ImGuiElements.Checkbox(this.configuration.AdvancedEnabled, nameof(this.configuration.AdvancedEnabled), this.configuration);
 		ImGui.SameLine();
-		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.AdvancedOption);
+		ImGui.Text(this.pluginLocalization.AdvancedOption);
 		if (ImGui.IsItemHovered())
 		{
-			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.AdvancedOptionTooltip);
+			ImGui.SetTooltip(this.pluginLocalization.AdvancedOptionTooltip);
 		}
 
 		ImGui.NextColumn();
 		float comboWidth =
 			(ImGui.CalcTextSize(
-					VisibilityPlugin.Instance.PluginLocalization.GetString(
+					this.pluginLocalization.GetString(
 						"LanguageName",
 						Localization.Language.English))
 				.X * 2) +
 			(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale);
 		ImGui.SameLine(
 			(ImGui.GetContentRegionMax().X / 2) -
-			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage).X - comboWidth);
-		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionLanguage);
+			ImGui.CalcTextSize(this.pluginLocalization.OptionLanguage).X - comboWidth);
+		ImGui.Text(this.pluginLocalization.OptionLanguage);
 		ImGui.SameLine();
 		ImGui.PushItemWidth(comboWidth);
-		if (ImGui.BeginCombo("###language", VisibilityPlugin.Instance.PluginLocalization.LanguageName))
+		if (ImGui.BeginCombo("###language", this.pluginLocalization.LanguageName))
 		{
-			foreach (Localization.Language language in VisibilityPlugin.Instance.PluginLocalization.AvailableLanguages
+			foreach (Localization.Language language in this.pluginLocalization.AvailableLanguages
 				         .Where(
 					         language =>
 						         ImGui.Selectable(
-							         VisibilityPlugin.Instance.PluginLocalization.GetString("LanguageName", language))))
+							         this.pluginLocalization.GetString("LanguageName", language))))
 			{
-				VisibilityPlugin.Instance.Configuration.Language = language;
-				VisibilityPlugin.Instance.PluginLocalization.CurrentLanguage = language;
-				configuration.Save();
+				this.configuration.Language = language;
+				this.pluginLocalization.CurrentLanguage = language;
+				this.configuration.Save();
 			}
 
 			ImGui.EndCombo();
@@ -259,51 +296,51 @@ public class Configuration: Window
 
 		ImGui.PopItemWidth();
 		ImGui.NextColumn();
-		ImGuiElements.Checkbox(configuration.EnableContextMenu, nameof(configuration.EnableContextMenu));
+		ImGuiElements.Checkbox(this.configuration.EnableContextMenu, nameof(this.configuration.EnableContextMenu), this.configuration);
 		ImGui.SameLine();
-		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenu);
+		ImGui.Text(this.pluginLocalization.OptionContextMenu);
 		if (ImGui.IsItemHovered())
 		{
-			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionContextMenuTip);
+			ImGui.SetTooltip(this.pluginLocalization.OptionContextMenuTip);
 		}
 
 		ImGui.NextColumn();
 		
-		ImGuiElements.Checkbox(configuration.ShowTargetOfTarget, nameof(configuration.ShowTargetOfTarget));
+		ImGuiElements.Checkbox(this.configuration.ShowTargetOfTarget, nameof(this.configuration.ShowTargetOfTarget), this.configuration);
 		ImGui.SameLine();
-		ImGui.Text(VisibilityPlugin.Instance.PluginLocalization.OptionShowTargetOfTarget);
+		ImGui.Text(this.pluginLocalization.OptionShowTargetOfTarget);
 		if (ImGui.IsItemHovered())
 		{
-			ImGui.SetTooltip(VisibilityPlugin.Instance.PluginLocalization.OptionShowTargetOfTargetTip);
+			ImGui.SetTooltip(this.pluginLocalization.OptionShowTargetOfTargetTip);
 		}
 		ImGui.NextColumn();
 		ImGui.Separator();
 
 		ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
 
-		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.OptionRefresh))
+		if (ImGui.Button(this.pluginLocalization.OptionRefresh))
 		{
-			VisibilityPlugin.Instance.RefreshActors();
+			this.frameworkUpdateHandler.RequestRefresh();
 		}
 
 		ImGui.SameLine(
 			ImGui.GetContentRegionMax().X -
-			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.WhitelistName).X -
-			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
+			ImGui.CalcTextSize(this.pluginLocalization.WhitelistName).X -
+			ImGui.CalcTextSize(this.pluginLocalization.VoidListName).X -
 			(4 * ImGui.GetStyle().FramePadding.X) -
 			(ImGui.GetStyle().ItemSpacing.X * ImGui.GetIO().FontGlobalScale));
 
-		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.WhitelistName))
+		if (ImGui.Button(this.pluginLocalization.WhitelistName))
 		{
 			this.whitelistWindow.Toggle();
 		}
 
 		ImGui.SameLine(
 			ImGui.GetContentRegionMax().X -
-			ImGui.CalcTextSize(VisibilityPlugin.Instance.PluginLocalization.VoidListName).X -
+			ImGui.CalcTextSize(this.pluginLocalization.VoidListName).X -
 			(2 * ImGui.GetStyle().FramePadding.X));
 
-		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.VoidListName))
+		if (ImGui.Button(this.pluginLocalization.VoidListName))
 		{
 			this.voidItemListWindow.Toggle();
 		}

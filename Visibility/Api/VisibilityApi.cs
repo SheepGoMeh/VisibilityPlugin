@@ -4,6 +4,9 @@ using System.Linq;
 
 using Lumina.Excel.Sheets;
 
+using Visibility.Configuration;
+using Visibility.Handlers;
+using Visibility.Utils;
 using Visibility.Void;
 
 namespace Visibility.Api;
@@ -12,9 +15,21 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 {
 	public int ApiVersion => 1;
 
+	private readonly VisibilityConfiguration configuration;
+	private readonly CommandManagerHandler commandManagerHandler;
+	private readonly FrameworkHandler frameworkHandler;
 	private bool initialised;
 
-	public VisibilityApi() => this.initialised = true;
+	public VisibilityApi(
+		VisibilityConfiguration configuration,
+		CommandManagerHandler commandManagerHandler,
+		FrameworkHandler frameworkHandler)
+	{
+		this.configuration = configuration;
+		this.commandManagerHandler = commandManagerHandler;
+		this.frameworkHandler = frameworkHandler;
+		this.initialised = true;
+	}
 
 	private void CheckInitialised()
 	{
@@ -28,9 +43,7 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 	{
 		this.CheckInitialised();
 
-		return VisibilityPlugin
-			.Instance
-			.Configuration
+		return this.configuration
 			.VoidList
 			.Select(x => $"{x.Name} {x.HomeworldId} {x.Reason}")
 			.ToList();
@@ -47,14 +60,14 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 			throw new Exception($"Invalid worldId ({worldId}).");
 		}
 
-		VisibilityPlugin.Instance.CommandManagerHandler.VoidPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
+		this.commandManagerHandler.VoidPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
 	}
 
 	public void RemoveFromVoidList(string name, uint worldId)
 	{
 		this.CheckInitialised();
 
-		VoidItem? item = VisibilityPlugin.Instance.Configuration.VoidList.SingleOrDefault(
+		VoidItem? item = this.configuration.VoidList.SingleOrDefault(
 			x => x.Name == name && x.HomeworldId == worldId);
 
 		if (item == null)
@@ -62,17 +75,17 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 			return;
 		}
 
-		VisibilityPlugin.Instance.Configuration.VoidList.Remove(item);
-		VisibilityPlugin.Instance.Configuration.Save();
+		this.configuration.VoidList.Remove(item);
+		this.configuration.Save();
 
 		if (item.ObjectId > 0)
 		{
-			VisibilityPlugin.Instance.RemoveChecked(item.ObjectId);
-			VisibilityPlugin.Instance.ShowPlayer(item.ObjectId);
+			this.frameworkHandler.RemoveChecked(item.ObjectId);
+			this.frameworkHandler.ShowPlayer(item.ObjectId);
 		}
 		else
 		{
-			VisibilityPlugin.Instance.RemoveChecked(item.Name);
+			this.frameworkHandler.RemoveChecked(item.Name);
 		}
 	}
 
@@ -80,9 +93,7 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 	{
 		this.CheckInitialised();
 
-		return VisibilityPlugin
-			.Instance
-			.Configuration
+		return this.configuration
 			.Whitelist
 			.Select(x => $"{x.Name} {x.HomeworldId} {x.Reason}")
 			.ToList();
@@ -99,14 +110,14 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 			throw new Exception($"Invalid worldId ({worldId}).");
 		}
 
-		VisibilityPlugin.Instance.CommandManagerHandler.WhitelistPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
+		this.commandManagerHandler.WhitelistPlayer("", $"{name} {world.Value.Name.ToString()} {reason}");
 	}
 
 	public void RemoveFromWhitelist(string name, uint worldId)
 	{
 		this.CheckInitialised();
 
-		VoidItem? item = VisibilityPlugin.Instance.Configuration.Whitelist.SingleOrDefault(
+		VoidItem? item = this.configuration.Whitelist.SingleOrDefault(
 			x => x.Name == name && x.HomeworldId == worldId);
 
 		if (item == null)
@@ -114,18 +125,15 @@ public class VisibilityApi: IDisposable, IVisibilityApi
 			return;
 		}
 
-		VisibilityPlugin.Instance.Configuration.Whitelist.Remove(item);
-		VisibilityPlugin.Instance.Configuration.Save();
+		this.configuration.Whitelist.Remove(item);
+		this.configuration.Save();
 	}
 
 	public void Enable(bool state) =>
-		VisibilityPlugin.Instance.Configuration.SettingsHandler
-			.Invoke(nameof(VisibilityPlugin.Instance.Configuration.Enabled), state, false, false);
+		this.configuration.SettingsHandler
+			.Invoke(nameof(this.configuration.Enabled), state, false, false);
 
-	public bool IsEnable() => VisibilityPlugin
-		.Instance
-		.Configuration
-		.Enabled;
+	public bool IsEnable() => this.configuration.Enabled;
 
 	public void Dispose() => this.initialised = false;
 }

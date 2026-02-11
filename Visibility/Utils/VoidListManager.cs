@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
+using Visibility.Configuration;
 using Visibility.Void;
 
 namespace Visibility.Utils;
@@ -12,10 +13,17 @@ namespace Visibility.Utils;
 /// </summary>
 public class VoidListManager
 {
+	private readonly VisibilityConfiguration configuration;
+
 	private readonly Dictionary<uint, long> checkedVoidedObjectIds = new(capacity: 1000);
 	private readonly Dictionary<uint, long> checkedWhitelistedObjectIds = new(capacity: 1000);
 	private readonly Dictionary<uint, long> voidedObjectIds = new(capacity: 1000);
 	private readonly Dictionary<uint, long> whitelistedObjectIds = new(capacity: 1000);
+
+	public VoidListManager(VisibilityConfiguration configuration)
+	{
+		this.configuration = configuration;
+	}
 
 	/// <summary>
 	/// Check if an object is in the void list
@@ -25,10 +33,10 @@ public class VoidListManager
 		if (this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 			return this.voidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId);
 
-		if (!VisibilityPlugin.Instance.Configuration.VoidDictionary.TryGetValue(characterPtr->ContentId,
+		if (!this.configuration.VoidDictionary.TryGetValue(characterPtr->ContentId,
 			    out VoidItem? voidedPlayer))
 		{
-			voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(x =>
+			voidedPlayer = this.configuration.VoidList.Find(x =>
 				characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
 				x.HomeworldId == characterPtr->HomeWorld);
 		}
@@ -38,8 +46,8 @@ public class VoidListManager
 			if (voidedPlayer.Id == 0)
 			{
 				voidedPlayer.Id = characterPtr->ContentId;
-				VisibilityPlugin.Instance.Configuration.Save();
-				VisibilityPlugin.Instance.Configuration.VoidDictionary[characterPtr->ContentId] = voidedPlayer;
+				this.configuration.Save();
+				this.configuration.VoidDictionary[characterPtr->ContentId] = voidedPlayer;
 			}
 
 			voidedPlayer.ObjectId = characterPtr->GameObject.EntityId;
@@ -59,10 +67,10 @@ public class VoidListManager
 		if (this.checkedWhitelistedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 			return this.whitelistedObjectIds.ContainsKey(characterPtr->GameObject.EntityId);
 
-		if (!VisibilityPlugin.Instance.Configuration.WhitelistDictionary.TryGetValue(characterPtr->ContentId,
+		if (!this.configuration.WhitelistDictionary.TryGetValue(characterPtr->ContentId,
 			    out VoidItem? whitelistedPlayer))
 		{
-			whitelistedPlayer = VisibilityPlugin.Instance.Configuration.Whitelist.Find(x =>
+			whitelistedPlayer = this.configuration.Whitelist.Find(x =>
 				characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
 				x.HomeworldId == characterPtr->HomeWorld);
 		}
@@ -72,8 +80,8 @@ public class VoidListManager
 			if (whitelistedPlayer.Id == 0)
 			{
 				whitelistedPlayer.Id = characterPtr->ContentId;
-				VisibilityPlugin.Instance.Configuration.Save();
-				VisibilityPlugin.Instance.Configuration.WhitelistDictionary[characterPtr->ContentId] =
+				this.configuration.Save();
+				this.configuration.WhitelistDictionary[characterPtr->ContentId] =
 					whitelistedPlayer;
 			}
 

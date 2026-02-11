@@ -12,10 +12,17 @@ public class SettingsHandler
 		new(StringComparer.InvariantCultureIgnoreCase);
 
 	private readonly VisibilityConfiguration configurationInstance;
+	private readonly FrameworkHandler frameworkHandler;
+	private readonly FrameworkUpdateHandler frameworkUpdateHandler;
 
-	public SettingsHandler(VisibilityConfiguration configurationInstance)
+	public SettingsHandler(
+		VisibilityConfiguration configurationInstance,
+		FrameworkHandler frameworkHandler,
+		FrameworkUpdateHandler frameworkUpdateHandler)
 	{
 		this.configurationInstance = configurationInstance;
+		this.frameworkHandler = frameworkHandler;
+		this.frameworkUpdateHandler = frameworkUpdateHandler;
 		this.InitializeSettingActions();
 	}
 
@@ -94,8 +101,8 @@ public class SettingsHandler
 			(v, t) => this.configurationInstance.Enabled.ToggleBool(v, t),
 			() =>
 			{
-				if (!VisibilityPlugin.Instance.Disable)
-					VisibilityPlugin.Instance.Disable = !this.configurationInstance.Enabled;
+				if (!this.frameworkUpdateHandler.Disable)
+					this.frameworkUpdateHandler.Disable = !this.configurationInstance.Enabled;
 			}
 		);
 
@@ -128,105 +135,105 @@ public class SettingsHandler
 		// Hide Section
 		this.settingActions[nameof(TerritoryConfig.HidePet)] = this.CreateToggleAction(
 			(config, v, t) => config.HidePet.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPets(ContainerType.All)
+			() => this.frameworkHandler.ShowPets(ContainerType.All)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.HidePlayer)] = this.CreateToggleAction(
 			(config, v, t) => config.HidePlayer.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPlayers(ContainerType.All)
+			() => this.frameworkHandler.ShowPlayers(ContainerType.All)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.HideChocobo)] = this.CreateToggleAction(
 			(config, v, t) => config.HideChocobo.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowChocobos(ContainerType.All)
+			() => this.frameworkHandler.ShowChocobos(ContainerType.All)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.HideMinion)] = this.CreateToggleAction(
 			(config, v, t) => config.HideMinion.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowMinions(ContainerType.All)
+			() => this.frameworkHandler.ShowMinions(ContainerType.All)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.HidePetInCombat)] = this.CreateToggleAction(
 			(config, v, t) => config.HidePetInCombat.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPets(ContainerType.All)
+			() => this.frameworkHandler.ShowPets(ContainerType.All)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.HidePlayerInCombat)] = this.CreateToggleAction(
 			(config, v, t) => config.HidePlayerInCombat.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPlayers(ContainerType.All)
+			() => this.frameworkHandler.ShowPlayers(ContainerType.All)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.HideChocoboInCombat)] = this.CreateToggleAction(
 			(config, v, t) => config.HideChocoboInCombat.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowChocobos(ContainerType.All)
+			() => this.frameworkHandler.ShowChocobos(ContainerType.All)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.HideMinionInCombat)] = this.CreateToggleAction(
 			(config, v, t) => config.HideMinionInCombat.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowMinions(ContainerType.All)
+			() => this.frameworkHandler.ShowMinions(ContainerType.All)
 		);
 
 		// Show Company Section
 		this.settingActions[nameof(TerritoryConfig.ShowCompanyPet)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowCompanyPet.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPets(ContainerType.Company)
+			() => this.frameworkHandler.ShowPets(ContainerType.Company)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowCompanyPlayer)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowCompanyPlayer.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPlayers(ContainerType.Company)
+			() => this.frameworkHandler.ShowPlayers(ContainerType.Company)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowCompanyChocobo)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowCompanyChocobo.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowChocobos(ContainerType.Company)
+			() => this.frameworkHandler.ShowChocobos(ContainerType.Company)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowCompanyMinion)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowCompanyMinion.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowMinions(ContainerType.Company)
+			() => this.frameworkHandler.ShowMinions(ContainerType.Company)
 		);
 
 		// Show Party Section
 		this.settingActions[nameof(TerritoryConfig.ShowPartyPet)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowPartyPet.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPets(ContainerType.Party)
+			() => this.frameworkHandler.ShowPets(ContainerType.Party)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowPartyPlayer)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowPartyPlayer.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPlayers(ContainerType.Party)
+			() => this.frameworkHandler.ShowPlayers(ContainerType.Party)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowPartyChocobo)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowPartyChocobo.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowChocobos(ContainerType.Party)
+			() => this.frameworkHandler.ShowChocobos(ContainerType.Party)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowPartyMinion)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowPartyMinion.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowMinions(ContainerType.Party)
+			() => this.frameworkHandler.ShowMinions(ContainerType.Party)
 		);
 
 		// Show Friend Section
 		this.settingActions[nameof(TerritoryConfig.ShowFriendPet)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowFriendPet.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPets(ContainerType.Friend)
+			() => this.frameworkHandler.ShowPets(ContainerType.Friend)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowFriendPlayer)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowFriendPlayer.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowPlayers(ContainerType.Friend)
+			() => this.frameworkHandler.ShowPlayers(ContainerType.Friend)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowFriendChocobo)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowFriendChocobo.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowChocobos(ContainerType.Friend)
+			() => this.frameworkHandler.ShowChocobos(ContainerType.Friend)
 		);
 
 		this.settingActions[nameof(TerritoryConfig.ShowFriendMinion)] = this.CreateToggleAction(
 			(config, v, t) => config.ShowFriendMinion.ToggleBool(v, t),
-			() => VisibilityPlugin.Instance.ShowMinions(ContainerType.Friend)
+			() => this.frameworkHandler.ShowMinions(ContainerType.Friend)
 		);
 
 		// Special Case: ShowDeadPlayer (no afterToggleAction)
