@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
@@ -16,6 +17,7 @@ public class VoidListManager
 	private readonly Dictionary<uint, long> checkedWhitelistedObjectIds = new(capacity: 1000);
 	private readonly Dictionary<uint, long> voidedObjectIds = new(capacity: 1000);
 	private readonly Dictionary<uint, long> whitelistedObjectIds = new(capacity: 1000);
+	private readonly HashSet<uint> regexObjectIds = new(capacity: 1000);
 
 	/// <summary>
 	/// Check if an object is in the void list
@@ -25,12 +27,25 @@ public class VoidListManager
 		if (this.checkedVoidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId))
 			return this.voidedObjectIds.ContainsKey(characterPtr->GameObject.EntityId);
 
+		if (this.regexObjectIds.Contains(characterPtr->GameObject.EntityId))
+			return true;
+
 		if (!VisibilityPlugin.Instance.Configuration.VoidDictionary.TryGetValue(characterPtr->ContentId,
 			    out VoidItem? voidedPlayer))
 		{
 			voidedPlayer = VisibilityPlugin.Instance.Configuration.VoidList.Find(x =>
 				characterPtr->GameObject.Name.StartsWith(x.NameBytes) &&
 				x.HomeworldId == characterPtr->HomeWorld);
+
+			if (voidedPlayer == null)
+			{
+				bool offworld = characterPtr->HomeWorld != Service.ClientState.LocalPlayer?.CurrentWorld.RowId;
+				if (this.IsRegexVoided(characterPtr->GameObject.NameString, offworld))
+				{
+					this.regexObjectIds.Add(characterPtr->GameObject.EntityId);
+					return true;
+				}
+			}
 		}
 
 		if (voidedPlayer != null)
@@ -87,6 +102,39 @@ public class VoidListManager
 	}
 
 	/// <summary>
+	/// Checks if a character should be voided by a registered regex pattern.
+	/// </summary>
+	/// <param name="name">Character name</param>
+	/// <param name="offworld">Is character from a world different from the current world</param>
+	private bool IsRegexVoided(string name, bool offworld)
+	{
+		return VisibilityPlugin.Instance.Configuration.VoidPatterns.Any(item =>
+		{
+			if (!item.Enabled)
+				return false;
+
+			if (item.Offworld && !offworld)
+			{
+				Service.PluginLog.Debug($"Regex Ignored: {item.Pattern} | {name} is offworld={offworld}");
+				return false;
+			}
+
+			try
+			{
+				bool match = item.Regex.IsMatch(name);
+				Service.PluginLog.Debug($"IsRegexVoided: {name} | {item.Pattern} | {match}");
+				return match;
+			}
+			catch (Exception e)
+			{
+				Service.PluginLog.Error($"Error during regex creation {item.Pattern}:\n{e}");
+			}
+
+			return false;
+		});
+	}
+
+	/// <summary>
 	/// Check if an object ID is in the void list
 	/// </summary>
 	public bool IsObjectVoided(uint objectId)
@@ -111,6 +159,7 @@ public class VoidListManager
 		this.whitelistedObjectIds.Remove(id);
 		this.checkedVoidedObjectIds.Remove(id);
 		this.checkedWhitelistedObjectIds.Remove(id);
+		this.regexObjectIds.Remove(id);
 	}
 
 	/// <summary>
@@ -122,5 +171,15 @@ public class VoidListManager
 		this.checkedWhitelistedObjectIds.Clear();
 		this.voidedObjectIds.Clear();
 		this.whitelistedObjectIds.Clear();
+		this.regexObjectIds.Clear();
+	}
+
+	/// <summary>
+	/// Clears the regex object list and checked list to allow for redrawing of models
+	/// </summary>
+	public void ClearRegexCache()
+	{
+		this.checkedVoidedObjectIds.Clear();
+		this.regexObjectIds.Clear();
 	}
 }

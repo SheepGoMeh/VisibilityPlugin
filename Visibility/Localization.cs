@@ -189,6 +189,12 @@ public class Localization
 	public string AdvancedOption => this.GetString("AdvancedOption", this.CurrentLanguage);
 	public string AdvancedOptionTooltip => this.GetString("AdvancedOptionTooltip", this.CurrentLanguage);
 	public string ResetToCurrentArea => this.GetString("ResetToCurrentArea", this.CurrentLanguage);
+	
+	public string PatternListName => this.GetString("PatternListName", this.CurrentLanguage);
+	public string PatternName => this.GetString("PatternName", this.CurrentLanguage);
+	public string PatternDescription => this.GetString("PatternDescription", this.CurrentLanguage);
+	public string ActionAddPattern => this.GetString("ActionAddPattern", this.CurrentLanguage);
+	public string PatternOffworld => this.GetString("PatternOffworld", this.CurrentLanguage);
 
 	public SeString EntryAdded(string name, SeString entryName) =>
 		FormatSeString(this.GetString("EntryAdded", this.CurrentLanguage), name, entryName);

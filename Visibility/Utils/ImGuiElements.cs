@@ -9,7 +9,7 @@ namespace Visibility.Utils;
 
 public static class ImGuiElements
 {
-	public static bool Checkbox(bool value, string name)
+	public static bool Checkbox(bool value, string name, Action<bool, bool, bool>? callback = null)
 	{
 		if (!ImGui.Checkbox($"###{name}", ref value))
 		{
@@ -19,24 +19,30 @@ public static class ImGuiElements
 		Action<bool, bool, bool>? onValueChanged =
 			VisibilityPlugin.Instance.Configuration.SettingsHandler.GetAction(name);
 
-		if (onValueChanged == null)
+		if (onValueChanged != null)
 		{
-			return false;
+			onValueChanged(value, false, true);
+			VisibilityPlugin.Instance.Configuration.Save();
+			return true;
 		}
 
-		onValueChanged(value, false, true);
-		VisibilityPlugin.Instance.Configuration.Save();
-		return true;
+		if (callback != null)
+		{
+			callback(value, false, true);
+			return true;
+		}
+		
+		return false;
 	}
 
-	public static bool CenteredCheckbox(bool value, string name)
+	public static bool CenteredCheckbox(bool value, string name, Action<bool, bool, bool>? callback = null)
 	{
 		ImGui.SetCursorPosX(
 			ImGui.GetCursorPosX() +
 			((ImGui.GetColumnWidth() + (2 * ImGui.GetStyle().FramePadding.X)) / 2) -
 			(2 * ImGui.GetStyle().ItemSpacing.X) - (2 * ImGui.GetStyle().CellPadding.X));
 
-		return Checkbox(value, name);
+		return Checkbox(value, name, callback);
 	}
 
 	/// <summary>

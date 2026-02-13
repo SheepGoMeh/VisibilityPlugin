@@ -13,6 +13,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 using Visibility.Utils.EntityHandlers;
 
+using BattleNpcSubKind = Dalamud.Game.ClientState.Objects.Enums.BattleNpcSubKind;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 using BattleNpcSubKind = Dalamud.Game.ClientState.Objects.Enums.BattleNpcSubKind;
 
@@ -285,6 +286,15 @@ public class FrameworkHandler: IDisposable
 		if (!this.visibilityManager.IsObjectHidden(id)) return;
 
 		this.visibilityManager.MarkObjectToShow(id);
+	}
+
+	/// <summary>
+	/// Flushes the regex visibility cache and allows the visibility manager to recalculate all characters.
+	/// </summary>
+	public void ClearRegexCache()
+	{
+		this.voidListManager.ClearRegexCache();
+		this.visibilityManager.ClearAll();
 	}
 
 	/// <summary>
