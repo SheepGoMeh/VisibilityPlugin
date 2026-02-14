@@ -241,5 +241,17 @@ public class SettingsHandler
 				config.ShowDeadPlayer.ToggleBool(v, t)
 			// No specific afterToggleAction needed
 		);
+
+		this.settingActions[nameof(this.configurationInstance.CrowdCullEnabled)] =
+			this.CreateDirectToggleAction((v, t) =>
+					this.configurationInstance.CrowdCullEnabled.ToggleBool(v, t),
+				() => this.frameworkHandler.ShowPlayers(ContainerType.All)
+			);
+
+		this.settingActions[nameof(this.configurationInstance.CrowdCullCountInside)] =
+			this.CreateDirectToggleAction((v, t) =>
+					this.configurationInstance.CrowdCullCountInside.ToggleBool(v, t),
+				() => this.frameworkHandler.ShowPlayers(ContainerType.All)
+			);
 	}
 }

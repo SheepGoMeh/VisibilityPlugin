@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Numerics;
 
@@ -318,6 +319,12 @@ public class Configuration: Window
 
 		ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
 
+		this.DrawCrowdCullingSection();
+
+		ImGui.Separator();
+
+		ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImGui.GetStyle().ItemSpacing.Y);
+
 		if (ImGui.Button(this.pluginLocalization.OptionRefresh))
 		{
 			this.frameworkUpdateHandler.RequestRefresh();
@@ -343,6 +350,115 @@ public class Configuration: Window
 		if (ImGui.Button(this.pluginLocalization.VoidListName))
 		{
 			this.voidItemListWindow.Toggle();
+		}
+	}
+
+	private void DrawCrowdCullingSection()
+	{
+		ImGuiElements.Checkbox(
+			this.configuration.CrowdCullEnabled,
+			nameof(this.configuration.CrowdCullEnabled),
+			this.configuration);
+		ImGui.SameLine();
+		ImGui.Text("Crowd Culling");
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.SetTooltip("Hide players based on crowd density around you.");
+		}
+
+		if (!this.configuration.CrowdCullEnabled) return;
+
+		ImGui.Indent();
+
+		ImGuiElements.Checkbox(
+			this.configuration.CrowdCullCountInside,
+			nameof(this.configuration.CrowdCullCountInside),
+			this.configuration);
+		ImGui.SameLine();
+		ImGui.Text(this.configuration.CrowdCullCountInside
+			? "Count inside radius"
+			: "Count outside radius");
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.SetTooltip(this.configuration.CrowdCullThreshold > 0
+				? "Direction to count players for the threshold.\nWhen reached, players in the opposite direction are hidden."
+				: "Direction from which players will be hidden (no threshold).");
+		}
+
+		float radius = this.configuration.CrowdCullRadius;
+		ImGui.SetNextItemWidth(200f);
+		if (ImGui.SliderFloat("Radius (yalms)", ref radius, 1f, 100f, "%.0f"))
+		{
+			this.configuration.CrowdCullRadius = radius;
+			this.configuration.Save();
+		}
+
+		int threshold = this.configuration.CrowdCullThreshold;
+		ImGui.SetNextItemWidth(200f);
+		if (ImGui.SliderInt("Threshold (0 = none)", ref threshold, 0, 100))
+		{
+			this.configuration.CrowdCullThreshold = threshold;
+			this.configuration.Save();
+		}
+
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.SetTooltip(
+				"Number of players required to trigger culling.\n" +
+				"0 = always cull from the configured direction.\n" +
+				"> 0 = when threshold is reached, cull from the opposite direction.");
+		}
+
+		bool showRadius = this.configuration.CrowdCullShowRadius;
+		if (ImGui.Checkbox("Show Radius", ref showRadius))
+		{
+			this.configuration.CrowdCullShowRadius = showRadius;
+			this.configuration.Save();
+		}
+
+		if (this.configuration.CrowdCullShowRadius)
+		{
+			this.DrawCrowdCullRadiusOverlay();
+		}
+
+		ImGui.Unindent();
+	}
+
+	private void DrawCrowdCullRadiusOverlay()
+	{
+		if (Service.ObjectTable.LocalPlayer is not { } localPlayer) return;
+
+		Vector3 center = localPlayer.Position;
+		float radius = this.configuration.CrowdCullRadius;
+		const int segments = 64;
+		const float thickness = 2f;
+		uint color = ImGui.GetColorU32(new Vector4(1f, 1f, 0f, 0.8f));
+
+		ImDrawListPtr drawList = ImGui.GetBackgroundDrawList();
+
+		Vector2? prevScreen = null;
+
+		for (int i = 0; i <= segments; ++i)
+		{
+			float angle = 2f * MathF.PI * i / segments;
+			Vector3 worldPoint = new Vector3(
+				center.X + (radius * MathF.Cos(angle)),
+				center.Y,
+				center.Z + (radius * MathF.Sin(angle)));
+
+			if (Service.GameGui.WorldToScreen(worldPoint, out Vector2 screenPoint))
+			{
+				if (prevScreen.HasValue)
+				{
+					drawList.AddLine(prevScreen.Value, screenPoint, color, thickness);
+				}
+
+				prevScreen = screenPoint;
+			}
+			else
+			{
+				prevScreen = null;
+			}
 		}
 	}
 }

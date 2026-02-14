@@ -43,6 +43,9 @@ public enum UnitType
 /// </summary>
 public class FrameworkHandler: IDisposable
 {
+	// Configuration
+	private readonly VisibilityConfiguration configuration;
+
 	// Component managers
 	private readonly ContainerManager containerManager;
 	private readonly VoidListManager voidListManager;
@@ -62,6 +65,8 @@ public class FrameworkHandler: IDisposable
 	/// </summary>
 	public FrameworkHandler(VisibilityConfiguration configuration)
 	{
+		this.configuration = configuration;
+
 		// Initialize managers
 		this.containerManager = new ContainerManager();
 		this.voidListManager = new VoidListManager(configuration);
@@ -133,8 +138,100 @@ public class FrameworkHandler: IDisposable
 			}
 		}
 
+		// Post-processing: crowd culling
+		if (this.configuration.Enabled && this.configuration.CrowdCullEnabled)
+		{
+			this.ProcessCrowdCulling(localPlayer);
+		}
+
 		// Clean up expired entries in containers
 		this.containerManager.CleanupContainers();
+	}
+
+	/// <summary>
+	/// Post-processing pass that hides players based on crowd density around the local player.
+	/// Runs after all other visibility checks so exempt players (party, friends, FC, etc.) are respected.
+	/// </summary>
+	private unsafe void ProcessCrowdCulling(Character* localPlayer)
+	{
+		float radius = this.configuration.CrowdCullRadius;
+		bool countInside = this.configuration.CrowdCullCountInside;
+		int threshold = this.configuration.CrowdCullThreshold;
+
+		int countInDirection = 0;
+		int candidateCount = 0;
+
+		Span<(nint Ptr, bool IsInside)> candidates = stackalloc (nint, bool)[200];
+
+		for (int i = 1; i != 200; ++i)
+		{
+			GameObject* gameObject = GameObjectManager.Instance()->Objects.IndexSorted[i];
+			Character* characterPtr = (Character*)gameObject;
+
+			if (gameObject == null || gameObject == (GameObject*)localPlayer || !gameObject->IsCharacter()) continue;
+			if ((ObjectKind)characterPtr->GameObject.ObjectKind != ObjectKind.Player) continue;
+			if (this.visibilityManager.IsObjectHidden(characterPtr->GameObject.EntityId)) continue;
+			if (this.IsPlayerCrowdCullExempt(characterPtr)) continue;
+
+			float dx = characterPtr->GameObject.Position.X - localPlayer->GameObject.Position.X;
+			float dz = characterPtr->GameObject.Position.Z - localPlayer->GameObject.Position.Z;
+			bool isInside = ((dx * dx) + (dz * dz)) <= (radius * radius);
+
+			candidates[candidateCount++] = ((nint)characterPtr, isInside);
+
+			if (countInside == isInside)
+			{
+				countInDirection++;
+			}
+		}
+
+		if (threshold > 0 && countInDirection < threshold) return;
+
+		for (int i = 0; i < candidateCount; ++i)
+		{
+			(nint ptr, bool isInside) = candidates[i];
+
+			bool shouldHide = threshold <= 0
+				? countInside == isInside
+				: countInside != isInside;
+
+			if (shouldHide)
+			{
+				this.visibilityManager.HideGameObject((Character*)ptr);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Determines if a player is exempt from crowd culling based on social connections and special states.
+	/// </summary>
+	private unsafe bool IsPlayerCrowdCullExempt(Character* characterPtr)
+	{
+		uint entityId = characterPtr->GameObject.EntityId;
+		TerritoryConfig currentConfig = this.configuration.CurrentConfig;
+
+		if (currentConfig.ShowPartyPlayer &&
+		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party, entityId))
+			return true;
+
+		if (currentConfig.ShowFriendPlayer &&
+		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Friend, entityId))
+			return true;
+
+		if (currentConfig.ShowCompanyPlayer &&
+		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Company, entityId))
+			return true;
+
+		if (currentConfig.ShowDeadPlayer && characterPtr->GameObject.IsDead())
+			return true;
+
+		if (CheckTargetOfTarget(characterPtr, this.configuration.ShowTargetOfTarget))
+			return true;
+
+		if (this.voidListManager.IsObjectWhitelisted(entityId))
+			return true;
+
+		return false;
 	}
 
 	/// <summary>

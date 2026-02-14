@@ -25,6 +25,12 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	public bool EnableContextMenu;
 	public bool ShowTargetOfTarget;
 
+	public bool CrowdCullEnabled;
+	public float CrowdCullRadius = 30f;
+	public int CrowdCullThreshold;
+	public bool CrowdCullCountInside = true;
+	public bool CrowdCullShowRadius;
+
 	public List<VoidItem> VoidList { get; } = [];
 
 	public List<VoidItem> Whitelist { get; } = [];
