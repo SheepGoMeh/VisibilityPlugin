@@ -16,18 +16,18 @@ public class PlayerHandler
 	private readonly ContainerManager containerManager;
 	private readonly VoidListManager voidListManager;
 	private readonly ObjectVisibilityManager visibilityManager;
-
-	private static VisibilityConfiguration Configuration => VisibilityPlugin.Instance.Configuration;
-	private static TerritoryConfig CurrentConfig => VisibilityPlugin.Instance.Configuration.CurrentConfig;
+	private readonly VisibilityConfiguration configuration;
 
 	public PlayerHandler(
 		ContainerManager containerManager,
 		VoidListManager voidListManager,
-		ObjectVisibilityManager visibilityManager)
+		ObjectVisibilityManager visibilityManager,
+		VisibilityConfiguration configuration)
 	{
 		this.containerManager = containerManager;
 		this.voidListManager = voidListManager;
 		this.visibilityManager = visibilityManager;
+		this.configuration = configuration;
 	}
 
 	/// <summary>
@@ -42,7 +42,7 @@ public class PlayerHandler
 		this.UpdateContainers(characterPtr, localPlayer);
 
 		// Check territory whitelist
-		if (isBound && !Configuration.TerritoryTypeWhitelist.Contains(
+		if (isBound && !this.configuration.TerritoryTypeWhitelist.Contains(
 			    Service.ClientState.TerritoryType))
 			return;
 
@@ -120,36 +120,38 @@ public class PlayerHandler
 	private unsafe bool ShouldShowPlayer(Character* characterPtr)
 	{
 		// Check if plugin is disabled or player hiding is disabled
-		if (!Configuration.Enabled ||
-		    !CurrentConfig.HidePlayer)
+		TerritoryConfig currentConfig = this.configuration.CurrentConfig;
+
+		if (!this.configuration.Enabled ||
+		    !currentConfig.HidePlayer)
 			return true;
 
 		// Check if player is dead and show dead players is enabled
-		if (CurrentConfig.ShowDeadPlayer &&
+		if (currentConfig.ShowDeadPlayer &&
 		    characterPtr->GameObject.IsDead())
 			return true;
 
 		// Check if player is a friend and show friends is enabled
-		if (CurrentConfig.ShowFriendPlayer &&
+		if (currentConfig.ShowFriendPlayer &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Friend,
 			    characterPtr->GameObject.EntityId)) return true;
 
 		// Check if player is in the same company and show company members is enabled
-		if (CurrentConfig.ShowCompanyPlayer &&
+		if (currentConfig.ShowCompanyPlayer &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Company,
 			    characterPtr->GameObject.EntityId)) return true;
 
 		// Check if player is in the party and show party members is enabled
-		if (CurrentConfig.ShowPartyPlayer &&
+		if (currentConfig.ShowPartyPlayer &&
 		    this.containerManager.IsInContainer(UnitType.Players, ContainerType.Party,
 			    characterPtr->GameObject.EntityId)) return true;
 
 		// Check if player is the target of the target
-		if (FrameworkHandler.CheckTargetOfTarget(characterPtr))
+		if (FrameworkHandler.CheckTargetOfTarget(characterPtr, this.configuration.ShowTargetOfTarget))
 			return true;
 
 		// Check if local player is in combat and hide players in combat is enabled
-		return CurrentConfig.HidePlayerInCombat &&
+		return currentConfig.HidePlayerInCombat &&
 		       !Service.Condition[ConditionFlag.InCombat];
 	}
 }

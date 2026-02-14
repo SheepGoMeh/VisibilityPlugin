@@ -5,11 +5,13 @@ using System.Text;
 
 using Dalamud.Bindings.ImGui;
 
+using Visibility.Configuration;
+
 namespace Visibility.Utils;
 
 public static class ImGuiElements
 {
-	public static bool Checkbox(bool value, string name)
+	public static bool Checkbox(bool value, string name, VisibilityConfiguration configuration)
 	{
 		if (!ImGui.Checkbox($"###{name}", ref value))
 		{
@@ -17,7 +19,7 @@ public static class ImGuiElements
 		}
 
 		Action<bool, bool, bool>? onValueChanged =
-			VisibilityPlugin.Instance.Configuration.SettingsHandler.GetAction(name);
+			configuration.SettingsHandler.GetAction(name);
 
 		if (onValueChanged == null)
 		{
@@ -25,18 +27,18 @@ public static class ImGuiElements
 		}
 
 		onValueChanged(value, false, true);
-		VisibilityPlugin.Instance.Configuration.Save();
+		configuration.Save();
 		return true;
 	}
 
-	public static bool CenteredCheckbox(bool value, string name)
+	public static bool CenteredCheckbox(bool value, string name, VisibilityConfiguration configuration)
 	{
 		ImGui.SetCursorPosX(
 			ImGui.GetCursorPosX() +
 			((ImGui.GetColumnWidth() + (2 * ImGui.GetStyle().FramePadding.X)) / 2) -
 			(2 * ImGui.GetStyle().ItemSpacing.X) - (2 * ImGui.GetStyle().CellPadding.X));
 
-		return Checkbox(value, name);
+		return Checkbox(value, name, configuration);
 	}
 
 	/// <summary>

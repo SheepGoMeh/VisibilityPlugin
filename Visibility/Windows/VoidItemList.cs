@@ -12,17 +12,34 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Bindings.ImGui;
 
 using Visibility.Configuration;
+using Visibility.Handlers;
+using Visibility.Utils;
 using Visibility.Void;
 
 namespace Visibility.Windows;
 
 public class VoidItemList: Window
 {
-	public VoidItemList(bool isWhitelist = false): base($"{VisibilityPlugin.Instance.Name}: ", 0, true)
+	private readonly VisibilityConfiguration configuration;
+	private readonly Localization pluginLocalization;
+	private readonly CommandManagerHandler commandManagerHandler;
+	private readonly FrameworkHandler frameworkHandler;
+
+	public VoidItemList(
+		bool isWhitelist,
+		VisibilityConfiguration configuration,
+		Localization pluginLocalization,
+		CommandManagerHandler commandManagerHandler,
+		FrameworkHandler frameworkHandler): base("Visibility: ", 0, true)
 	{
+		this.configuration = configuration;
+		this.pluginLocalization = pluginLocalization;
+		this.commandManagerHandler = commandManagerHandler;
+		this.frameworkHandler = frameworkHandler;
+
 		this.WindowName += isWhitelist
-			? VisibilityPlugin.Instance.PluginLocalization.WhitelistName
-			: VisibilityPlugin.Instance.PluginLocalization.VoidListName;
+			? this.pluginLocalization.WhitelistName
+			: this.pluginLocalization.VoidListName;
 
 		this.isWhitelist = isWhitelist;
 		this.Size = new Vector2(700, 500);
@@ -47,22 +64,20 @@ public class VoidItemList: Window
 			return;
 		}
 
-		ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnFirstname);
-		ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnLastname);
-		ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnWorld);
+		ImGui.TableSetupColumn(this.pluginLocalization.ColumnFirstname);
+		ImGui.TableSetupColumn(this.pluginLocalization.ColumnLastname);
+		ImGui.TableSetupColumn(this.pluginLocalization.ColumnWorld);
 		ImGui.TableSetupColumn(
-			VisibilityPlugin.Instance.PluginLocalization.ColumnDate,
+			this.pluginLocalization.ColumnDate,
 			ImGuiTableColumnFlags.DefaultSort);
-		ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnReason);
-		ImGui.TableSetupColumn(VisibilityPlugin.Instance.PluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
+		ImGui.TableSetupColumn(this.pluginLocalization.ColumnReason);
+		ImGui.TableSetupColumn(this.pluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 		ImGui.TableSetupScrollFreeze(0, 1);
 		ImGui.TableHeadersRow();
 
 		VoidItem? itemToRemove = null;
 
-		VisibilityConfiguration configuration = VisibilityPlugin.Instance.Configuration;
-
-		List<VoidItem> container = this.isWhitelist ? configuration.Whitelist : configuration.VoidList;
+		List<VoidItem> container = this.isWhitelist ? this.configuration.Whitelist : this.configuration.VoidList;
 		this.sortedContainer ??= container;
 
 		ImGuiTableSortSpecsPtr sortSpecs = ImGui.TableGetSortSpecs();
@@ -110,7 +125,7 @@ public class VoidItemList: Window
 			ImGui.TextUnformatted(item.Reason);
 			ImGui.TableNextColumn();
 
-			if (ImGui.Button($"{VisibilityPlugin.Instance.PluginLocalization.OptionRemovePlayer}##{item.Name}"))
+			if (ImGui.Button($"{this.pluginLocalization.OptionRemovePlayer}##{item.Name}"))
 			{
 				itemToRemove = item;
 			}
@@ -121,7 +136,7 @@ public class VoidItemList: Window
 		if (itemToRemove != null)
 		{
 			container.Remove(itemToRemove);
-			configuration.Save();
+			this.configuration.Save();
 
 			if (this.sortKeySelector != null)
 			{
@@ -134,20 +149,20 @@ public class VoidItemList: Window
 
 			if (itemToRemove.ObjectId > 0)
 			{
-				VisibilityPlugin.Instance.RemoveChecked(itemToRemove.ObjectId);
+				this.frameworkHandler.RemoveChecked(itemToRemove.ObjectId);
 
 				if (!this.isWhitelist)
 				{
-					VisibilityPlugin.Instance.ShowPlayer(itemToRemove.ObjectId);
+					this.frameworkHandler.ShowPlayer(itemToRemove.ObjectId);
 				}
 			}
 			else
 			{
-				VisibilityPlugin.Instance.RemoveChecked(itemToRemove.Name);
+				this.frameworkHandler.RemoveChecked(itemToRemove.Name);
 
 				if (!this.isWhitelist)
 				{
-					VisibilityPlugin.Instance.ShowPlayer(itemToRemove.Name);
+					this.frameworkHandler.ShowPlayer(itemToRemove.Name);
 				}
 			}
 		}
@@ -194,17 +209,17 @@ public class VoidItemList: Window
 		ImGui.InputText("###reason", this.buffer[3]);
 		ImGui.TableNextColumn();
 
-		if (ImGui.Button(VisibilityPlugin.Instance.PluginLocalization.OptionAddPlayer))
+		if (ImGui.Button(this.pluginLocalization.OptionAddPlayer))
 		{
 			if (this.isWhitelist)
 			{
-				VisibilityPlugin.Instance.CommandManagerHandler.WhitelistPlayer(
+				this.commandManagerHandler.WhitelistPlayer(
 					manual ? "WhitelistUIManual" : string.Empty,
 					$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
 			}
 			else
 			{
-				VisibilityPlugin.Instance.CommandManagerHandler.VoidPlayer(
+				this.commandManagerHandler.VoidPlayer(
 					manual ? "VoidUIManual" : string.Empty,
 					$"{this.buffer[0].ByteToString()} {this.buffer[1].ByteToString()} {this.buffer[2].ByteToString()} {this.buffer[3].ByteToString()}");
 			}

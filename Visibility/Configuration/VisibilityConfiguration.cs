@@ -50,7 +50,6 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 	{
 		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
 		this.WhitelistDictionary = this.Whitelist.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
-		this.SettingsHandler = new SettingsHandler(this);
 
 		IEnumerable<(ushort, ReadOnlySeString)> valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()
 			.Where(this.IsAllowedTerritory)
