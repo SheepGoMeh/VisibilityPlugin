@@ -24,5 +24,7 @@ public class Service
 
 	[PluginService] public static ICondition Condition { get; set; } = null!;
 
+	[PluginService] public static IGameInteropProvider GameInteropProvider { get; set; } = null!;
+
 	[PluginService] public static IPluginLog PluginLog { get; set; } = null!;
 }
