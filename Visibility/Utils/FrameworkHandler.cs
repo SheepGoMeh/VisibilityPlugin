@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Hooking;
 
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
@@ -60,10 +60,14 @@ public class FrameworkHandler: IDisposable
 	private Func<bool>? isDisabled;
 	private bool isChangingTerritory;
 
+	// Friend list sync via EndRequest hook
+	private unsafe delegate void EndRequestDelegate(InfoProxyInterface* thisPtr);
+	private Hook<EndRequestDelegate>? endRequestHook;
+
 	/// <summary>
 	/// Constructor for FrameworkHandler
 	/// </summary>
-	public FrameworkHandler(VisibilityConfiguration configuration)
+	public unsafe FrameworkHandler(VisibilityConfiguration configuration)
 	{
 		this.configuration = configuration;
 
@@ -77,6 +81,15 @@ public class FrameworkHandler: IDisposable
 		this.petHandler = new PetHandler(this.containerManager, this.voidListManager, this.visibilityManager, configuration);
 		this.chocoboHandler = new ChocoboHandler(this.containerManager, this.voidListManager, this.visibilityManager, configuration);
 		this.minionHandler = new MinionHandler(this.containerManager, this.visibilityManager, configuration);
+
+		// Hook InfoProxyFriendList.EndRequest to sync friend content IDs when the list is refreshed
+		InfoProxyFriendList* friendList = InfoProxyFriendList.Instance();
+		if (friendList != null)
+		{
+			nint endRequestAddr = (nint)((InfoProxyInterface*)friendList)->VirtualTable->EndRequest;
+			this.endRequestHook = Service.GameInteropProvider.HookFromAddress<EndRequestDelegate>(endRequestAddr, this.OnFriendListEndRequest);
+			this.endRequestHook.Enable();
+		}
 	}
 
 	public void SetDisableCheck(Func<bool> check) => this.isDisabled = check;
@@ -298,6 +311,16 @@ public class FrameworkHandler: IDisposable
 	}
 
 	/// <summary>
+	/// Hook callback for InfoProxyFriendList.EndRequest.
+	/// Forces a friend container refresh so IsFriend is re-evaluated on the next frame.
+	/// </summary>
+	private unsafe void OnFriendListEndRequest(InfoProxyInterface* thisPtr)
+	{
+		this.endRequestHook!.Original(thisPtr);
+		this.ShowAll();
+	}
+
+	/// <summary>
 	/// Handle territory change events
 	/// </summary>
 	public void OnTerritoryChanged()
@@ -426,5 +449,10 @@ public class FrameworkHandler: IDisposable
 	/// <summary>
 	/// Dispose the framework handler and show all hidden entities
 	/// </summary>
-	public void Dispose() => this.ShowAll();
+	public void Dispose()
+	{
+		this.endRequestHook?.Disable();
+		this.endRequestHook?.Dispose();
+		this.ShowAll();
+	}
 }
