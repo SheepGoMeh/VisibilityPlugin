@@ -8,7 +8,6 @@ using Lumina.Excel.Sheets;
 using Lumina.Text.ReadOnly;
 
 using Visibility.Handlers;
-using Visibility.Utils;
 using Visibility.Void;
 
 namespace Visibility.Configuration;
@@ -34,28 +33,28 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 
 	[NonSerialized] public SettingsHandler SettingsHandler = null!;
 
-	[NonSerialized] public readonly HashSet<ushort> TerritoryTypeWhitelist = [];
+	[NonSerialized] public readonly HashSet<uint> TerritoryTypeWhitelist = [];
 
-	[NonSerialized] private readonly HashSet<ushort> allowedTerritory = [];
+	[NonSerialized] private readonly HashSet<uint> allowedTerritory = [];
 
 	[NonSerialized]
-	public readonly Dictionary<ushort, string> TerritoryPlaceNameDictionary = new() { { 0, "Default" } };
+	public readonly Dictionary<uint, string> TerritoryPlaceNameDictionary = new() { { 0, "Default" } };
 
-	public readonly Dictionary<ushort, TerritoryConfig> TerritoryConfigDictionary = new();
+	public readonly Dictionary<uint, TerritoryConfig> TerritoryConfigDictionary = new();
 
 	[NonSerialized] public TerritoryConfig CurrentConfig = null!;
 	[NonSerialized] public TerritoryConfig CurrentEditedConfig = null!;
 
-	public void Init(ushort territoryType)
+	public void Init(uint territoryType)
 	{
 		this.VoidDictionary = this.VoidList.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
 		this.WhitelistDictionary = this.Whitelist.Where(x => x.Id != 0).DistinctBy(x => x.Id).ToDictionary(x => x.Id, x => x);
 
-		IEnumerable<(ushort, ReadOnlySeString)> valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()
+		IEnumerable<(uint, ReadOnlySeString)> valueTuples = Service.DataManager.GetExcelSheet<TerritoryType>()
 			.Where(this.IsAllowedTerritory)
-			.Select(x => ((ushort)x.RowId, x.PlaceName.ValueNullable?.Name ?? "Unknown Place"));
+			.Select(x => (x.RowId, x.PlaceName.ValueNullable?.Name ?? "Unknown Place"));
 
-		foreach ((ushort rowId, ReadOnlySeString placeName) in valueTuples)
+		foreach ((uint rowId, ReadOnlySeString placeName) in valueTuples)
 		{
 			this.allowedTerritory.Add(rowId);
 			this.TerritoryTypeWhitelist.Add(rowId);
@@ -89,7 +88,7 @@ public partial class VisibilityConfiguration: IPluginConfiguration
 		       territory.RowId != 136; // Exclude test map
 	}
 
-	public void UpdateCurrentConfig(ushort territoryType, bool edit = false)
+	public void UpdateCurrentConfig(uint territoryType, bool edit = false)
 	{
 		if (this.AdvancedEnabled == false ||
 		    this.allowedTerritory.Contains(territoryType) == false)

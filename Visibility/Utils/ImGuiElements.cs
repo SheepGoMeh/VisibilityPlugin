@@ -53,11 +53,10 @@ public static class ImGuiElements
 	/// <param name="searchIcon">Search icon string</param>
 	/// <param name="fontPtr">ImGui font pointer for search icon</param>
 	/// <returns></returns>
-	public static bool ComboWithFilter(
-		string label,
-		ref ushort currentItem,
+	public static bool ComboWithFilter(string label,
+		ref uint currentItem,
 		ref bool comboNewOpen,
-		Dictionary<ushort, string> itemsDictionary,
+		Dictionary<uint, string> itemsDictionary,
 		byte[] textBuffer,
 		uint maxItems = 5,
 		string searchIcon = "",
@@ -65,9 +64,9 @@ public static class ImGuiElements
 	{
 		string previewValue = itemsDictionary.TryGetValue(currentItem, out string? value) ? value : string.Empty;
 
-		Dictionary<ushort, string> items = new();
+		Dictionary<uint, string> items = new();
 
-		foreach ((ushort key, string? name) in itemsDictionary)
+		foreach ((uint key, string? name) in itemsDictionary)
 		{
 			if (name.Contains(
 				    Encoding.UTF8.GetString(textBuffer),
@@ -128,7 +127,7 @@ public static class ImGuiElements
 				    0,
 				    (ImGui.GetTextLineHeightWithSpacing() * maxItems) + (ImGui.GetStyle().FramePadding.Y * 2.0f))))
 		{
-			foreach ((ushort key, string? name) in items)
+			foreach ((uint key, string? name) in items)
 			{
 				ImGui.PushID(key);
 				bool itemSelected = key == currentItem;

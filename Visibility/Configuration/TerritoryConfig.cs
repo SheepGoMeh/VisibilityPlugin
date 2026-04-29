@@ -4,7 +4,7 @@ namespace Visibility.Configuration;
 
 public class TerritoryConfig
 {
-	[NonSerialized] public ushort TerritoryType;
+	[NonSerialized] public uint TerritoryType;
 	public bool HidePet;
 	public bool HidePlayer;
 	public bool HideMinion;

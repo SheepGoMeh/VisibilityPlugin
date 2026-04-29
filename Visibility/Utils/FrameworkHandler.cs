@@ -125,7 +125,7 @@ public class FrameworkHandler: IDisposable
 			// Process different types of entities
 			switch ((ObjectKind)characterPtr->GameObject.ObjectKind)
 			{
-				case ObjectKind.Player:
+				case ObjectKind.Pc:
 					this.playerHandler.ProcessPlayer(characterPtr, localPlayer, isBound);
 					break;
 				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet &&
@@ -137,7 +137,7 @@ public class FrameworkHandler: IDisposable
 					// Earthly Star
 					this.petHandler.ProcessEarthlyStar(characterPtr, localPlayer);
 					break;
-				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Chocobo:
+				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Buddy:
 					this.chocoboHandler.ProcessChocobo(characterPtr, localPlayer);
 					break;
 				case ObjectKind.Companion:

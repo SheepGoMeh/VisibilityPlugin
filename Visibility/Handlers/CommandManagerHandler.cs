@@ -216,7 +216,7 @@ public class CommandManagerHandler: IDisposable
 		}
 
 		World? world = Service.DataManager.GetExcelSheet<World>().SingleOrDefault(x =>
-			x.DataCenter.ValueNullable?.Region != 0 &&
+			x.DataCenter.ValueNullable?.Region.RowId != 0 &&
 			x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 		if (world is null)
@@ -358,7 +358,7 @@ public class CommandManagerHandler: IDisposable
 		}
 
 		World? world = Service.DataManager.GetExcelSheet<World>().SingleOrDefault(x =>
-			x.DataCenter.ValueNullable?.Region != 0 &&
+			x.DataCenter.ValueNullable?.Region.RowId != 0 &&
 			x.Name.ToString().Equals(args[2], StringComparison.InvariantCultureIgnoreCase));
 
 		if (world is null)
