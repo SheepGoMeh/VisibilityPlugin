@@ -65,7 +65,7 @@ public class Configuration: Window
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 50);
 		if (this.configuration.AdvancedEnabled)
 		{
-			ushort territoryType = this.configuration.CurrentEditedConfig.TerritoryType;
+			uint territoryType = this.configuration.CurrentEditedConfig.TerritoryType;
 
 			ImGui.SetNextItemWidth(250f);
 			if (ImGuiElements.ComboWithFilter(

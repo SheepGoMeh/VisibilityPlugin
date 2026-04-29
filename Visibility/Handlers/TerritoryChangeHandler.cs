@@ -23,7 +23,7 @@ public class TerritoryChangeHandler: IDisposable
 		Service.ClientState.TerritoryChanged -= this.ClientStateOnTerritoryChanged;
 	}
 
-	private void ClientStateOnTerritoryChanged(ushort territoryType)
+	private void ClientStateOnTerritoryChanged(uint territoryType)
 	{
 		this.frameworkHandler.OnTerritoryChanged();
 

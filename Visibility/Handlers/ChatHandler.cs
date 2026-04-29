@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 
+using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 
 using Visibility.Configuration;
@@ -26,23 +26,22 @@ public class ChatHandler: IDisposable
 		Service.ChatGui.ChatMessage -= this.OnChatMessage;
 	}
 
-	private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message,
-		ref bool isHandled)
+	private void OnChatMessage(IHandleableChatMessage message)
 	{
 		if (!this.configuration.Enabled)
 		{
 			return;
 		}
 
-		if (isHandled)
+		if (message.IsHandled)
 		{
 			return;
 		}
 
-		PlayerPayload? playerPayload = sender.Payloads.SingleOrDefault(x => x is PlayerPayload) as PlayerPayload;
+		PlayerPayload? playerPayload = message.Sender.Payloads.SingleOrDefault(x => x is PlayerPayload) as PlayerPayload;
 		PlayerPayload? emotePlayerPayload =
-			message.Payloads.FirstOrDefault(x => x is PlayerPayload) as PlayerPayload;
-		bool isEmoteType = type is XivChatType.CustomEmote or XivChatType.StandardEmote;
+			message.Message.Payloads.FirstOrDefault(x => x is PlayerPayload) as PlayerPayload;
+		bool isEmoteType = message.LogKind is XivChatType.CustomEmote or XivChatType.StandardEmote;
 
 		if (playerPayload == null &&
 		    (!isEmoteType || emotePlayerPayload == null))
@@ -55,7 +54,7 @@ public class ChatHandler: IDisposable
 			    (isEmoteType ? emotePlayerPayload?.World.RowId : playerPayload?.World.RowId)
 			    && x.Name == (isEmoteType ? emotePlayerPayload?.PlayerName : playerPayload?.PlayerName)))
 		{
-			isHandled = true;
+			message.PreventOriginal();
 		}
 	}
 }
