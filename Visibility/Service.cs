@@ -1,6 +1,7 @@
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Dalamud.Game.Gui.ContextMenu;
 
 namespace Visibility;
 
@@ -27,4 +28,6 @@ public class Service
 	[PluginService] public static IGameInteropProvider GameInteropProvider { get; set; } = null!;
 
 	[PluginService] public static IPluginLog PluginLog { get; set; } = null!;
+
+	[PluginService] public static IContextMenu ContextMenu { get; set; } = null!;
 }

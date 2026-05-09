@@ -121,9 +121,7 @@ public class SettingsHandler
 
 		this.settingActions[nameof(this.configurationInstance.EnableContextMenu)] =
 			this.CreateDirectToggleAction((v, t) =>
-					this.configurationInstance.EnableContextMenu.ToggleBool(v, t)
-				// afterToggleAction: () => { /* TODO: Switch to dalamud service */ }
-			);
+				this.configurationInstance.EnableContextMenu.ToggleBool(v, t));
 
 		this.settingActions[nameof(this.configurationInstance.ShowTargetOfTarget)] =
 			this.CreateDirectToggleAction((v, t) =>

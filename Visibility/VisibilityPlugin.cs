@@ -25,6 +25,7 @@ public class VisibilityPlugin: IDalamudPlugin
 	private readonly UiManager uiManager;
 	private readonly VisibilityApi api;
 	private readonly VisibilityProvider ipcProvider;
+	private readonly ContextMenuHandler contextMenuHandler;
 
 	public VisibilityPlugin(IDalamudPluginInterface pluginInterface)
 	{
@@ -57,6 +58,9 @@ public class VisibilityPlugin: IDalamudPlugin
 
 		this.api = new VisibilityApi(this.configuration, this.commandManagerHandler, this.frameworkHandler);
 		this.ipcProvider = new VisibilityProvider(this.api);
+		
+		this.contextMenuHandler = new ContextMenuHandler(
+			this.configuration, this.commandManagerHandler, this.frameworkHandler, this.pluginLocalization);
 	}
 
 	protected virtual void Dispose(bool disposing)
@@ -74,6 +78,7 @@ public class VisibilityPlugin: IDalamudPlugin
 		this.frameworkUpdateHandler.Dispose();
 		this.uiManager.Dispose();
 		this.frameworkHandler.Dispose();
+		this.contextMenuHandler.Dispose();
 	}
 
 	public void Dispose()
