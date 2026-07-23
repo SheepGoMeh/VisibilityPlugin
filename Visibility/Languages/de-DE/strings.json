@@ -45,6 +45,8 @@
   "ColumnWorld": "Welt",
   "ColumnDate": "Datum",
   "ColumnReason": "Begründung",
+  "ColumnPublicChat": "Öffentlicher Chat",
+  "ColumnPublicChatTooltip": "Zeigt Sagen-, Rufen-, Schreien-, Emote-, Gruppen- und Allianz-Nachrichten dieses Spielers an. Flüster-, Freie-Gesellschaft-, Kontaktkreis- und alle anderen Kanäle bleiben ausgeblendet.",
   "ColumnAction": "Aktion",
   "OptionLanguage": "Sprache",
   "LanguageName": "Deutsch",

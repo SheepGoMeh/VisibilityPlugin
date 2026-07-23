@@ -45,6 +45,8 @@
   "ColumnWorld": "Värld",
   "ColumnDate": "Datum",
   "ColumnReason": "Anledning",
+  "ColumnPublicChat": "Offentlig chatt",
+  "ColumnPublicChatTooltip": "Visar denna spelares meddelanden i say, shout, yell, emotes, grupp och allians. Tells, FC- och linkshell-meddelanden samt alla andra kanaler förblir dolda.",
   "ColumnAction": "Handling",
   "OptionLanguage": "Språk",
   "LanguageName": "svenska",

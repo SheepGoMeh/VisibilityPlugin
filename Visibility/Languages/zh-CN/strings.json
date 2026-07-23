@@ -45,6 +45,8 @@
   "ColumnWorld": "服务器",
   "ColumnDate": "日期",
   "ColumnReason": "原因",
+  "ColumnPublicChat": "公共聊天",
+  "ColumnPublicChatTooltip": "显示该玩家的说话、呼喊、喊话、情感动作、小队和团队消息。密语、部队、通讯贝以及所有其他频道的消息仍将被隐藏。",
   "ColumnAction": "操作",
   "OptionLanguage": "语言",
   "LanguageName": "简体中文",

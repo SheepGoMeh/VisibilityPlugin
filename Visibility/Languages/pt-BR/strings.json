@@ -45,6 +45,8 @@
   "ColumnWorld": "Mundo",
   "ColumnDate": "Data",
   "ColumnReason": "Motivo",
+  "ColumnPublicChat": "Chat público",
+  "ColumnPublicChatTooltip": "Mostra as mensagens de say, shout, yell, emotes, party e aliança deste jogador. Tells, mensagens de FC e linkshell e todos os outros canais continuam ocultos.",
   "ColumnAction": "Ação",
   "OptionLanguage": "Idioma",
   "LanguageName": "Português",

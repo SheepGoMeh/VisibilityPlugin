@@ -41,6 +41,7 @@ public class VoidItem()
 	public uint HomeworldId { get; set; }
 	public string Reason { get; set; } = string.Empty;
 	public bool Manual { get; set; }
+	public bool ShowPublicChat { get; set; }
 
 	[JsonConstructor]
 	public VoidItem(
@@ -52,7 +53,8 @@ public class VoidItem()
 		DateTime time,
 		uint homeworldId,
 		string reason,
-		bool manual): this()
+		bool manual,
+		bool showPublicChat): this()
 	{
 		this.Version = version;
 		this.Id = id;
@@ -62,5 +64,6 @@ public class VoidItem()
 		this.HomeworldId = homeworldId;
 		this.Reason = reason;
 		this.Manual = manual;
+		this.ShowPublicChat = showPublicChat;
 	}
 }
