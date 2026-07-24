@@ -45,6 +45,8 @@
   "ColumnWorld": "Мир",
   "ColumnDate": "Дата",
   "ColumnReason": "Причина",
+  "ColumnPublicChat": "Общий чат",
+  "ColumnPublicChatTooltip": "Показывать сообщения этого игрока в say, shout, yell, эмоции, группе и альянсе. Личные сообщения (tell), сообщения FC и linkshell, а также все остальные каналы останутся скрытыми.",
   "ColumnAction": "Действие",
   "OptionLanguage": "Язык",
   "LanguageName": "Русский",

@@ -45,6 +45,8 @@
   "ColumnWorld": "ワールド",
   "ColumnDate": "日付",
   "ColumnReason": "理由",
+  "ColumnPublicChat": "公開チャット",
+  "ColumnPublicChatTooltip": "このプレイヤーのSay、Shout、Yell、エモート、パーティ、アライアンスのメッセージを表示します。テル、フリーカンパニー、リンクシェル、その他すべてのチャンネルのメッセージは非表示のままです。",
   "ColumnAction": "動作",
   "OptionLanguage": "言語",
   "LanguageName": "日本語",

@@ -45,6 +45,8 @@
   "ColumnWorld": "Monde",
   "ColumnDate": "Date",
   "ColumnReason": "Motif",
+  "ColumnPublicChat": "Chat public",
+  "ColumnPublicChatTooltip": "Affiche les messages dire, crier, hurler, emotes, équipe et alliance de ce joueur. Les messages privés, de compagnie libre, de contact et de tous les autres canaux restent masqués.",
   "ColumnAction": "Action",
   "OptionLanguage": "Langue",
   "LanguageName": "Français",

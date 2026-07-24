@@ -6,6 +6,7 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 
 using Visibility.Configuration;
+using Visibility.Void;
 
 
 namespace Visibility.Handlers;
@@ -49,12 +50,33 @@ public class ChatHandler: IDisposable
 			return;
 		}
 
-		if (this.configuration.VoidList.Any(x =>
-			    x.HomeworldId ==
-			    (isEmoteType ? emotePlayerPayload?.World.RowId : playerPayload?.World.RowId)
-			    && x.Name == (isEmoteType ? emotePlayerPayload?.PlayerName : playerPayload?.PlayerName)))
+		PlayerPayload? payload = isEmoteType ? emotePlayerPayload : playerPayload;
+		uint? worldId = payload?.World.RowId;
+		string? name = payload?.PlayerName;
+
+		VoidItem? match = this.configuration.VoidList
+			.FirstOrDefault(x => x.HomeworldId == worldId && x.Name == name);
+
+		if (match == null)
 		{
-			message.PreventOriginal();
+			return;
 		}
+
+		if (match.ShowPublicChat && IsPublicChannel(message.LogKind))
+		{
+			return;
+		}
+
+		message.PreventOriginal();
 	}
+
+	private static bool IsPublicChannel(XivChatType chatType) => chatType is
+		XivChatType.Say or
+		XivChatType.Shout or
+		XivChatType.Yell or
+		XivChatType.CustomEmote or
+		XivChatType.StandardEmote or
+		XivChatType.Party or
+		XivChatType.CrossParty or
+		XivChatType.Alliance;
 }

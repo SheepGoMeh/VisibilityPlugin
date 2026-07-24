@@ -58,7 +58,7 @@ public class VoidItemList: Window
 	{
 		if (!ImGui.BeginTable(
 			    this.isWhitelist ? "WhitelistTable" : "VoidListTable",
-			    6,
+			    this.isWhitelist ? 6 : 7,
 			    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable))
 		{
 			return;
@@ -71,6 +71,14 @@ public class VoidItemList: Window
 			this.pluginLocalization.ColumnDate,
 			ImGuiTableColumnFlags.DefaultSort);
 		ImGui.TableSetupColumn(this.pluginLocalization.ColumnReason);
+
+		if (!this.isWhitelist)
+		{
+			ImGui.TableSetupColumn(
+				this.pluginLocalization.ColumnPublicChat,
+				ImGuiTableColumnFlags.NoSort);
+		}
+
 		ImGui.TableSetupColumn(this.pluginLocalization.ColumnAction, ImGuiTableColumnFlags.NoSort);
 		ImGui.TableSetupScrollFreeze(0, 1);
 		ImGui.TableHeadersRow();
@@ -123,6 +131,24 @@ public class VoidItemList: Window
 			ImGui.Text(item.Time.ToString(CultureInfo.CurrentCulture));
 			ImGui.TableNextColumn();
 			ImGui.TextUnformatted(item.Reason);
+
+			if (!this.isWhitelist)
+			{
+				ImGui.TableNextColumn();
+				bool showPublicChat = item.ShowPublicChat;
+
+				if (ImGui.Checkbox($"##showPublicChat{item.Name}{item.HomeworldId}", ref showPublicChat))
+				{
+					item.ShowPublicChat = showPublicChat;
+					this.configuration.Save();
+				}
+
+				if (ImGui.IsItemHovered())
+				{
+					ImGui.SetTooltip(this.pluginLocalization.ColumnPublicChatTooltip);
+				}
+			}
+
 			ImGui.TableNextColumn();
 
 			if (ImGui.Button($"{this.pluginLocalization.OptionRemovePlayer}##{item.Name}"))
@@ -207,6 +233,12 @@ public class VoidItemList: Window
 		ImGui.TableNextColumn();
 		ImGui.TableNextColumn();
 		ImGui.InputText("###reason", this.buffer[3]);
+
+		if (!this.isWhitelist)
+		{
+			ImGui.TableNextColumn();
+		}
+
 		ImGui.TableNextColumn();
 
 		if (ImGui.Button(this.pluginLocalization.OptionAddPlayer))

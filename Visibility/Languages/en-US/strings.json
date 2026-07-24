@@ -45,6 +45,8 @@
   "ColumnWorld": "World",
   "ColumnDate": "Date",
   "ColumnReason": "Reason",
+  "ColumnPublicChat": "Public chat",
+  "ColumnPublicChatTooltip": "Show this player's say, shout, yell, emote, party and alliance messages. Tells, free company, linkshell and all other channels stay hidden.",
   "ColumnAction": "Action",
   "OptionLanguage": "Language",
   "LanguageName": "English",

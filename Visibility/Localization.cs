@@ -183,6 +183,11 @@ public class Localization
 	public string ColumnWorld => this.GetString("ColumnWorld", this.CurrentLanguage);
 	public string ColumnDate => this.GetString("ColumnDate", this.CurrentLanguage);
 	public string ColumnReason => this.GetString("ColumnReason", this.CurrentLanguage);
+	public string ColumnPublicChat => this.GetString("ColumnPublicChat", this.CurrentLanguage);
+
+	public string ColumnPublicChatTooltip =>
+		this.GetString("ColumnPublicChatTooltip", this.CurrentLanguage);
+
 	public string ColumnAction => this.GetString("ColumnAction", this.CurrentLanguage);
 	public string OptionLanguage => this.GetString("OptionLanguage", this.CurrentLanguage);
 	public string LanguageName => this.GetString("LanguageName", this.CurrentLanguage);
