@@ -9,58 +9,26 @@ namespace Visibility.Utils;
 /// </summary>
 public class ContainerManager
 {
-	private readonly Dictionary<UnitType, Dictionary<ContainerType, Dictionary<uint, long>>> containers;
+	// Flat [unitType, containerType] lookup instead of nested dictionaries
+	private readonly Dictionary<uint, long>[,] containers = new Dictionary<uint, long>[4, 4];
 	private readonly HashSet<uint> idsToDelete = new(capacity: 200);
 
 	public ContainerManager()
 	{
-		this.containers = new Dictionary<UnitType, Dictionary<ContainerType, Dictionary<uint, long>>>
-		{
-			{
-				UnitType.Players, new Dictionary<ContainerType, Dictionary<uint, long>>
-				{
-					{ ContainerType.All, new Dictionary<uint, long>() },
-					{ ContainerType.Friend, new Dictionary<uint, long>() },
-					{ ContainerType.Party, new Dictionary<uint, long>() },
-					{ ContainerType.Company, new Dictionary<uint, long>() },
-				}
-			},
-			{
-				UnitType.Pets, new Dictionary<ContainerType, Dictionary<uint, long>>
-				{
-					{ ContainerType.All, new Dictionary<uint, long>() },
-					{ ContainerType.Friend, new Dictionary<uint, long>() },
-					{ ContainerType.Party, new Dictionary<uint, long>() },
-					{ ContainerType.Company, new Dictionary<uint, long>() },
-				}
-			},
-			{
-				UnitType.Chocobos, new Dictionary<ContainerType, Dictionary<uint, long>>
-				{
-					{ ContainerType.All, new Dictionary<uint, long>() },
-					{ ContainerType.Friend, new Dictionary<uint, long>() },
-					{ ContainerType.Party, new Dictionary<uint, long>() },
-					{ ContainerType.Company, new Dictionary<uint, long>() },
-				}
-			},
-			{
-				UnitType.Minions, new Dictionary<ContainerType, Dictionary<uint, long>>
-				{
-					{ ContainerType.All, new Dictionary<uint, long>() },
-					{ ContainerType.Friend, new Dictionary<uint, long>() },
-					{ ContainerType.Party, new Dictionary<uint, long>() },
-					{ ContainerType.Company, new Dictionary<uint, long>() },
-				}
-			},
-		};
+		for (int u = 0; u < 4; ++u)
+		for (int c = 0; c < 4; ++c)
+			this.containers[u, c] = new Dictionary<uint, long>();
 	}
+
+	private Dictionary<uint, long> Get(UnitType unitType, ContainerType containerType) =>
+		this.containers[(int)unitType, (int)containerType];
 
 	/// <summary>
 	/// Add an entity to a specific container
 	/// </summary>
 	public void AddToContainer(UnitType unitType, ContainerType containerType, uint entityId)
 	{
-		this.containers[unitType][containerType][entityId] = Environment.TickCount64;
+		this.Get(unitType, containerType)[entityId] = Environment.TickCount64;
 	}
 
 	/// <summary>
@@ -68,7 +36,7 @@ public class ContainerManager
 	/// </summary>
 	public void RemoveFromContainer(UnitType unitType, ContainerType containerType, uint entityId)
 	{
-		this.containers[unitType][containerType].Remove(entityId);
+		this.Get(unitType, containerType).Remove(entityId);
 	}
 
 	/// <summary>
@@ -76,7 +44,7 @@ public class ContainerManager
 	/// </summary>
 	public bool IsInContainer(UnitType unitType, ContainerType containerType, uint entityId)
 	{
-		return this.containers[unitType][containerType].ContainsKey(entityId);
+		return this.Get(unitType, containerType).ContainsKey(entityId);
 	}
 
 	/// <summary>
@@ -84,18 +52,17 @@ public class ContainerManager
 	/// </summary>
 	public void CleanupContainers()
 	{
-		foreach ((UnitType _, Dictionary<ContainerType, Dictionary<uint, long>>? unitContainer) in this.containers)
+		long expiry = Environment.TickCount64 - 5000;
+
+		foreach (Dictionary<uint, long> container in this.containers)
 		{
-			foreach ((ContainerType _, Dictionary<uint, long>? container) in unitContainer)
-			{
-				foreach ((uint id, long ticks) in container)
-					if (ticks > Environment.TickCount64 + 5000)
-						this.idsToDelete.Add(id);
+			foreach ((uint id, long ticks) in container)
+				if (ticks < expiry)
+					this.idsToDelete.Add(id);
 
-				foreach (uint id in this.idsToDelete) container.Remove(id);
+			foreach (uint id in this.idsToDelete) container.Remove(id);
 
-				this.idsToDelete.Clear();
-			}
+			this.idsToDelete.Clear();
 		}
 	}
 
@@ -104,7 +71,7 @@ public class ContainerManager
 	/// </summary>
 	public IEnumerable<KeyValuePair<uint, long>> GetContainerEntities(UnitType unitType, ContainerType containerType)
 	{
-		return this.containers[unitType][containerType].ToList();
+		return this.Get(unitType, containerType).ToList();
 	}
 
 	/// <summary>
@@ -112,7 +79,7 @@ public class ContainerManager
 	/// </summary>
 	public void ClearContainer(UnitType unitType, ContainerType containerType)
 	{
-		this.containers[unitType][containerType].Clear();
+		this.Get(unitType, containerType).Clear();
 	}
 
 	/// <summary>
@@ -120,8 +87,7 @@ public class ContainerManager
 	/// </summary>
 	public void ClearAllContainers()
 	{
-		foreach ((UnitType _, Dictionary<ContainerType, Dictionary<uint, long>>? unitContainer) in this.containers)
-		foreach ((ContainerType _, Dictionary<uint, long>? container) in unitContainer)
+		foreach (Dictionary<uint, long> container in this.containers)
 			container.Clear();
 	}
 }

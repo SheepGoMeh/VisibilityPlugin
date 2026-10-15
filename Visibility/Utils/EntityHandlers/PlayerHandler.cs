@@ -33,13 +33,16 @@ public class PlayerHandler
 	/// <summary>
 	/// Process a player entity and determine its visibility
 	/// </summary>
-	public unsafe void ProcessPlayer(Character* characterPtr, Character* localPlayer, bool isBound)
+	public unsafe void ProcessPlayer(Character* characterPtr, Character* localPlayer, bool isBound, bool refreshContainers)
 	{
 		if (characterPtr->GameObject.EntityId == 0xE0000000 ||
 		    this.visibilityManager.ShowGameObject(characterPtr)) return;
 
 		// Add to containers
-		this.UpdateContainers(characterPtr, localPlayer);
+		// New players are added immediately; membership of known ones is refreshed periodically
+		if (refreshContainers || !this.containerManager.IsInContainer(UnitType.Players, ContainerType.All,
+			    characterPtr->GameObject.EntityId))
+			this.UpdateContainers(characterPtr, localPlayer);
 
 		// Check territory whitelist
 		if (isBound && !this.configuration.TerritoryTypeWhitelist.Contains(

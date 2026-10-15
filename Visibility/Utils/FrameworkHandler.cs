@@ -56,6 +56,10 @@ public class FrameworkHandler: IDisposable
 
 	private Func<bool>? isDisabled;
 	private bool isChangingTerritory;
+	private long nextContainerRefresh;
+
+	// Two frames: players un-hidden in the first return early, before their container update.
+	private int forcedContainerRefreshFrames;
 
 	// Friend list sync via EndRequest hook
 	private unsafe delegate void EndRequestDelegate(InfoProxyInterface* thisPtr);
@@ -114,10 +118,18 @@ public class FrameworkHandler: IDisposable
 
 		Character* localPlayer = (Character*)localPlayerGameObject;
 
+		// Membership rarely changes; refresh containers once per second, not every frame
+		long now = Environment.TickCount64;
+		bool refreshContainers = now >= this.nextContainerRefresh || this.forcedContainerRefreshFrames > 0;
+		if (now >= this.nextContainerRefresh) this.nextContainerRefresh = now + 1000;
+		if (this.forcedContainerRefreshFrames > 0) --this.forcedContainerRefreshFrames;
+
+		GameObjectManager* objectManager = GameObjectManager.Instance();
+
 		// Process all game objects
 		for (int i = 1; i != 200; ++i)
 		{
-			GameObject* gameObject = GameObjectManager.Instance()->Objects.IndexSorted[i];
+			GameObject* gameObject = objectManager->Objects.IndexSorted[i];
 			Character* characterPtr = (Character*)gameObject;
 
 			if (gameObject == null || gameObject == localPlayerGameObject || !gameObject->IsCharacter()) continue;
@@ -126,7 +138,7 @@ public class FrameworkHandler: IDisposable
 			switch ((ObjectKind)characterPtr->GameObject.ObjectKind)
 			{
 				case ObjectKind.Pc:
-					this.playerHandler.ProcessPlayer(characterPtr, localPlayer, isBound);
+					this.playerHandler.ProcessPlayer(characterPtr, localPlayer, isBound, refreshContainers);
 					break;
 				case ObjectKind.BattleNpc when characterPtr->GameObject.SubKind == (byte)BattleNpcSubKind.Pet &&
 				                               characterPtr->NameId != 6565:
@@ -147,7 +159,7 @@ public class FrameworkHandler: IDisposable
 		}
 
 		// Clean up expired entries in containers
-		this.containerManager.CleanupContainers();
+		if (refreshContainers) this.containerManager.CleanupContainers();
 	}
 
 	/// <summary>
@@ -178,8 +190,9 @@ public class FrameworkHandler: IDisposable
 		// Check cross-realm party
 		if (!infoProxyCrossRealm->IsInCrossRealmParty) return false;
 
-		foreach (CrossRealmGroup group in infoProxyCrossRealm->CrossRealmGroups)
+		for (int g = 0; g < infoProxyCrossRealm->CrossRealmGroups.Length; ++g)
 		{
+			ref CrossRealmGroup group = ref infoProxyCrossRealm->CrossRealmGroups[g];
 			if (group.GroupMembers.Length == 0) continue;
 
 			for (int i = 0; i < group.GroupMembers.Length; ++i)
@@ -211,6 +224,7 @@ public class FrameworkHandler: IDisposable
 
 		// Clear the container after processing
 		this.containerManager.ClearContainer(unitType, containerType);
+		this.forcedContainerRefreshFrames = 2;
 	}
 
 	/// <summary>
@@ -268,6 +282,8 @@ public class FrameworkHandler: IDisposable
 	public unsafe void ShowAll()
 	{
 		if (Service.ObjectTable.LocalPlayer == null) return;
+
+		this.forcedContainerRefreshFrames = 2;
 
 		// Process all game objects in the object table
 		foreach (Dalamud.Game.ClientState.Objects.Types.IGameObject gameObject in Service.ObjectTable)
